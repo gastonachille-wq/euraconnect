@@ -179,8 +179,8 @@ export default function Home(){
       </section>}
       {tab==='entreprise'&&<section className="ec08-page"><div className="ec08-page-title"><div><span className="section-eyebrow">Votre identité professionnelle</span><h1>Entreprise, collaborateurs & profil</h1>
         <p className="sub">Logo cadré automatiquement, photo de profil, tags de compétences et équipe.</p></div></div>
-        <EntrepriseEtProfil role={role} userId={user.id} defaultName={profile.nom||'Utilisateur'} onChanged={()=>void reload(user.id)}/></section>}
-      {tab==='modules'&&<ModulesV03 role={role} providerId={provider?.id} userId={user.id} offers={offers.map(o=>({id:o.id,titre:o.titre,prestataire_id:o.prestataire_id}))}/>}
+        <EntrepriseEtProfil role={role ?? ''} userId={user.id} defaultName={profile.nom||'Utilisateur'} onChanged={()=>void reload(user.id)}/></section>}
+      {tab==='modules'&&<ModulesV03 role={role ?? ''} providerId={provider?.id} userId={user.id} offers={offers.map(o=>({id:o.id,titre:o.titre,prestataire_id:o.prestataire_id}))}/>}
       {tab==='admin'&&role==='admin'&&<section className="ec08-page"><div className="ec08-page-title"><div><span className="section-eyebrow">Gestion de la plateforme</span><h1>Administration</h1>
         <p className="sub">Utilisateurs, validation des prestataires et rattachements entreprise.</p></div></div>
         <AdminUtilisateurs/><AdminEntreprises/><details className="panel ec08-compose"><summary>Activer un compte Supabase existant</summary>
