@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useState,type FormEvent} from 'react';
 import {ArrowRight,Bell,BookOpen,BriefcaseBusiness,Building2,CalendarDays,
- ClipboardList,Handshake,LayoutDashboard,LogOut,Menu,Search,ShieldCheck,
+ ClipboardList,Handshake,LayoutDashboard,LogOut,Menu,Plus,Search,ShieldCheck,
  Sparkles,UserRound,UsersRound,X} from 'lucide-react';
 import type {User} from '@supabase/supabase-js';
 import {db} from '@/lib/supabase';

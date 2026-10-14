@@ -1,3 +1,11 @@
+# EURACONNECT V0.8.1 — Correctif de compilation Netlify
+
+**Lire en premier [`CORRECTIF_V081.md`](CORRECTIF_V081.md).**
+
+V0.8.1 reprend la V0.8 fonctionnelle et ajoute uniquement le symbole manquant `Plus` dans les imports de `app/page.tsx`. Pour une installation existante, utiliser de préférence le ZIP **PATCH_GITHUB** plutôt que de remplacer tous les fichiers. Aucune migration SQL à rejouer.
+
+---
+
 # EURACONNECT V0.8
 
 **Lire en premier [`README_V08.md`](README_V08.md)**, puis `docs/INSTALLATION_V08.md` et `docs/RECETTE_V08.md`.
