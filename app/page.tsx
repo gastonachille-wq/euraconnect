@@ -17,6 +17,7 @@ import WorkspaceCommercialV07 from '@/components/v07/WorkspaceCommercialV07';
 import DashboardV08 from '@/components/v08/DashboardV08';
 import DemandesV08 from '@/components/v08/DemandesV08';
 import RendezVousV08 from '@/components/v08/RendezVousV08';
+import NotificationCenterV084 from '@/components/v08/NotificationCenterV084';
 
 type Role='admin'|'incube'|'prestataire';
 type Profile={id:string;role:Role;nom:string|null;entreprise_id:string|null;statut:string};
@@ -121,7 +122,7 @@ export default function Home(){
   <header className="top ec08-top"><div className="shell topin">
    <div className="ec08-header-brand"><button type="button" className="ec08-mobile-nav" onClick={()=>setSideOpen(x=>!x)} aria-label={sideOpen?'Fermer le menu':'Ouvrir le menu'}>{sideOpen?<X size={21}/>:<Menu size={21}/>}</button>
     <button className="brand-button" onClick={()=>navigate('dashboard')} aria-label="Tableau de bord EURACONNECT"><span className="logo">EURA<span>CONNECT</span></span><small>Expertises & opportunités</small></button></div>
-   <div className="ec08-header-right">{user&&profile?<><button type="button" className="ec08-header-quick" onClick={()=>navigate('demandes')}><Search size={16}/> Explorer</button>
+   <div className="ec08-header-right">{user&&profile?<><NotificationCenterV084 userId={user.id}/><button type="button" className="ec08-header-quick" onClick={()=>navigate('demandes')}><Search size={16}/> Explorer</button>
     <button className="ec08-header-identity" onClick={()=>navigate('entreprise')}><PublicImage path={avatarPath} variant="avatar" alt={profile.nom||'Utilisateur'} className="ec08-header-avatar"/>
      <span><b>{profile.nom||user.email}</b><small>{role==='admin'?'Administrateur':role==='incube'?'Startup incubée':'Prestataire'}</small></span></button>
     <button type="button" className="ec08-header-signout" aria-label="Se déconnecter" title="Se déconnecter" onClick={()=>void db().auth.signOut()}><LogOut size={18}/></button></>:

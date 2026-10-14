@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useState,type FormEvent} from 'react';
-import {Building2,UserRound,Search,Filter,ArrowRight,X} from 'lucide-react';
+import {Building2,UserRound,Search,Filter,ArrowRight,X,Heart,CalendarDays,Clock3} from 'lucide-react';
 import {db} from '@/lib/supabase';
 import {PublicImage} from './MediaAndSkills';
 import {RichContent} from './RichEditor';
@@ -10,13 +10,21 @@ type Entry={nature:'entreprise'|'personne';id:string;nom:string;sous_titre:strin
 const explain=(e:unknown)=>e instanceof Error?e.message:String(e);
 export default function AnnuaireV06(){
  const [items,setItems]=useState<Entry[]>([]),[skills,setSkills]=useState<Skill[]>([]),[query,setQuery]=useState(''),[kind,setKind]=useState('tous'),[skill,setSkill]=useState('');
+ const [favorites,setFavorites]=useState<string[]>([]),[slots,setSlots]=useState<any[]>([]),[booking,setBooking]=useState<any|null>(null),[subject,setSubject]=useState('Decouverte de prestation'),[feedback,setFeedback]=useState(''),[saving,setSaving]=useState(false);
  const [page,setPage]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[opened,setOpened]=useState<Entry|null>(null);
  async function refresh(target=0){setLoading(true);setError('');try{
   const {data,error:e}=await db().rpc('ec_annuaire_rechercher',{p_texte:query.trim(),p_type:kind,p_competence:skill||null,p_limite:24,p_offset:target*24});
   if(e)throw e;setItems((data||[]) as Entry[]);setPage(target);
  }catch(e){setError(explain(e));}finally{setLoading(false);}}
- useEffect(()=>{void refresh(0);void db().from('competences_ec').select('id,libelle').eq('actif',true).order('libelle')
+ useEffect(()=>{void refresh(0);void loadFavorites();void db().from('competences_ec').select('id,libelle').eq('actif',true).order('libelle')
   .then(({data})=>setSkills((data||[]) as Skill[]));},[]);
+ async function loadFavorites(){const r=await db().from('favoris_ec').select('cible_type,cible_id');if(!r.error)setFavorites((r.data||[]).map(x=>`${x.cible_type}:${x.cible_id}`));}
+ async function toggleFavorite(item:Entry){const key=`${item.nature}:${item.id}`;setFeedback('');setSaving(true);
+  try{const c=db();const has=favorites.includes(key);const q=has?c.from('favoris_ec').delete().eq('cible_type',item.nature).eq('cible_id',item.id):c.from('favoris_ec').insert({cible_type:item.nature,cible_id:item.id});const r=await q;if(r.error)throw r.error;await loadFavorites();setFeedback(has?'Retiré des favoris.':'Ajouté aux favoris.');}
+  catch(e){setFeedback(explain(e));}finally{setSaving(false);}}
+ async function showSlots(item:Entry){setOpened(item);setFeedback('');setBooking(null);const r=await db().rpc('ec08_lister_creneaux');if(r.error){setFeedback(explain(r.error));return;}
+  const list=(r.data||[]) as any[];setSlots(list.filter(x=>!x.est_reserve&&new Date(x.debut).getTime()>Date.now()+12*3600000&&x.prestataire_nom.toLowerCase()===item.nom.toLowerCase()));}
+ async function reserve(){if(!booking)return;setSaving(true);setFeedback('');try{const r=await db().rpc('ec08_reserver_rdv',{p_creneau:booking.id,p_objet:subject,p_details:'Réservation depuis l’annuaire EURACONNECT',p_besoin:null});if(r.error)throw r.error;setFeedback('Rendez-vous confirmé. Retrouvez ses détails dans votre agenda.');setBooking(null);if(opened)await showSlots(opened);}catch(e){setFeedback(explain(e));}finally{setSaving(false);}}
  const total=items[0]?.nb_total||0;
  return <div className="directory">
   <div className="page-head"><div><div className="section-eyebrow">Explorer l’écosystème</div><h1>Annuaire</h1><p className="sub">Retrouvez les entreprises, les professionnels et leurs expertises dans un seul espace.</p></div>
@@ -36,7 +44,7 @@ export default function AnnuaireV06(){
   </div>
   {error&&<div className="alert" role="alert">{error}</div>}
   {loading?<div className="directory-grid">{[1,2,3,4].map(i=><div className="directory-card skeleton" key={i}/>)}</div>:
-   <div className="directory-grid">{items.map(item=><button type="button" className="directory-card" key={`${item.nature}-${item.id}`} onClick={()=>setOpened(item)}>
+   <div className="directory-grid">{items.map(item=><button type="button" className="directory-card" key={`${item.nature}-${item.id}`} onClick={()=>{setOpened(item);setSlots([]);setBooking(null);setFeedback('');}}>
     <div className="directory-image"><PublicImage path={item.image_path} alt={item.nom} className="directory-avatar" variant={item.nature==='entreprise'?'logo':'avatar'}/></div>
     <div className="directory-card-body"><div className="entry-meta">{item.nature==='entreprise'?<Building2 size={14}/>:<UserRound size={14}/>}
       {item.nature==='entreprise'?'Entreprise':'Personne'}</div>
@@ -55,6 +63,11 @@ export default function AnnuaireV06(){
    <div className="modal-heading"><PublicImage path={opened.image_path} alt={opened.nom} className="modal-avatar" variant={opened.nature==='entreprise'?'logo':'avatar'}/><div>
     <span className="section-eyebrow">{opened.nature==='entreprise'?'Fiche entreprise':'Fiche professionnelle'}</span>
     <h2>{opened.nom}</h2><span className="muted">{opened.sous_titre}</span></div></div>
+   <div className="ec84-directory-actions"><button type="button" className="btn ghost" disabled={saving} onClick={()=>void toggleFavorite(opened)}><Heart size={17} fill={favorites.includes(`${opened.nature}:${opened.id}`)?'currentColor':'none'}/>{favorites.includes(`${opened.nature}:${opened.id}`)?'Dans mes favoris':'Ajouter aux favoris'}</button>
+    {opened.nature==='entreprise'&&<button type="button" className="btn" onClick={()=>void showSlots(opened)}><CalendarDays size={16}/> Voir les créneaux</button>}</div>
+   {feedback&&<div className="alert" role="status">{feedback}</div>}
+   {opened.nature==='entreprise'&&<div className="ec84-slot-list"><h3>Disponibilités de cette entreprise</h3>{slots.length?slots.slice(0,12).map(slot=><button key={slot.id} type="button" className={`ec84-slot ${booking?.id===slot.id?'selected':''}`} onClick={()=>setBooking(slot)}><Clock3 size={15}/>{new Date(slot.debut).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Paris'})} · {slot.intervenant_nom}</button>):<p className="muted">Aucun créneau public disponible actuellement. Cliquez sur « Voir les créneaux » pour actualiser.</p>}
+   {booking&&<div className="ec84-booking"><label>Objet du rendez-vous <select value={subject} onChange={e=>setSubject(e.target.value)}><option value="Decouverte de prestation">Découverte de prestation</option><option value="Cadrage de besoin">Cadrage de besoin</option><option value="Evaluation de solution">Évaluation de solution</option><option value="Suivi de proposition">Suivi de proposition</option></select></label><button className="btn" disabled={saving} onClick={()=>void reserve()}>Confirmer ce rendez-vous</button></div>}</div>}
    <div className="modal-content"><h3>Presentation</h3><RichContent html={opened.description_html}/>
     <h3>Competences</h3><div className="tag-row">{opened.competences.map(t=><span className="skill-mini" key={t}>{t}</span>)}
     {!opened.competences.length&&<p className="muted">Aucune competence renseignee.</p>}</div>
