@@ -1,0 +1,3 @@
+"use client";
+import {useState,type FormEvent} from 'react';import {db} from '@/lib/supabase';
+export default function Reset(){const[p,setP]=useState(''),[m,setM]=useState('');async function submit(e:FormEvent){e.preventDefault();const {error}=await db().auth.updateUser({password:p});setM(error?error.message:'Mot de passe mis à jour. Vous pouvez revenir sur la page d’accueil.')}return <main style={{maxWidth:500,margin:'70px auto',padding:24}}><h1>Réinitialiser mon mot de passe</h1><form onSubmit={submit}><div className="field"><label>Nouveau mot de passe</label><input type="password" minLength={12} required value={p} onChange={e=>setP(e.target.value)}/></div><button className="btn">Enregistrer</button></form><p>{m}</p><a href="/">Retour à EURACONNECT</a></main>}
