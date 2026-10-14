@@ -13,7 +13,7 @@ const money=(n:number|null)=>n===null?'Sur devis':new Intl.NumberFormat('fr-FR',
 const err=(error:unknown)=>error instanceof Error?error.message:String(error);
 export default function Home(){
  const [user,setUser]=useState<User|null>(null),[profile,setProfile]=useState<Profile|null>(null),[provider,setProvider]=useState<Provider|null>(null);
- const [tab,setTab]=useState('accueil'),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true);
+ const [tab,setTab]=useState('accueil'),[error,setError]=useState(''),[notice,setNotice]=useState(''),[loading,setLoading]=useState(true),[submitting,setSubmitting]=useState(false);
  const [offers,setOffers]=useState<Offer[]>([]),[needs,setNeeds]=useState<Need[]>([]),[candidates,setCandidates]=useState<Candidate[]>([]),[ownApplications,setOwnApplications]=useState<{id:string;projet_id:string;statut:string}[]>([]);
  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[signup,setSignup]=useState(false);
  const [name,setName]=useState(''),[providerName,setProviderName]=useState(''),[description,setDescription]=useState('');
@@ -38,7 +38,7 @@ export default function Home(){
     setError('Le mot de passe doit contenir au moins 12 caractères.');
     return;
   }
-  setLoading(true);
+  setSubmitting(true);
   try {
     const c=db();
     if(signup){
@@ -68,7 +68,7 @@ export default function Home(){
   }catch(e){
     setError(err(e));
   }finally{
-    setLoading(false);
+    setSubmitting(false);
   }
  }
  async function saveName(e:FormEvent){e.preventDefault();await run(async()=>{const {error:e}=await db().from('profiles').update({nom:name}).eq('id',user!.id);if(e)throw e})}
@@ -81,7 +81,7 @@ export default function Home(){
  const myNeeds=needs.filter(n=>n.incube_id===user?.id);
  return <><header className="top"><div className="shell topin"><div className="logo">EURA<span>CONNECT</span></div><nav className="nav">{user?<><span className="textsmall">{profile?.nom||user.email} · {profile?.role||'...'}</span><button onClick={()=>void db().auth.signOut()}>Déconnexion</button></>:<button className="btn" onClick={()=>setTab('connexion')}>Se connecter</button>}</nav></div></header>
  <main className="shell">{error&&<div className="alert" role="alert">{error}</div>}{notice&&<div className="alert ok" role="status">{notice}</div>}
- {!user&&tab==='connexion'?<div className="panel login"><h1>{signup?'Créer un compte prestataire':'Connexion'}</h1><p>{signup?'L’inscription publique est réservée aux prestataires. Les incubés sont activés par un administrateur.':'Accédez à votre espace EURACONNECT.'}</p><form onSubmit={login} noValidate><div className="field"><label>Email</label><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} /></div><div className="field"><label>Mot de passe</label><input type="password" minLength={12} required value={password} onChange={e=>setPassword(e.target.value)}/><p className="textsmall">12 caractères minimum.</p></div><button className="btn" type="submit" disabled={loading}>{loading?"Veuillez patienter…":signup?'Créer mon compte':'Connexion'}</button></form><div className="actions"><button className="btn ghost" onClick={()=>setSignup(!signup)}>{signup?'J’ai déjà un compte':'Devenir prestataire'}</button><button className="btn ghost" onClick={()=>void run(async()=>{if(!email)throw new Error('Saisissez votre email.');const {error:e}=await db().auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/reset'});if(e)throw e;setNotice('Email de réinitialisation envoyé si le compte existe.')})}>Mot de passe oublié</button></div></div>:
+ {!user&&tab==='connexion'?<div className="panel login"><h1>{signup?'Créer un compte prestataire':'Connexion'}</h1><p>{signup?'L’inscription publique est réservée aux prestataires. Les incubés sont activés par un administrateur.':'Accédez à votre espace EURACONNECT.'}</p><form onSubmit={login} noValidate><div className="field"><label>Email</label><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} /></div><div className="field"><label>Mot de passe</label><input type="password" minLength={12} required value={password} onChange={e=>setPassword(e.target.value)}/><p className="textsmall">12 caractères minimum.</p></div><button className="btn" type="submit" disabled={submitting}>{submitting?"Veuillez patienter…":signup?'Créer mon compte':'Connexion'}</button></form><div className="actions"><button className="btn ghost" onClick={()=>setSignup(!signup)}>{signup?'J’ai déjà un compte':'Devenir prestataire'}</button><button className="btn ghost" onClick={()=>void run(async()=>{if(!email)throw new Error('Saisissez votre email.');const {error:e}=await db().auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/reset'});if(e)throw e;setNotice('Email de réinitialisation envoyé si le compte existe.')})}>Mot de passe oublié</button></div></div>:
  !user?<><section className="hero"><div><div className="tag">L’écosystème de services pour l’innovation</div><h1>Les bonnes expertises.<br/>Au bon moment.</h1><p>EURACONNECT rapproche les startups incubées des experts et prestataires qualifiés. Découvrez les services et trouvez des réponses concrètes à vos besoins.</p><button className="btn" onClick={()=>setTab('connexion')}>Accéder à la plateforme</button></div></section><div className="grid"><div className="panel"><h3>Expertises visibles</h3><p>Un annuaire structuré pour identifier la bonne offre de service.</p></div><div className="panel"><h3>Besoins qualifiés</h3><p>Une demande ouverte peut recevoir des réponses adaptées.</p></div><div className="panel"><h3>Intermédiation maîtrisée</h3><p>Un modèle hybride avec des candidatures Free anonymisées.</p></div></div></>:
  loading||!profile?<div className="empty">Chargement du profil…</div>:
  <div className="layout"><aside className="side panel">{nav.map(([k,v])=><button key={k} className={tab===k?'active':''} onClick={()=>setTab(k)}>{v}</button>)}</aside><section className="content">
