@@ -1,0 +1,351 @@
+{
+  "project": "EURACONNECT",
+  "version": "0.8.0",
+  "migration": "supabase/migrations/202610140007_experience_confidentialite.sql",
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "8fa696e1a47ec96221f162573974d85ff348693ab9f09dc230f42fe155d77850",
+      "bytes": 126
+    },
+    {
+      "path": ".github/workflows/verify.yml",
+      "sha256": "7178f014e5fffd91b86fc62d5d2c9aeb495c2d8203198aa807f9d76f74351617",
+      "bytes": 806
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "e2eefe4764ceb969cc1a279ad002fdf718edc2ae8a3dd22187e85829e0e1c78f",
+      "bytes": 57
+    },
+    {
+      "path": "CAHIER_DES_CHARGES_V2.md",
+      "sha256": "98e3f7a4f1080e75401166631dc3b94398e26e6352bcf1fc318cb81cd526d117",
+      "bytes": 123265
+    },
+    {
+      "path": "MANIFEST_V07.json",
+      "sha256": "824c433b0e2011eeb6bd33e578dc9c0f1aac7177c935e472331308ec29797e75",
+      "bytes": 5740
+    },
+    {
+      "path": "README.md",
+      "sha256": "58904ce16a317de1a1e16838d20f9aacc0f6c97799a9310fbff3788628f9a150",
+      "bytes": 2074
+    },
+    {
+      "path": "README_V03.md",
+      "sha256": "0311a117e0c971e7ac93cc5c1d93bda7a9d94222e5d54c31600fc1f91d594bd1",
+      "bytes": 612
+    },
+    {
+      "path": "README_V04.md",
+      "sha256": "e5695163386d70cfed2a54d85c96e25f8ecdfa715d6e2a9459bc7cca64d3381c",
+      "bytes": 661
+    },
+    {
+      "path": "README_V05.md",
+      "sha256": "e0a1b0618ec3e169d657e6a90ad4c6ecb54ad900a545e7ac8a9e97865acdd41e",
+      "bytes": 1495
+    },
+    {
+      "path": "README_V06.md",
+      "sha256": "52ad4d99416b97670f05c44e80de686113b22786f710ec114901d0244ca6edf7",
+      "bytes": 1713
+    },
+    {
+      "path": "README_V07.md",
+      "sha256": "2f8f087bcb7bee0337a5600d39bc22cb348c2ce766121f9613f39aa5b07025d5",
+      "bytes": 3185
+    },
+    {
+      "path": "README_V08.md",
+      "sha256": "70952739f679ddd08f64909a6ec8251c3bd076a2b0e50d62f92a09d48ddb5c5d",
+      "bytes": 3431
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "57fd66c94ff4cfa7d3a76f714d7123827df84ceee51c5f1ca7bbf09b2fed812b",
+      "bytes": 55025
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha256": "5e70c3ffbacd7e2f309e71a23c42b9ef24d3126ac5b83fd5ae78365231b5ec76",
+      "bytes": 482
+    },
+    {
+      "path": "app/page.tsx",
+      "sha256": "e7b4c75a463deccca0088eb828de65bb6c8b08dc1e67a82e50a9ce9da1517267",
+      "bytes": 21428
+    },
+    {
+      "path": "app/reset/page.tsx",
+      "sha256": "d0ec798550e18db59bfa9ec5e4b7debccfc425016a07adb314eb76f23e663e19",
+      "bytes": 778
+    },
+    {
+      "path": "components/AdminUtilisateurs.tsx",
+      "sha256": "47c456e775e74a1d165633ca19d22fa33928a2da8bd526b130b78f5186e41d5c",
+      "bytes": 5621
+    },
+    {
+      "path": "components/IntermediationV04.tsx",
+      "sha256": "b7fb02fc7ef3f9c3342df81529ad52cd3cb1fa20fb1814b5546cbb05459e6817",
+      "bytes": 7855
+    },
+    {
+      "path": "components/ModulesV03.tsx",
+      "sha256": "7ed1d3c5a79f16fbada059a1009a7a9d269a10f27fe2a18be72a43ad67053a11",
+      "bytes": 4981
+    },
+    {
+      "path": "components/v06/AdminEntreprises.tsx",
+      "sha256": "8f38b6823c07474b5cb633d3192066314d5ef7009966361e3f8047c3f8fae86c",
+      "bytes": 4308
+    },
+    {
+      "path": "components/v06/AnnuaireV06.tsx",
+      "sha256": "59fe03efa877f1170b7aceae11b8dfdb0287c2dc892eeb5befafef8c6d40a9cd",
+      "bytes": 6475
+    },
+    {
+      "path": "components/v06/DashboardV06.tsx",
+      "sha256": "4b5cd12ebef530cff95dded8a3f8ee703066e2f6e27eba62b3cf9483bc5fec54",
+      "bytes": 5842
+    },
+    {
+      "path": "components/v06/EntrepriseEtProfil.tsx",
+      "sha256": "9b380d4a0115eb2de0dced18df3bd3abb9ac4a1c18afd8395e025eaeba2321bd",
+      "bytes": 11230
+    },
+    {
+      "path": "components/v06/MediaAndSkills.tsx",
+      "sha256": "ba4ada16581065b56ffeed621d77bc9685315d9b053599491292f3cd3698872b",
+      "bytes": 6613
+    },
+    {
+      "path": "components/v06/OffreImages.tsx",
+      "sha256": "24a9305930a553ea0d333606783df2f74b6d45e437cce3b6559244d3b940d65d",
+      "bytes": 1710
+    },
+    {
+      "path": "components/v06/RichEditor.tsx",
+      "sha256": "9001a80a98888f108a08910a61004800ef18ff03de3a66932f9a2257884fd236",
+      "bytes": 4897
+    },
+    {
+      "path": "components/v07/WorkspaceCommercialV07.tsx",
+      "sha256": "c040447d6c053f27b85bb3d8611391e3b09bfb3b324ca151bf85bdf64a235b52",
+      "bytes": 22742
+    },
+    {
+      "path": "components/v08/DashboardV08.tsx",
+      "sha256": "c47d7512617f64d18f785836d29483c7df67396946c7f2654c7c6d18982fb360",
+      "bytes": 7345
+    },
+    {
+      "path": "components/v08/DemandesV08.tsx",
+      "sha256": "cfc0af37898ffd686875081b4a5cf88619f2d16bdc4e81a8431387b7b0a52e2f",
+      "bytes": 18732
+    },
+    {
+      "path": "components/v08/RendezVousV08.tsx",
+      "sha256": "bc041fae8e19d915944991d063e6966f1bba1b8128bc3f3267423c2e50775df8",
+      "bytes": 16658
+    },
+    {
+      "path": "docs/DEPLOIEMENT.md",
+      "sha256": "2fac1be86c539ae4844de230d171d18566dcd97703fed31cd7ded617ae108770",
+      "bytes": 4411
+    },
+    {
+      "path": "docs/HYPOTHESES.md",
+      "sha256": "92a0177bb2ee97b6bc02e4f85a70d15558fe5f97ee72d8a4379f514a6f953a2d",
+      "bytes": 1386
+    },
+    {
+      "path": "docs/HYPOTHESES_V06.md",
+      "sha256": "56e54548b080b775a18b103a48e3e12abf9dc7b1cfc672d7fd7d1a39fb1df0a7",
+      "bytes": 1414
+    },
+    {
+      "path": "docs/HYPOTHESES_V07.md",
+      "sha256": "1456d0dd0adf5bb4f1b0882b468a95c31e9565ee551d0dac1fe4ce24cc86e227",
+      "bytes": 2090
+    },
+    {
+      "path": "docs/HYPOTHESES_V08.md",
+      "sha256": "82603fdc897d1d646ef9ced0d45d4d71ef7fef5c3ddb76e3e60ce8f06f4130bf",
+      "bytes": 2020
+    },
+    {
+      "path": "docs/INSTALLATION_V03.md",
+      "sha256": "985e9b7620d17f00cac8c5e09c3bb3f7140209dae5c58290ba87f76ddcda086e",
+      "bytes": 2423
+    },
+    {
+      "path": "docs/INSTALLATION_V04.md",
+      "sha256": "8413b9aa2c4eb3a122aaa35cca6c403c7235f75ed36c033e85ddc915b0c38dc9",
+      "bytes": 2478
+    },
+    {
+      "path": "docs/INSTALLATION_V06.md",
+      "sha256": "cda5c2e0047da2ca4ef675224311c28c22f31ebc9cf1a61e351c85e8b6898769",
+      "bytes": 6403
+    },
+    {
+      "path": "docs/INSTALLATION_V07.md",
+      "sha256": "b301bb6d388fc32b723fab9ea4f93ea9ce6ac5d8fcbeba8d428f6b11ef54dde3",
+      "bytes": 4231
+    },
+    {
+      "path": "docs/INSTALLATION_V08.md",
+      "sha256": "4c5d982a5b218b515e889eb12e8126b9e64a17cd356eab003d46335697022cdd",
+      "bytes": 3689
+    },
+    {
+      "path": "docs/LOT_SUIVANT.md",
+      "sha256": "7356151afc51516eeb21dac2c5327489435a6b80c4f1ebd1562abd33fcb5d631",
+      "bytes": 890
+    },
+    {
+      "path": "docs/RECETTE.md",
+      "sha256": "94bcebcee3251ac185552c63e7152254950b2b9e2430597879d1ff34cd1899a0",
+      "bytes": 1112
+    },
+    {
+      "path": "docs/RECETTE_V06.md",
+      "sha256": "9aa12736ca4afa6f338f97e3a5b857ba91c6199a97c15c74276df23524f48225",
+      "bytes": 2704
+    },
+    {
+      "path": "docs/RECETTE_V07.md",
+      "sha256": "b83d962f174e38259bae281cadfef32eb20bbb0d09e2298b1ae667b97423bd1e",
+      "bytes": 3159
+    },
+    {
+      "path": "docs/RECETTE_V08.md",
+      "sha256": "cf63d0ac7a73931c6e492502ed2500aff9fe6a06edbfc7468327486d7505ce2f",
+      "bytes": 4347
+    },
+    {
+      "path": "lib/supabase.ts",
+      "sha256": "4fd0dcce09b7c3ea8ab9993d8059dbe439f2c6476b788575ead15a025c123670",
+      "bytes": 545
+    },
+    {
+      "path": "netlify.toml",
+      "sha256": "6266768564600d76acf06266bee63538913ac77c6126ceb991986434ec9b090f",
+      "bytes": 336
+    },
+    {
+      "path": "next-env.d.ts",
+      "sha256": "879741880b6ab48da99dcc06dcc674d381c9826137b0496bf7bb368f302de9fc",
+      "bytes": 81
+    },
+    {
+      "path": "next.config.ts",
+      "sha256": "2f564f57132c088edfa8cf254bbcd41e8a9a488f4c9033b8403effaa02b54e8f",
+      "bytes": 102
+    },
+    {
+      "path": "package.json",
+      "sha256": "4c9ec4183ce0d5f480725e05aaa7993a3f6b5f60ad52bdcfdf1ff8a6cb78fc6c",
+      "bytes": 764
+    },
+    {
+      "path": "postcss.config.mjs",
+      "sha256": "712f9ce838ee57cee1b977321a5d61028b0f4b4d772d45fff0df39e14ee821ca",
+      "bytes": 35
+    },
+    {
+      "path": "scripts/verify-structure.mjs",
+      "sha256": "4c662bf5d99548e5656c55f02fd4e7777983a0bbe7d04146a3dc8ebde1bbe0d7",
+      "bytes": 1577
+    },
+    {
+      "path": "scripts/verify-v07.mjs",
+      "sha256": "343f1fa7571e896b17c5634fb1c14aa08d382e2f8e7e39bdae18eae24f5bf01a",
+      "bytes": 1888
+    },
+    {
+      "path": "scripts/verify-v08.mjs",
+      "sha256": "ec60cf54821abf82c7cc200b73714899ea0f815a7374b8493560be0edad8bffa",
+      "bytes": 2654
+    },
+    {
+      "path": "supabase/BOOTSTRAP_ADMIN.sql",
+      "sha256": "ba976539c249e9e6fb936efa2fe86005eb9a2d804e3a5f1c10a1917ffc7f186b",
+      "bytes": 710
+    },
+    {
+      "path": "supabase/migrations/202610140001_core.sql",
+      "sha256": "41b535f6f75268d1a7ae8a6374c967ea0ae70a1a485d87103998b0a967762e33",
+      "bytes": 20188
+    },
+    {
+      "path": "supabase/migrations/202610140002_modules.sql",
+      "sha256": "02aa717a661e192a2a7c1c0bcab4affbc8ee7c3d7d75f887675f3bed27f863a8",
+      "bytes": 8931
+    },
+    {
+      "path": "supabase/migrations/202610140003_intermediation.sql",
+      "sha256": "84d4c34b4d506d9992b39205ed3a610fcbc07e5de17a70ab41c4ddbb4bd5f27a",
+      "bytes": 13903
+    },
+    {
+      "path": "supabase/migrations/202610140004_admin_utilisateurs.sql",
+      "sha256": "b91fec7b7074bde38c58106f288483a1b48d5dc9e797cd62844b150995d5b9d5",
+      "bytes": 4578
+    },
+    {
+      "path": "supabase/migrations/202610140005_entreprises_annuaire.sql",
+      "sha256": "0857a264584f4ac9a5291373ef7d76a9123209748cd745620afd73d077ae6fa9",
+      "bytes": 37524
+    },
+    {
+      "path": "supabase/migrations/202610140006_collaboration_dossiers.sql",
+      "sha256": "173fa19e7b143c690a15164a88bcc83a050ef4e167368562d03c74b0c80a583a",
+      "bytes": 38754
+    },
+    {
+      "path": "supabase/migrations/202610140007_experience_confidentialite.sql",
+      "sha256": "68d631a17d6f24187be7243bdb1062d52d871caef034146b90c344e62651d4ba",
+      "bytes": 44093
+    },
+    {
+      "path": "supabase/tests/v06_diagnostics.sql",
+      "sha256": "ff2edadf978a20e6663aa7785e46f95d16af238fe78cac8792d28b5055d0be50",
+      "bytes": 1592
+    },
+    {
+      "path": "supabase/tests/v07_diagnostics.sql",
+      "sha256": "4764901385a5fa513b4e2d5422f3de25e07903740e605f3511e382d29c5b2e9d",
+      "bytes": 2975
+    },
+    {
+      "path": "supabase/tests/v07_smoke_acces.sql",
+      "sha256": "5b6275a3d9a6b4ecf876f46a8f3272c81306df7595629278a86849f57f58b475",
+      "bytes": 1076
+    },
+    {
+      "path": "supabase/tests/v08_diagnostics.sql",
+      "sha256": "d09968c69c488aca1961edf700243bf50abe0a0225582ed240678ee47a498438",
+      "bytes": 2245
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "8b44b3f40f41fd5e8d7712d4b51584c57603acde3fca64cbe534cb5bdbc39ee1",
+      "bytes": 665
+    }
+  ],
+  "validation": {
+    "v06_structure": "passed",
+    "v07_structure": "passed",
+    "v08_structure": "passed",
+    "typescript_syntax": "19 files, 0 parsing errors",
+    "nextjs_build": "not validated - npm dependencies unavailable",
+    "supabase_sql": "not executed on user environment",
+    "e2e_tests": "not executed"
+  }
+}

@@ -11,7 +11,7 @@ export default function OffreImages({offers,onChanged}:{offers:Offer[];onChanged
  return <div className="panel"><div className="section-heading"><div><span className="section-eyebrow">Vitrine</span><h3>Images de mes offres</h3></div></div>
   <p className="muted">Valorisez vos prestations avec un visuel public. Vous pouvez importer une image par offre.</p>
   {error&&<div className="alert" role="alert">{error}</div>}{notice&&<div className="alert ok" role="status">{notice}</div>}
-  <div className="list">{offers.map(o=><div className="offer-image-editor" key={o.id}><div className="offer-image-mini"><PublicImage path={o.image_path} alt={o.titre}/></div>
+  <div className="list">{offers.map(o=><div className="offer-image-editor" key={o.id}><div className="offer-image-mini"><PublicImage path={o.image_path} alt={o.titre} variant="cover"/></div>
     <div><b>{o.titre}</b><ImageUpload folder="offres" id={o.id} current={o.image_path||null} onUploaded={path=>setImage(x=>({...x,[o.id]:path}))} label="Importer une image"/>
      <button className="btn small" disabled={!image[o.id]} onClick={()=>void save(o)}>Enregistrer le visuel</button></div></div>)}
    {!offers.length&&<p className="muted">Publiez votre premiere offre avant d ajouter une image.</p>}</div></div>;

@@ -17,7 +17,7 @@ for(const name of ['entreprises_ec','entreprise_membres_ec','personnes_annuaire_
  'ec_dashboard_v06','ec_annuaire_rechercher','euraconnect-media'])
  if(!sql.includes(name))throw new Error(`Missing migration object: ${name}`);
 const page=readFileSync(resolve(root,'app/page.tsx'),'utf8');
-for(const name of ['DashboardV06','AnnuaireV06','EntrepriseEtProfil','AdminEntreprises','RichEditor','OffreImages'])
+for(const name of ['DashboardV08','AnnuaireV06','EntrepriseEtProfil','AdminEntreprises','RichEditor','OffreImages'])
  if(!page.includes(name))throw new Error(`Missing app integration: ${name}`);
 const postcss=readFileSync(resolve(root,'postcss.config.mjs'),'utf8');
 if(!/plugins\s*:/.test(postcss))throw new Error('PostCSS config missing plugins');

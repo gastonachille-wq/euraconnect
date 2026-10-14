@@ -66,7 +66,7 @@ export default function EntrepriseEtProfil({userId,role,defaultName,onChanged}:{
     <RichEditor label="Presentation" value={newHtml} onChange={setNewHtml}/>
     <button className="btn" disabled={busy}><Plus size={16}/> Créer mon entreprise</button></form></div>}
    {!companies.length&&role!=='incube'&&<div className="empty">Aucune entreprise rattachee a ce compte. Pour les prestataires, commencez par creer votre structure dans "Mon activite". Un administrateur peut rattacher un autre collaborateur.</div>}
-   {!!companies.length&&<><div className="panel company-head"><div className="company-head-left"><PublicImage path={ent?.logo_path} alt={ent?.nom||'Entreprise'} className="company-logo"/>
+   {!!companies.length&&<><div className="panel company-head"><div className="company-head-left"><PublicImage path={ent?.logo_path} alt={ent?.nom||'Entreprise'} className="company-logo" variant="logo"/>
     <div><span className="section-eyebrow">Espace entreprise</span><h2>{ent?.nom}</h2><div className="meta-line"><span className="pill">{ent?.type}</span><span className="pill">{ent?.statut}</span><span className="pill red">{ent?.role_membre}</span></div></div></div>
     {companies.length>1&&<select aria-label="Choisir une entreprise" value={selected} onChange={e=>setSelected(e.target.value)}>{companies.map(e=><option value={e.id} key={e.id}>{e.nom}</option>)}</select>}
    </div>
@@ -98,7 +98,7 @@ export default function EntrepriseEtProfil({userId,role,defaultName,onChanged}:{
     <label className="check-row"><input type="checkbox" checked={visible} onChange={e=>setVisible(e.target.checked)}/>Rendre ma fiche visible aux utilisateurs connectes</label>
     <p className="field-hint">La publication exige une entreprise rattachee. Votre email et votre numero de telephone ne sont jamais affiches dans cet annuaire.</p>
     <button className="btn" disabled={busy}><Save size={16}/> Enregistrer mon profil</button>
-   </form></div><div className="panel"><span className="section-eyebrow">Aperçu annuaire</span><div className="profile-preview"><PublicImage path={avatar} alt={personName||'Personne'} className="profile-large-avatar"/>
+   </form></div><div className="panel"><span className="section-eyebrow">Aperçu annuaire</span><div className="profile-preview"><PublicImage path={avatar} alt={personName||'Personne'} className="profile-large-avatar" variant="avatar"/>
     <h3>{personName||'Nom non renseigne'}</h3><p className="muted">{title||'Votre fonction'}</p>
     <span className={`status-chip ${visible?'online':'offline'}`}>{visible?'Visibilite demandee':'Prive'}</span><RichContent html={bio}/>
     <p className="muted">{person?'Fiche deja enregistree':'Fiche non encore enregistree'}</p>

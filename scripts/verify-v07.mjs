@@ -19,7 +19,7 @@ for(const token of ['enable row level security','revoke all','create policy ec07
  'create policy ec07_conversations_lecture','for update'])
  if(!sql.includes(token))throw new Error(`Missing security token ${token}`);
 const page=readFileSync(resolve(root,'app/page.tsx'),'utf8');
-for(const token of ['WorkspaceCommercialV07',"['dossiers'", "tab==='dossiers'"])
+for(const token of ['WorkspaceCommercialV07',"key:'dossiers'", "tab==='dossiers'"])
  if(!page.includes(token))throw new Error(`Missing router entry ${token}`);
 const component=readFileSync(resolve(root,paths[0]),'utf8');
 for(const token of ['ec_mes_entreprises','ec07_lister_dossiers','ec07_candidater',

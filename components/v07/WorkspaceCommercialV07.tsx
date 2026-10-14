@@ -13,7 +13,7 @@ type Dossier={dossier_id:string;nature:'besoin'|'candidature';projet_id:string;t
  statut_opportunite:string|null;assigne_a:string|null;assigne_nom:string|null;cree_le:string};
 type Need={id:string;titre:string;description:string;budget_centimes:number|null;score:number;deja_repondu:boolean;created_at:string};
 type Member={profile_id:string;nom_public:string;role_membre:string;actif:boolean};
-type Message={id:string;auteur_id:string;corps:string;created_at:string};
+type Message={id:string;auteur_id:string|null;auteur_libelle:string;corps:string;created_at:string};
 type Activity={action:string;detail:string;auteur:string;created_at:string};
 type Unattached={id:string;titre:string};
 const errorMessage=(e:unknown)=>e instanceof Error?e.message:String(e);
@@ -76,8 +76,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
   }else setUnattached([]);
  },[userId]);
  const loadMessages=useCallback(async(conv:string)=>{
-  const r=await db().from('messages_ec').select('id,auteur_id,corps,created_at')
-    .eq('conversation_id',conv).order('created_at',{ascending:true}).limit(200);
+  const r=await db().rpc('ec08_lister_messages',{p_conversation:conv});
   if(r.error)throw r.error;setMessages((r.data||[]) as Message[]);
  },[]);
  const loadActivity=useCallback(async(ent:string,caseId:string)=>{
@@ -125,7 +124,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
   await action(async()=>{
    const r=await db().rpc('ec07_candidater',{p_entreprise:company.id,p_projet:responseFor,p_message:responseText});
    if(r.error)throw r.error;setResponseFor('');setResponseText('');
-  },'Candidature transmise sous alias.');
+  },'Réponse envoyée : la startup voit votre entreprise, son identité reste privée hors Premium.');
  }
  async function beginRelation(row:Dossier){if(!company||!row.candidature_id)return;
   await action(async()=>{
@@ -137,7 +136,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
   await action(async()=>{
    const r=await db().rpc('ec07_repondre_relation',{p_entreprise:company.id,p_relation:row.relation_id,p_accepter:accept});
    if(r.error)throw r.error;
-  },accept?'Identite partagee avec la startup.':'Demande declinee.');
+  },accept?'Mise en relation acceptée. Le demandeur reste confidentiel pour Free/Pro.':'Mise en relation refusée.');
  }
  async function openThread(row:Dossier){if(!row.relation_id)return;
   await action(async()=>{
@@ -227,7 +226,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
        {n.deja_repondu?'Deja repondu':'Repondre'}</button></article>)}
       {!needs.length&&<div className="empty">Aucun besoin disponible pour cette recherche.</div>}</div>
      {responseFor&&<form className="v07-reply panel" onSubmit={applyForNeed}><h3>Proposition pour {needs.find(n=>n.id===responseFor)?.titre}</h3>
-      <p className="muted">Candidature sous alias. Les contacts ne sont reveles qu'apres accord mutuel.</p>
+      <p className="muted">Votre identité professionnelle est visible pour la startup dès la candidature. Celle du demandeur reste masquée hors Premium.</p>
       <div className="field"><label>Reponse construite (100 caracteres minimum)</label><textarea required minLength={100} maxLength={5000} rows={7} value={responseText} onChange={e=>setResponseText(e.target.value)}/></div>
       <button className="btn" disabled={busy} type="submit"><Send size={16}/> Envoyer ma candidature</button>
       <button className="btn ghost" type="button" onClick={()=>setResponseFor('')}>Annuler</button>
@@ -242,7 +241,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
         <span className="v07-case-name">{d.titre}</span><small>{d.candidat||'En attente de candidature'} · {relativeDate(d.cree_le)}</small>
         <span className="v07-case-meta"><span className="pill">{d.statut_opportunite?opportunityLabels[d.statut_opportunite]:d.statut_relation?relationLabels[d.statut_relation]:d.statut_candidature||'Sans reponse'}</span>
         {d.assigne_nom&&<span className="v07-assigned">{d.assigne_nom}</span>}</span>
-       </button>)}{!filtered.length&&<div className="empty">Aucun dossier pour ces filtres.</div>}</div>
+       </button>)}{!filtered.length&&<div className="empty">Aucun dossier pour ces filtres. Les propositions de prestataires sont identifiées dès leur réception.</div>}</div>
      </section>
      <section className="panel v07-detail">{!active?<div className="v07-no-selection"><ClipboardList size={34}/><h3>Selectionnez un dossier</h3>
       <p>Consultez la candidature, attribuez un responsable et poursuivez la relation.</p></div>:<>
@@ -257,7 +256,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
          :<strong>{active.assigne_nom||'Non attribue'}</strong>}
         <small>Un collaborateur attribue peut repondre et suivre le dossier. Les gestionnaires pilotent l'ensemble.</small></div>}
        {isStartup&&active.candidature_id&&!active.relation_id&&isManager&&
-         <button className="btn" disabled={busy} onClick={()=>void beginRelation(active)}>Demander la mise en relation <ArrowRight size={16}/></button>}
+         <button className="btn" disabled={busy} onClick={()=>void beginRelation(active)}>Proposer un échange <ArrowRight size={16}/></button>}
        {isProvider&&active.relation_id&&active.statut_relation==='demandee'&&isManager&&
         <div className="actions"><button className="btn" disabled={busy} onClick={()=>void respondRelation(active,true)}><CheckCircle2 size={16}/> Accepter le contact</button>
          <button className="btn ghost" disabled={busy} onClick={()=>void respondRelation(active,false)}>Refuser</button></div>}
@@ -268,7 +267,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
           <button className="btn small ghost" onClick={()=>void loadMessages(conversationId)}><RefreshCw size={14}/> Actualiser</button></div>
          <div className="v07-chat-messages" role="log" aria-label="Messages de la conversation">
           {messages.map(m=><div className={'v07-bubble'+(m.auteur_id===userId?' mine':'')} key={m.id}>
-            <small>{m.auteur_id===userId?'Moi':'Interlocuteur'} · {new Date(m.created_at).toLocaleString('fr-FR')}</small><p>{m.corps}</p></div>)}
+            <small>{m.auteur_libelle|| (m.auteur_id===userId?'Moi':'Équipe partenaire')} · {new Date(m.created_at).toLocaleString('fr-FR')}</small><p>{m.corps}</p></div>)}
           {!messages.length&&<p className="muted">Aucun message. Debutez l'echange.</p>}</div>
          <form onSubmit={send} className="v07-message-form"><textarea aria-label="Ecrire un message" value={draftMessage} onChange={e=>setDraftMessage(e.target.value)}
              disabled={!canRespond||busy} maxLength={4000} required placeholder={canRespond?'Votre message...':'Lecture seule : demandez une attribution'} rows={3}/>

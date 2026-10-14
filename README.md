@@ -1,3 +1,11 @@
+# EURACONNECT V0.8
+
+**Lire en premier [`README_V08.md`](README_V08.md)**, puis `docs/INSTALLATION_V08.md` et `docs/RECETTE_V08.md`.
+
+Le projet contient les migrations historiques V0.2 a V0.7. Ne rejouez pas les anciennes migrations sur une base existante. Appliquez seulement `202610140007_experience_confidentialite.sql` apres une sauvegarde et une validation en recette.
+
+---
+
 # EURACONNECT - Plateforme de services et d'intermediation
 
 **Version du projet : V0.7** (migrations 001 a 006, Next.js + Supabase + Netlify).

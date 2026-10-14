@@ -37,7 +37,7 @@ export default function AnnuaireV06(){
   {error&&<div className="alert" role="alert">{error}</div>}
   {loading?<div className="directory-grid">{[1,2,3,4].map(i=><div className="directory-card skeleton" key={i}/>)}</div>:
    <div className="directory-grid">{items.map(item=><button type="button" className="directory-card" key={`${item.nature}-${item.id}`} onClick={()=>setOpened(item)}>
-    <div className="directory-image"><PublicImage path={item.image_path} alt={item.nom} className="directory-avatar"/></div>
+    <div className="directory-image"><PublicImage path={item.image_path} alt={item.nom} className="directory-avatar" variant={item.nature==='entreprise'?'logo':'avatar'}/></div>
     <div className="directory-card-body"><div className="entry-meta">{item.nature==='entreprise'?<Building2 size={14}/>:<UserRound size={14}/>}
       {item.nature==='entreprise'?'Entreprise':'Personne'}</div>
      <h3>{item.nom}</h3><p>{item.sous_titre}</p>
@@ -52,7 +52,7 @@ export default function AnnuaireV06(){
    <button className="btn ghost" disabled={loading||(page+1)*24>=total} onClick={()=>void refresh(page+1)}>Suivant</button></div>
   {opened&&<div className="modal-backdrop" role="presentation" onMouseDown={()=>setOpened(null)}><div role="dialog" aria-modal="true" aria-label={`Fiche ${opened.nom}`} className="modal-panel" onMouseDown={e=>e.stopPropagation()}>
    <button className="modal-close" aria-label="Fermer la fiche" onClick={()=>setOpened(null)}><X size={20}/></button>
-   <div className="modal-heading"><PublicImage path={opened.image_path} alt={opened.nom} className="modal-avatar"/><div>
+   <div className="modal-heading"><PublicImage path={opened.image_path} alt={opened.nom} className="modal-avatar" variant={opened.nature==='entreprise'?'logo':'avatar'}/><div>
     <span className="section-eyebrow">{opened.nature==='entreprise'?'Fiche entreprise':'Fiche professionnelle'}</span>
     <h2>{opened.nom}</h2><span className="muted">{opened.sous_titre}</span></div></div>
    <div className="modal-content"><h3>Presentation</h3><RichContent html={opened.description_html}/>
