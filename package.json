@@ -1,6 +1,6 @@
 {
   "name": "euraconnect",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "verify:structure": "node scripts/verify-structure.mjs"
+    "verify:structure": "node scripts/verify-structure.mjs",
+    "verify:v07": "node scripts/verify-v07.mjs"
   },
   "dependencies": {
     "next": "^15.3.0",

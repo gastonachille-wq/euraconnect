@@ -3,6 +3,7 @@ import {useEffect,useState,type FormEvent} from 'react';
 import {db} from '@/lib/supabase';
 import ModulesV03 from '@/components/ModulesV03';
 import IntermediationV04 from '@/components/IntermediationV04';
+import WorkspaceCommercialV07 from '@/components/v07/WorkspaceCommercialV07';
 import AdminUtilisateurs from '@/components/AdminUtilisateurs';
 import DashboardV06 from '@/components/v06/DashboardV06';
 import AnnuaireV06 from '@/components/v06/AnnuaireV06';
@@ -96,6 +97,7 @@ export default function Home(){
   ['annuaire','Annuaire',UsersRound],
   ['catalogue','Offres de services',BriefcaseBusiness],
   ['besoins','Besoins ouverts',ClipboardList],
+  ...(profile?.role==='incube'||profile?.role==='prestataire'?[['dossiers','Dossiers partages',Handshake]]:[]),
   ...(profile?.role==='prestataire'?[['prestataire','Mon activite',BriefcaseBusiness]]:[]),
   ...(profile?.role==='incube'?[['mes-besoins','Mes demandes',ClipboardList]]:[]),
   ...(profile?[['entreprise','Entreprise & profil',Building2],['modules','Services & rendez-vous',CalendarDays],['intermediation','Intermediation & messages',Handshake]]:[]),
@@ -124,10 +126,11 @@ export default function Home(){
  {tab==='admin'&&profile.role==='admin'&&<><h1>Administration</h1><AdminUtilisateurs/><AdminEntreprises/><p className="sub">Contrôle des prestataires et activation des comptes incubés.</p><div className="panel"><h3>Activer un utilisateur existant</h3><p>Pour inviter une personne, créez d’abord son compte via Supabase Auth (Invite user). Attribuez ensuite le rôle incubé avec ce formulaire.</p><form onSubmit={adminAction}><div className="fields"><div className="field"><label>Email existant</label><input required type="email" value={adminEmail} onChange={e=>setAdminEmail(e.target.value)}/></div><div className="field"><label>Rôle à attribuer</label><select value={adminRole} onChange={e=>setAdminRole(e.target.value as 'incube'|'prestataire')}><option value="incube">Incubé</option><option value="prestataire">Prestataire</option></select></div></div><button className="btn">Appliquer le rôle</button></form></div><div className="panel" style={{marginTop:18}}><h3>Prestataires en validation</h3><AdminProviders onDone={()=>void reload()}/></div></>}
  {tab==='entreprise'&&<><div className="page-head"><div><span className="section-eyebrow">Votre espace professionnel</span><h1>Entreprise et collaborateurs</h1><p className="sub">Une entreprise, plusieurs utilisateurs, des competences et une presence dans l annuaire.</p></div></div>
  <EntrepriseEtProfil role={profile.role} userId={user.id} defaultName={profile.nom||'Utilisateur'} onChanged={()=>void reload()}/></>}
+ {tab==='dossiers'&&(profile.role==='prestataire'||profile.role==='incube')&&<><WorkspaceCommercialV07 userId={user.id}/></>}
  {tab==='modules'&&<><h1>Services & rendez-vous</h1><p className="sub">Avantages incubés, disponibilités, réservations, notifications et indicateurs.</p><ModulesV03 role={profile.role} providerId={provider?.id} userId={user.id} offers={offers.map(o=>({id:o.id,titre:o.titre,prestataire_id:o.prestataire_id}))}/></>}
  {tab==='intermediation'&&<><h1>Intermédiation & messages</h1><p className="sub">Matching, relations acceptées, conversations et suivi commercial.</p><IntermediationV04 role={profile.role} providerId={provider?.id} userId={user.id}/></>}
  {tab==='compte'&&<><h1>Mon compte</h1><p className="sub">Gérez votre identité et votre accès.</p><div className="panel"><form onSubmit={saveName}><div className="field"><label>Nom d'affichage</label><input required value={name} onChange={e=>setName(e.target.value)}/></div><p className="textsmall">Email : {user.email} · Rôle : {profile.role}</p><button className="btn">Enregistrer</button></form><div className="actions"><button className="btn ghost" onClick={()=>void run(async()=>{const {error:e}=await db().auth.signOut({scope:'global'});if(e)throw e})}>Déconnecter tous mes appareils</button></div></div></>}
  </section></div>}
- </main><footer className="footer"><div className="shell">EURACONNECT | V0.6 | Annuaire entreprises et personnes | Paiements Stripe non disponibles</div></footer></>;
+ </main><footer className="footer"><div className="shell">EURACONNECT | V0.7 | Dossiers collaboratifs, annuaire entreprises et personnes | Paiements Stripe non disponibles</div></footer></>;
 }
 function AdminProviders({onDone}:{onDone:()=>void}){const [items,setItems]=useState<Provider[]>([]),[error,setError]=useState('');useEffect(()=>{void db().from('prestataires').select('id,nom_public,description,statut,proprietaire_id').eq('statut','en_validation').then(({data,error})=>{if(error)setError(error.message);setItems((data||[]) as Provider[])})},[]);return <div className="list">{error&&<div className="alert">{error}</div>}{items.map(p=><div className="item" key={p.id}><div><h3>{p.nom_public}</h3><p>{p.description}</p></div><button className="btn" onClick={async()=>{const {error:e}=await db().rpc('admin_valider_prestataire',{p_prestataire_id:p.id});if(e)setError(e.message);else{setItems(x=>x.filter(v=>v.id!==p.id));onDone()}}}>Valider</button></div>)}{items.length===0&&<p>Aucun prestataire en attente.</p>}</div>}

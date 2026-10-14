@@ -37,6 +37,7 @@ export default function DashboardV06({role,displayName,onNavigate,userId,hasComp
     <button onClick={()=>onNavigate('annuaire')}><div className="action-icon"><Search size={21}/></div><span><b>Explorer l annuaire</b><small>Entreprises, personnes et competences</small></span><ArrowUpRight size={18}/></button>
     <button onClick={()=>onNavigate(role==='incube'?'mes-besoins':'besoins')}><div className="action-icon"><ClipboardList size={21}/></div><span><b>{role==='incube'?'Publier un besoin':'Consulter les besoins'}</b><small>Recevoir ou envoyer des propositions</small></span><ArrowUpRight size={18}/></button>
     <button onClick={()=>onNavigate('entreprise')}><div className="action-icon"><Building2 size={21}/></div><span><b>Compléter ma fiche</b><small>Entreprise, collaborateurs et competences</small></span><ArrowUpRight size={18}/></button>
+    {(role==='incube'||role==='prestataire')&&<button onClick={()=>onNavigate('dossiers')}><div className="action-icon"><Handshake size={21}/></div><span><b>Dossiers partages</b><small>Candidatures, conversations et suivi d'equipe</small></span><ArrowUpRight size={18}/></button>}
     <button onClick={()=>onNavigate('modules')}><div className="action-icon"><CalendarDays size={21}/></div><span><b>Rendez-vous d’expertise</b><small>Proposer ou reserver un creneau</small></span><ArrowUpRight size={18}/></button>
    </div></section>
    <section className="panel dashboard-aside"><span className="section-eyebrow">Pilotage</span><h2>Au coeur de la plateforme</h2>

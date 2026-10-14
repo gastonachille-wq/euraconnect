@@ -1,8 +1,17 @@
-# Priorités d'implémentation
+# EURACONNECT - Apres V0.7
 
-1. **Durcissement Lot 0** : MFA administrateurs, invitations incubés avec jetons, authentification SSR Next.js, tests automatiques pgTAP et Playwright, CI/CD, audit sécurité.
-2. **Compléter Lot 1** : structures multi-tenant, collaborateurs, référentiel de compétences, fiches prestataires, recherche, avantages incubés.
-3. **Lot 2 complet** : invitations nominatives, réponse directe sans quota, expurgation garantie des candidatures, matching, messagerie sécurisée, opportunités et notifications.
-4. **Lot 3** : agenda et rendez-vous sans doubles réservations, fichiers ICS, suivi commercial.
-5. **Lot 4** : Stripe, abonnements, options, avis, modération, RGPD, reporting.
-6. **Lot 5** : équipes, projets multi-rôles, événements, webinaires et listes d'attente.
+La V0.7 stabilise les dossiers partages entre plusieurs comptes par entreprise.
+Avant d'ouvrir le service a des prestataires externes, effectuer la recette V0.7
+et finir le durcissement technique (MFA admin, assainissement serveur HTML,
+limitation des requetes, journalisation de tous les statuts).
+
+## Livraisons a prioriser
+
+1. V0.8 - Invitation des collaborateurs et incubes par email, preferences
+   de notification, SMTP transactionnel fiable (ne pas depend de l'email Supabase de test).
+2. V0.9 - Offre hybride Free / Pro / Premium payante, Stripe Checkout,
+   webhooks idempotents, quota par entreprise, facture et portail client.
+3. V1.0 - Projets multi-roles, equipes, evenements et animations,
+   rendez-vous avances, statistiques approfondies et recette de conformite.
+
+L'ordre est une proposition. Aucune de ces fonctions n'est incluse dans la V0.7.
