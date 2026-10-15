@@ -7,7 +7,6 @@ export type Term={id:string;libelle:string};
 type Suggestion=Term&{score:number};
 const message=(e:unknown)=>e instanceof Error?e.message:String(e);
 const norm=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/[^a-z0-9+#]/g,'');
-
 /** Un seul catalogue pour competences et mots-cles, avec creations dedoublonnees cote SQL. */
 export function SmartTagPicker({value,onChange,label='Tags et mots-clés',limit=15,hint}:{value:string[];onChange:(v:string[])=>void;label?:string;limit?:number;hint?:string}){
  const [termMap,setTermMap]=useState<Record<string,string>>({});
@@ -26,7 +25,7 @@ export function SmartTagPicker({value,onChange,label='Tags et mots-clés',limit=
     .then(({data,error:e})=>{if(id!==req.current)return;if(e)setError(e.message);
      else {const list=(data||[]) as Suggestion[];setSuggestions(list);
       setTermMap(old=>({...old,...Object.fromEntries(list.map(t=>[t.id,t.libelle]))}));}
-    }).finally(()=>{if(id===req.current)setLoading(false);});},220);
+    }).then(()=>{if(id===req.current)setLoading(false);},()=>{if(id===req.current)setLoading(false);});},220);
   return()=>clearTimeout(timer);
  },[q]);
  function toggle(t:Term){setError('');setNotice('');setTermMap(old=>({...old,[t.id]:t.libelle}));
@@ -75,7 +74,6 @@ export function SmartTagPicker({value,onChange,label='Tags et mots-clés',limit=
   {error&&<p className="field-error" role="alert">{error}</p>}{notice&&<p className="ec09-feedback" role="status">{notice}</p>}
  </div>;
 }
-
 export type TagTarget='entreprise'|'personne'|'offre'|'besoin';
 /** Gestion autonome pour les fiches deja creees ; l'enregistrement porte uniquement sur cette cible. */
 export function TagAssignmentEditor({type,id,heading='Tags associés',description}:{type:TagTarget;id:string;heading?:string;description?:string}){
