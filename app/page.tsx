@@ -7,6 +7,7 @@ import {ArrowRight,Bell,BookOpen,BriefcaseBusiness,Building2,CalendarDays,Messag
 import type {User} from '@supabase/supabase-js';
 import {db} from '@/lib/supabase';
 import AdminUtilisateurs from '@/components/AdminUtilisateurs';
+import AdminPremium from '@/components/AdminPremium';
 import AdminEntreprises from '@/components/v06/AdminEntreprises';
 import AnnuaireV06 from '@/components/v06/AnnuaireV06';
 import EntrepriseEtProfil from '@/components/v06/EntrepriseEtProfil';
@@ -185,7 +186,7 @@ export default function Home(){
       {tab==='modules'&&role&&<ModulesV03 role={role} providerId={provider?.id} userId={user.id} offers={offers.map(o=>({id:o.id,titre:o.titre,prestataire_id:o.prestataire_id}))}/>}
       {tab==='admin'&&role==='admin'&&<section className="ec08-page"><div className="ec08-page-title"><div><span className="section-eyebrow">Gestion de la plateforme</span><h1>Administration</h1>
         <p className="sub">Utilisateurs, validation des prestataires et rattachements entreprise.</p></div></div>
-        <AdminUtilisateurs/><AdminEntreprises/><details className="panel ec08-compose"><summary>Activer un compte Supabase existant</summary>
+        <AdminPremium/><AdminUtilisateurs/><AdminEntreprises/><details className="panel ec08-compose"><summary>Activer un compte Supabase existant</summary>
          <form onSubmit={adminAction} className="ec08-form-compact"><div className="fields"><div className="field"><label>Email existant</label><input type="email" required value={adminEmail} onChange={e=>setAdminEmail(e.target.value)}/></div>
           <div className="field"><label>Rôle</label><select value={adminRole} onChange={e=>setAdminRole(e.target.value as 'incube'|'prestataire')}><option value="incube">Incubé</option><option value="prestataire">Prestataire</option></select></div></div>
          <button className="btn" disabled={sending}>Attribuer le rôle</button></form></details>

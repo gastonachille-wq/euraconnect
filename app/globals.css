@@ -148,3 +148,21 @@ button:disabled{cursor:not-allowed;opacity:.52}.shell{max-width:1510px;padding:0
 .ec86-directory-card{position:relative;overflow:hidden}.ec86-directory-open{border:0;background:transparent;color:inherit;text-align:left;display:block;width:100%;height:100%;padding:0;cursor:pointer;font:inherit}.ec86-favorite{position:absolute;z-index:3;right:12px;top:12px;background:#fff;border:1px solid #e0e2e5;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:#565b64;box-shadow:0 2px 9px #161b2920}.ec86-favorite.is-active{color:#c52c3d;background:#fff5f5;border-color:#ef9ba4}.ec86-favorite:hover{transform:scale(1.06)}.ec08-market-card{position:relative}.ec08-market-card .ec86-favorite{position:static;width:34px;height:34px;margin-left:auto}.ec86-tag-chips{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}.ec86-messages-shortcut{display:inline-flex;gap:7px;align-items:center;border:1px solid #e0e1e3;border-radius:10px;background:#fff;padding:9px 11px;cursor:pointer;color:#1e2633;font-weight:650}.ec86-messages-shortcut:hover{border-color:#c52c3d;color:#bd2539}.ec86-needs-redirect{display:flex;align-items:center;justify-content:space-between;gap:20px}.ec86-needs-redirect p{margin:5px 0 0;color:#687185;font-size:13px}.ec86-tag-picker .ec85-suggestions{display:flex;flex-direction:column;align-items:stretch}.ec86-tag-picker .ec85-suggestions button{text-align:left}.ec08-filter-bar>.btn{white-space:nowrap}@media(max-width:700px){.ec86-messages-shortcut span{display:none}.ec86-needs-redirect{flex-direction:column;align-items:stretch}}
 
 .ec86-premium{display:flex;justify-content:space-between;align-items:center;gap:20px;background:#fbf9f7}.ec86-premium p{font-size:13px;color:#667085;margin:4px 0 0}.ec86-premium button{white-space:nowrap}@media(max-width:700px){.ec86-premium{flex-direction:column;align-items:stretch}}
+
+/* V0.8.7 : matching et lisibilite de la bourse */
+.ec087-check{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;cursor:pointer}
+.ec087-check input{width:16px;height:16px;accent-color:#b52338}
+.ec087-help{font-size:12px;margin:5px 0 12px}
+.ec087-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;margin:10px 0}
+.ec087-tags b{font-weight:600;margin-right:2px}
+.ec087-tags span{border:1px solid #d1dfd8;border-radius:40px;padding:4px 8px;background:#eff7f2;color:#226a46}
+@media(max-width:800px){.ec087-check{white-space:normal}.ec087-tags{gap:4px}}
+
+/* V0.8.8 - besoins explicites et consultables */
+.ec088-description{white-space:pre-line;line-height:1.65;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;overflow:hidden}.ec088-tags{margin:12px 0}.ec088-tags>b{font-size:.8rem;display:block;margin-bottom:7px}.ec088-tags>div{display:flex;flex-wrap:wrap;gap:6px}.ec088-tags span{border:1px solid #d9e1e9;background:#f4f7fa;border-radius:999px;padding:5px 10px;font-size:.78rem;color:#273746}.ec088-detail-toggle{display:flex;align-items:center;gap:8px;margin:10px 0}.ec088-detail{background:#f7f9fb;border:1px solid #dae3eb;border-radius:12px;padding:16px;line-height:1.65}.ec088-detail p{margin:7px 0 12px;white-space:pre-line}.ec088-detail ol{padding-left:22px;margin:8px 0}
+
+/* V0.8.9 : accès Premium prestataire et commande de consentement */
+.ec089-upsell{display:flex;justify-content:space-between;align-items:center;gap:1rem;border:1px solid #e7c77c;background:#fffaf0;color:#513c1b;border-radius:14px;padding:1rem 1.2rem;margin:1rem 0;}
+.ec089-upsell p{margin:.35rem 0 0;font-size:.9rem;max-width:65ch;line-height:1.5}
+.ec089-upsell button{white-space:nowrap}
+@media(max-width:640px){.ec089-upsell{flex-direction:column;align-items:stretch}}
