@@ -1,55 +1,42 @@
 'use client';
-import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useEffect,useState,type FormEvent} from 'react';
 import {Building2,UserRound,Search,Filter,ArrowRight,X,Heart,CalendarDays,Clock3} from 'lucide-react';
 import {db} from '@/lib/supabase';
 import {PublicImage} from './MediaAndSkills';
 import {RichContent} from './RichEditor';
 import type {Skill} from './MediaAndSkills';
+import FavoriteToggle from './FavoriteToggle';
 
 type Entry={nature:'entreprise'|'personne';id:string;nom:string;sous_titre:string;description_html:string;image_path:string|null;entreprise_id:string;competences:string[];nb_total:number};
 const explain=(e:unknown)=>e instanceof Error?e.message:String(e);
-export default function AnnuaireV06(){
+export default function AnnuaireV06({role}:{role?:'admin'|'incube'|'prestataire'}){
  const [items,setItems]=useState<Entry[]>([]),[skills,setSkills]=useState<Skill[]>([]),[query,setQuery]=useState(''),[kind,setKind]=useState('tous'),[skill,setSkill]=useState('');
- const [favorites,setFavorites]=useState<string[]>([]),[favoriteOnly,setFavoriteOnly]=useState(false),[favoriteBusy,setFavoriteBusy]=useState(''),[favoriteError,setFavoriteError]=useState(''),[slots,setSlots]=useState<any[]>([]),[booking,setBooking]=useState<any|null>(null),[subject,setSubject]=useState('Decouverte de prestation'),[feedback,setFeedback]=useState(''),[saving,setSaving]=useState(false);
- const [page,setPage]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[opened,setOpened]=useState<Entry|null>(null);
- const refreshCounter=useRef(0);
- async function refresh(target=0,override?:{search:string;kind:string;skill:string;only:boolean}){
-  const id=++refreshCounter.current;
-  setLoading(true);setError('');try{
-   const f=override||{search:query,kind,skill,only:favoriteOnly};
-   const fn=f.only?'ec09_annuaire_favoris':'ec_annuaire_rechercher';
-   const {data,error:e}=await db().rpc(fn,{p_texte:f.search.trim(),p_type:f.kind,p_competence:f.skill||null,p_limite:24,p_offset:target*24});
-   if(e)throw e;if(id!==refreshCounter.current)return;
-   setItems((data||[]) as Entry[]);setPage(target);
-  }catch(e){if(id===refreshCounter.current)setError(explain(e));}
-  finally{if(id===refreshCounter.current)setLoading(false);}}
- useEffect(()=>{void loadFavorites();void db().from('competences_ec').select('id,libelle').eq('actif',true).order('libelle')
+ const [favorites,setFavorites]=useState<string[]>([]),[slots,setSlots]=useState<any[]>([]),[booking,setBooking]=useState<any|null>(null),[subject,setSubject]=useState('Decouverte de prestation'),[feedback,setFeedback]=useState(''),[saving,setSaving]=useState(false);
+ const [onlyFavorites,setOnlyFavorites]=useState(false),[page,setPage]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(''),[opened,setOpened]=useState<Entry|null>(null);
+ async function refresh(target=0){setLoading(true);setError('');try{
+  const {data,error:e}=await db().rpc('ec_annuaire_rechercher',{p_texte:query.trim(),p_type:kind,p_competence:skill||null,p_limite:24,p_offset:target*24});
+  if(e)throw e;setItems((data||[]) as Entry[]);setPage(target);
+ }catch(e){setError(explain(e));}finally{setLoading(false);}}
+ useEffect(()=>{void refresh(0);void loadFavorites();void db().from('competences_ec').select('id,libelle').eq('actif',true).order('libelle')
   .then(({data})=>setSkills((data||[]) as Skill[]));},[]);
- useEffect(()=>{const timer=setTimeout(()=>void refresh(0),query?300:0);return()=>clearTimeout(timer);},[query,kind,skill,favoriteOnly]);
- async function loadFavorites(){setFavoriteError('');const c=db();const auth=await c.auth.getUser();
-  if(auth.error){setFavoriteError(auth.error.message);return;}
-  if(!auth.data.user){setFavoriteError('Connectez-vous pour consulter vos favoris.');return;}
-  const r=await c.from('favoris_ec').select('cible_type,cible_id').eq('utilisateur_id',auth.data.user.id);
-  if(r.error){setFavoriteError(r.error.message);return;}
-  setFavorites((r.data||[]).map(x=>`${x.cible_type}:${x.cible_id}`));}
- async function toggleFavorite(item:Entry){const key=`${item.nature}:${item.id}`;setFeedback('');setFavoriteError('');setFavoriteBusy(key);
-  try{const r=await db().rpc('ec09_basculer_favori',{p_type:item.nature,p_id:item.id});
-   if(r.error)throw r.error;
-   const isFavorite=r.data===true;setFavorites(old=>isFavorite?[...new Set([...old,key])]:old.filter(x=>x!==key));
-   await loadFavorites();setFeedback(isFavorite?'Ajouté à vos favoris.':'Retiré des favoris.');
-   if(favoriteOnly)void refresh(!isFavorite&&items.length===1&&page>0?page-1:page);
-  }catch(e){const m=explain(e);setFavoriteError(m);setFeedback(`Impossible de modifier ce favori : ${m}`);}
-  finally{setFavoriteBusy('');}}
+ async function loadFavorites(){const {data:{user},error:authError}=await db().auth.getUser();if(authError||!user){setFeedback('Connectez-vous pour utiliser les favoris.');return;}
+  const r=await db().from('favoris_ec').select('cible_type,cible_id').eq('utilisateur_id',user.id);
+  if(r.error)setFeedback(r.error.message);else setFavorites((r.data||[]).map(x=>`${x.cible_type}:${x.cible_id}`));}
+ async function toggleFavorite(item:Entry){const key=`${item.nature}:${item.id}`;setFeedback('');setSaving(true);
+  try{const c=db();const {data:{user},error:authError}=await c.auth.getUser();if(authError)throw authError;if(!user)throw new Error('Session expirée. Reconnectez-vous.');
+   const has=favorites.includes(key);const q=has?c.from('favoris_ec').delete().eq('utilisateur_id',user.id).eq('cible_type',item.nature).eq('cible_id',item.id):
+   c.from('favoris_ec').upsert({utilisateur_id:user.id,cible_type:item.nature,cible_id:item.id},{onConflict:'utilisateur_id,cible_type,cible_id'});
+   const r=await q;if(r.error)throw r.error;setFavorites(xs=>has?xs.filter(x=>x!==key):[...xs,key]);setFeedback(has?'Retiré des favoris.':'Ajouté aux favoris.');}
+  catch(e){setFeedback(explain(e));}finally{setSaving(false);}}
  async function showSlots(item:Entry){setOpened(item);setFeedback('');setBooking(null);const r=await db().rpc('ec08_lister_creneaux');if(r.error){setFeedback(explain(r.error));return;}
   const list=(r.data||[]) as any[];setSlots(list.filter(x=>!x.est_reserve&&new Date(x.debut).getTime()>Date.now()+12*3600000&&x.prestataire_nom.toLowerCase()===item.nom.toLowerCase()));}
  async function reserve(){if(!booking)return;setSaving(true);setFeedback('');try{const r=await db().rpc('ec08_reserver_rdv',{p_creneau:booking.id,p_objet:subject,p_details:'Réservation depuis l’annuaire EURACONNECT',p_besoin:null});if(r.error)throw r.error;setFeedback('Rendez-vous confirmé. Retrouvez ses détails dans votre agenda.');setBooking(null);if(opened)await showSlots(opened);}catch(e){setFeedback(explain(e));}finally{setSaving(false);}}
- const total=items[0]?.nb_total||0;
+ const total=items[0]?.nb_total||0;const displayed=onlyFavorites?items.filter(item=>favorites.includes(`${item.nature}:${item.id}`)):items;
  return <div className="directory">
   <div className="page-head"><div><div className="section-eyebrow">Explorer l’écosystème</div><h1>Annuaire</h1><p className="sub">Retrouvez les entreprises, les professionnels et leurs expertises dans un seul espace.</p></div>
    <div className="head-icon"><Search size={24}/></div></div>
-  <div className="ec09-directory-toolbar"><button type="button" className={`ec09-favorites-filter ${favoriteOnly?'active':''}`} onClick={()=>setFavoriteOnly(v=>!v)} aria-pressed={favoriteOnly}>
-   <Heart size={17} fill={favoriteOnly?'currentColor':'none'}/> {favoriteOnly?'Tous les profils':'Mes favoris'} <span>{favorites.length}</span></button>
-   <span className="muted">Enregistrez les fiches utiles pour les retrouver plus tard.</span></div>
+  {role==='prestataire'&&<div className="panel ec86-premium"><div><b>Développez vos opportunités avec Premium</b><p>Accédez à l'identité des startups derrière les besoins et priorisez vos mises en relation. Fonction disponible selon votre abonnement prestataire.</p></div><button type="button" className="btn ghost small" onClick={()=>{setFeedback('Pour activer Premium, contactez l’administration EURACONNECT. La souscription en ligne n’est pas encore disponible.');setOpened(null);}}>Découvrir Premium</button></div>}
+  {feedback&&!opened&&<div role="status" className="alert">{feedback}</div>}
   <form className="directory-filters panel" onSubmit={(e:FormEvent)=>{e.preventDefault();void refresh(0);}}>
    <div className="directory-search"><Search size={19}/><input aria-label="Recherche dans l annuaire" placeholder="Entreprise, personne, expertise..." value={query} onChange={e=>setQuery(e.target.value)}/></div>
    <div className="filter-select"><Filter size={16}/><select aria-label="Type de fiche" value={kind} onChange={e=>setKind(e.target.value)}>
@@ -60,15 +47,14 @@ export default function AnnuaireV06(){
    <button className="btn" type="submit"><Search size={16}/> Rechercher</button>
   </form>
   <div className="results-header"><div><strong>{loading?'Recherche...':`${total} résultat(s)`}</strong><span className="muted">Visibilité selon les règles de la plateforme</span></div>
-   {(query||skill||kind!=='tous')&&<button className="btn ghost small" onClick={()=>{setQuery('');setSkill('');setKind('tous');void refresh(0,{search:'',kind:'tous',skill:'',only:favoriteOnly});}}>Effacer les filtres <X size={14}/></button>}
+   <button type="button" className={`btn ghost small ${onlyFavorites?'active':''}`} aria-pressed={onlyFavorites} onClick={()=>setOnlyFavorites(x=>!x)}><Heart size={15} fill={onlyFavorites?'currentColor':'none'}/> {onlyFavorites?'Afficher tout':'Mes favoris'}</button>{(query||skill||kind!=='tous')&&<button className="btn ghost small" onClick={()=>{setQuery('');setSkill('');setKind('tous');setPage(0);
+    void db().rpc('ec_annuaire_rechercher',{p_texte:'',p_type:'tous',p_competence:null,p_limite:24,p_offset:0}).then(({data,error:e})=>{if(e)setError(e.message);else setItems((data||[]) as Entry[]);});}}>Effacer les filtres <X size={14}/></button>}
   </div>
-  {error&&<div className="alert" role="alert">{error}</div>}{favoriteError&&<div className="alert" role="alert">Favoris : {favoriteError}</div>}
+  {error&&<div className="alert" role="alert">{error}</div>}
   {loading?<div className="directory-grid">{[1,2,3,4].map(i=><div className="directory-card skeleton" key={i}/>)}</div>:
-   <div className="directory-grid">{items.map(item=><div className="ec09-directory-item" key={`${item.nature}-${item.id}`}><button type="button" className="ec09-favorite-pin" title={favorites.includes(`${item.nature}:${item.id}`)?'Retirer des favoris':'Ajouter aux favoris'}
-    aria-label={favorites.includes(`${item.nature}:${item.id}`)?`Retirer ${item.nom} des favoris`:`Ajouter ${item.nom} aux favoris`}
-    aria-pressed={favorites.includes(`${item.nature}:${item.id}`)} disabled={favoriteBusy===`${item.nature}:${item.id}`}
-    onClick={()=>void toggleFavorite(item)}><Heart size={20} fill={favorites.includes(`${item.nature}:${item.id}`)?'currentColor':'none'}/></button>
-   <button type="button" className="directory-card" onClick={()=>{setOpened(item);setSlots([]);setBooking(null);setFeedback('');}}>
+   <div className="directory-grid">{displayed.map(item=><article className="directory-card ec86-directory-card" key={`${item.nature}-${item.id}`} >
+    <FavoriteToggle type={item.nature} active={favorites.includes(`${item.nature}:${item.id}`)} disabled={saving} onClick={()=>void toggleFavorite(item)}/>
+    <button type="button" className="ec86-directory-open" onClick={()=>{setOpened(item);setSlots([]);setBooking(null);setFeedback('');}}>
     <div className="directory-image"><PublicImage path={item.image_path} alt={item.nom} className="directory-avatar" variant={item.nature==='entreprise'?'logo':'avatar'}/></div>
     <div className="directory-card-body"><div className="entry-meta">{item.nature==='entreprise'?<Building2 size={14}/>:<UserRound size={14}/>}
       {item.nature==='entreprise'?'Entreprise':'Personne'}</div>
@@ -76,8 +62,8 @@ export default function AnnuaireV06(){
      <div className="tag-row">{item.competences.slice(0,4).map(t=><span className="skill-mini" key={t}>{t}</span>)}
       {item.competences.length>4&&<span className="skill-mini">+{item.competences.length-4}</span>}</div>
      <span className="card-action">Voir la fiche <ArrowRight size={15}/></span>
-    </div></button></div>)}
-    {!items.length&&<div className="empty directory-empty"><Search size={26}/><h3>{favoriteOnly?'Aucun favori correspondant':'Aucun résultat'}</h3><p>{favoriteOnly?'Ajoutez des fiches avec le cœur, ou élargissez les filtres.':'Essayez un autre mot-clé ou modifiez les filtres.'}</p></div>}
+    </div></button></article>)}
+    {!displayed.length&&<div className="empty directory-empty"><Search size={26}/><h3>{onlyFavorites?'Aucun favori parmi ces résultats':'Aucun résultat'}</h3><p>Essayez un autre mot-clé ou modifiez les filtres.</p></div>}
    </div>}
   <div className="pagination"><button className="btn ghost" disabled={page===0||loading} onClick={()=>void refresh(page-1)}>Precedent</button>
    <span className="muted">Page {page+1}{total?` / ${Math.ceil(total/24)}`:''}</span>
@@ -87,7 +73,7 @@ export default function AnnuaireV06(){
    <div className="modal-heading"><PublicImage path={opened.image_path} alt={opened.nom} className="modal-avatar" variant={opened.nature==='entreprise'?'logo':'avatar'}/><div>
     <span className="section-eyebrow">{opened.nature==='entreprise'?'Fiche entreprise':'Fiche professionnelle'}</span>
     <h2>{opened.nom}</h2><span className="muted">{opened.sous_titre}</span></div></div>
-   <div className="ec84-directory-actions"><button type="button" className="btn ghost" disabled={!!favoriteBusy} onClick={()=>void toggleFavorite(opened)}><Heart size={17} fill={favorites.includes(`${opened.nature}:${opened.id}`)?'currentColor':'none'}/>{favorites.includes(`${opened.nature}:${opened.id}`)?'Retirer des favoris':'Ajouter aux favoris'}</button>
+   <div className="ec84-directory-actions"><button type="button" className="btn ghost" disabled={saving} onClick={()=>void toggleFavorite(opened)}><Heart size={17} fill={favorites.includes(`${opened.nature}:${opened.id}`)?'currentColor':'none'}/>{favorites.includes(`${opened.nature}:${opened.id}`)?'Dans mes favoris':'Ajouter aux favoris'}</button>
     {opened.nature==='entreprise'&&<button type="button" className="btn" onClick={()=>void showSlots(opened)}><CalendarDays size={16}/> Voir les créneaux</button>}</div>
    {feedback&&<div className="alert" role="status">{feedback}</div>}
    {opened.nature==='entreprise'&&<div className="ec84-slot-list"><h3>Disponibilités de cette entreprise</h3>{slots.length?slots.slice(0,12).map(slot=><button key={slot.id} type="button" className={`ec84-slot ${booking?.id===slot.id?'selected':''}`} onClick={()=>setBooking(slot)}><Clock3 size={15}/>{new Date(slot.debut).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Paris'})} · {slot.intervenant_nom}</button>):<p className="muted">Aucun créneau public disponible actuellement. Cliquez sur « Voir les créneaux » pour actualiser.</p>}

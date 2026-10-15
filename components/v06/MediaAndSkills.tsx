@@ -1,13 +1,22 @@
 'use client';
 import {useEffect,useState,type ChangeEvent} from 'react';
 import {db} from '@/lib/supabase';
-import {Camera,UploadCloud} from 'lucide-react';
-import {SmartTagPicker} from '@/components/v09/SmartTags';
+import {Camera,Check,Search,UploadCloud,X} from 'lucide-react';
 
 export type Skill={id:string;libelle:string};
 export function SkillPicker({value,onChange,limit=20,label='Compétences et savoir-faire'}:{value:string[];onChange:(v:string[])=>void;limit?:number;label?:string}){
- return <SmartTagPicker value={value} onChange={onChange} limit={limit} label={label}
-  hint="Sélectionnez les compétences existantes ou créez-en une si nécessaire. Les synonymes et orthographes proches sont proposés automatiquement."/>;
+ const [items,setItems]=useState<Skill[]>([]),[q,setQ]=useState(''),[error,setError]=useState('');
+ useEffect(()=>{void db().from('competences_ec').select('id,libelle').eq('actif',true).order('libelle').limit(300)
+  .then(({data,error})=>{if(error)setError(error.message);else setItems((data||[]) as Skill[]);});},[]);
+ const filtered=items.filter(s=>s.libelle.toLocaleLowerCase('fr').includes(q.toLocaleLowerCase('fr')));
+ function toggle(id:string){if(value.includes(id))onChange(value.filter(x=>x!==id));else if(value.length<limit)onChange([...value,id]);}
+ return <div className="field skill-field"><label>{label} <span className="muted">({value.length}/{limit})</span></label>
+  <div className="selected-skills">{value.map(id=>{const skill=items.find(s=>s.id===id);return <button type="button" className="skill-tag active" key={id} onClick={()=>toggle(id)} title="Retirer cette compétence">{skill?.libelle||'Compétence'} <X size={13}/></button>;})}</div>
+  <div className="skill-search"><Search size={16}/><input aria-label="Rechercher une compétence" placeholder="Rechercher une compétence..." value={q} onChange={e=>setQ(e.target.value)}/></div>
+  <div className="skill-options" role="group" aria-label={label}>{filtered.slice(0,40).map(s=><button type="button" key={s.id} className={`skill-option ${value.includes(s.id)?'chosen':''}`} aria-pressed={value.includes(s.id)} disabled={!value.includes(s.id)&&value.length>=limit} onClick={()=>toggle(s.id)}>{value.includes(s.id)?<Check size={15}/>:<span className="skill-dot"/>}{s.libelle}</button>)}
+   {!filtered.length&&<span className="muted">Aucune compétence correspondante.</span>}</div>
+  {error&&<p role="alert" className="field-error">{error}</p>}
+ </div>;
 }
 
 type ImageVariant='logo'|'avatar'|'cover';

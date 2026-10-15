@@ -16,13 +16,13 @@ type Member={profile_id:string;nom_public:string;role_membre:string;actif:boolea
 type Message={id:string;auteur_id:string|null;auteur_libelle:string;corps:string;created_at:string};
 type Activity={action:string;detail:string;auteur:string;created_at:string};
 type Unattached={id:string;titre:string};
-const errorMessage=(e:unknown)=>e instanceof Error?e.message:String(e);
+const errorMessage=(e:unknown)=>{if(e instanceof Error)return e.message; if(e&&typeof e==='object'){const obj=e as {message?:unknown;details?:unknown;hint?:unknown};return [obj.message,obj.details,obj.hint].filter(x=>typeof x==='string'&&x.trim()).join(' — ')||'Une erreur est survenue. Réessayez.';}return typeof e==='string'?e:'Une erreur est survenue. Réessayez.';};
 const euros=(cents:number|null)=>cents===null?'Sur devis':new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(cents/100);
 const relativeDate=(date:string)=>new Date(date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 const opportunityLabels:Record<string,string>={contact:'Contact etabli',rdv:'Rendez-vous',proposition:'Proposition envoyee',gagnee:'Mission concretisee',perdue:'Sans suite'};
 const relationLabels:Record<string,string>={demandee:'Validation attendue',acceptee:'Contact etabli',refusee:'Contact refuse'};
 
-export default function WorkspaceCommercialV07({userId}:{userId:string}){
+export default function WorkspaceCommercialV07({userId,onNavigate}:{userId:string;onNavigate?:(tab:string)=>void}){
  const [companies,setCompanies]=useState<Company[]>([]);
  const [selected,setSelected]=useState('');
  const [dossiers,setDossiers]=useState<Dossier[]>([]);
@@ -202,13 +202,7 @@ export default function WorkspaceCommercialV07({userId}:{userId:string}){
      {isProvider&&<button type="button" className={view==='market'?'selected':''} onClick={()=>setView('market')}>
       <Search size={18}/> Besoins auxquels repondre</button>}
     </div>
-    {isStartup&&isManager&&<details className="panel v07-compose"><summary><PlusCircle size={18}/> Publier un nouveau besoin au nom de l'entreprise</summary>
-     <form onSubmit={createNeed} className="v07-compose-form">
-      <div className="field"><label>Titre du besoin</label><input required minLength={8} maxLength={150} value={newTitle} onChange={e=>setNewTitle(e.target.value)}/></div>
-      <RichEditor label="Description complete (50 caracteres minimum)" value={newDescription} onChange={setNewDescription}/>
-      <div className="field"><label>Budget indicatif en euros (facultatif)</label><input type="number" min={0} step="0.01" value={newBudget} onChange={e=>setNewBudget(e.target.value)}/></div>
-      <button className="btn" disabled={busy} type="submit">Publier le besoin <ArrowUpRight size={15}/></button>
-     </form></details>}
+    {isStartup&&isManager&&<div className="panel ec86-needs-redirect"><div><b>Un nouveau besoin à publier ?</b><p>Publiez-le depuis « Mes demandes » pour renseigner vos compétences, préparer l’annonce anonyme et suivre les réponses.</p></div><button type="button" className="btn" onClick={()=>onNavigate?.('demandes')}><PlusCircle size={16}/> Créer un besoin <ArrowRight size={14}/></button></div>}
     {isStartup&&unattached.length>0&&<div className="callout"><b>Anciens besoins non rattaches</b><p>Ces demandes restent personnelles tant que vous ne les attribuez pas a une entreprise.</p>
       {unattached.map(n=><div key={n.id} className="v07-unattached"><span>{n.titre}</span><button className="btn small ghost" disabled={!isManager||busy} onClick={()=>company&&void action(async()=>{
        const r=await db().rpc('ec07_rattacher_besoin',{p_besoin:n.id,p_entreprise:company.id});if(r.error)throw r.error;

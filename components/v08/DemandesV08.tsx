@@ -5,7 +5,9 @@ import {ArrowRight,CheckCircle2,ChevronDown,ClipboardList,Clock3,Eye,EyeOff,
 import {db} from '@/lib/supabase';
 import RichEditor,{richPlainText} from '@/components/v06/RichEditor';
 import {SkillPicker} from '@/components/v06/MediaAndSkills';
-import {SmartTagPicker,TagAssignmentEditor} from '@/components/v09/SmartTags';
+import FavoriteToggle,{useSavedTargets} from '@/components/v06/FavoriteToggle';
+import NeedTagPicker from '@/components/v08/NeedTagPicker';
+import TagEditor from '@/components/v06/TagEditor';
 
 type Company={id:string;nom:string;type:string;role_membre:string};
 type Need={id:string;entreprise_id:string|null;titre:string;titre_anonyme:string;description:string;
@@ -35,11 +37,12 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
  const [scope,setScope]=useState<'mine'|'marche'>(role==='incube'?'mine':'marche');
  const [mine,setMine]=useState<Need[]>([]),[market,setMarket]=useState<MarketNeed[]>([]);
  const [query,setQuery]=useState(''),[filter,setFilter]=useState(''),[busy,setBusy]=useState(false);
+ const [onlySaved,setOnlySaved]=useState(false),saved=useSavedTargets('besoin'),[requestedTags,setRequestedTags]=useState<string[]>([]);
  const [error,setError]=useState(''),[notice,setNotice]=useState('');
  const [creating,setCreating]=useState(false),[expanded,setExpanded]=useState('');
  const [title,setTitle]=useState(''),[description,setDescription]=useState('');
  const [anonTitle,setAnonTitle]=useState(''),[anonDescription,setAnonDescription]=useState('');
- const [price,setPrice]=useState(''),[skills,setSkills]=useState<string[]>([]),[tags,setTags]=useState<string[]>([]);
+ const [price,setPrice]=useState(''),[skills,setSkills]=useState<string[]>([]);
  const [responseFor,setResponseFor]=useState(''),[response,setResponse]=useState('');
  const [nextStatus,setNextStatus]=useState(''),[reason,setReason]=useState('');
  const [anonEdit,setAnonEdit]=useState<string|null>(null),[editTitle,setEditTitle]=useState(''),[editSummary,setEditSummary]=useState('');
@@ -75,11 +78,14 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
    const plain=richPlainText(description);if(plain.length<50)throw new Error('Ajoute une description complète d’au moins 50 caractères.');
    const cents=price.trim()?Math.round(Number(price)*100):null;
    if(cents!==null&&(!Number.isSafeInteger(cents)||cents<0))throw new Error('Budget incorrect.');
-   const r=await db().rpc('ec09_publier_besoin_tags',{p_entreprise:companyId,p_titre:title,
+   const r=await db().rpc('ec08_publier_besoin',{p_entreprise:companyId,p_titre:title,
     p_description:plain,p_titre_anonyme:anonTitle,p_annonce_anonyme:anonDescription,
-    p_budget_centimes:cents,p_html:description,p_competences:skills,p_tags:tags});
+    p_budget_centimes:cents,p_html:description});
    if(r.error)throw r.error;
-   setCreating(false);setTitle('');setDescription('');setAnonTitle('');setAnonDescription('');setSkills([]);setTags([]);setPrice('');
+   if(skills.length&&r.data){const x=await db().rpc('ec_set_competences',{
+    p_cible:'projet',p_id:r.data,p_competences:skills});if(x.error)throw new Error(`Besoin créé, mais compétences non enregistrées : ${x.error.message}`);}
+   if(requestedTags.length&&r.data){const ids:string[]=[];for(const label of requestedTags){const t=await db().rpc('ec085_creer_tag',{p_libelle:label});if(t.error)throw new Error('Besoin publié mais tag non associé : '+t.error.message);ids.push((t.data as {id:string}).id);}const link=await db().rpc('ec085_definir_tags',{p_type:'besoin',p_id:r.data,p_tags:ids});if(link.error)throw new Error('Besoin publié mais tags non associés : '+link.error.message);}
+   setCreating(false);setTitle('');setDescription('');setAnonTitle('');setAnonDescription('');setSkills([]);setRequestedTags([]);setPrice('');
   },'Besoin publié, avec une annonce anonymisée accessible aux prestataires Free/Pro.');
  }
  async function apply(e:FormEvent){e.preventDefault();if(!responseFor||!companyId)return;
@@ -126,8 +132,7 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
      <div className="field"><label>Titre interne</label><input minLength={8} maxLength={150} required value={title} onChange={e=>setTitle(e.target.value)} placeholder="Ex. Accompagnement réglementaire pour notre dispositif"/></div>
      <RichEditor label="Contexte et livrables (description complète)" value={description} onChange={setDescription}/>
      <div className="fields"><div className="field"><label>Budget indicatif (€)</label><input type="number" min={0} step="0.01" value={price} onChange={e=>setPrice(e.target.value)}/></div></div>
-     <SkillPicker value={skills} onChange={setSkills} limit={10} label="Compétences recherchées"/>
-     <SmartTagPicker value={tags} onChange={setTags} label="Thématiques & mots-clés du besoin" hint="Tags internes au besoin. Pour protéger la startup, ils ne sont pas publiés dans l’annonce anonyme."/>
+     <NeedTagPicker value={requestedTags} onChange={setRequestedTags} label="Compétences recherchées (suggestions ou création libre)"/>
      <div className="ec08-anon-box"><div className="ec08-section-caption"><EyeOff size={22}/><div><h3>Annonce visible avant Premium</h3><p>Retire noms d’entreprises, contacts, liens et indices permettant de t’identifier.</p></div></div>
       <div className="field"><label>Titre anonymisé</label><input minLength={8} maxLength={150} value={anonTitle} required onChange={e=>setAnonTitle(e.target.value)} placeholder="Ex. Recherche expertise réglementaire santé"/></div>
       <div className="field"><label>Résumé anonymisé (50 à 1 500 caractères)</label><textarea rows={4} required minLength={50} maxLength={1500} value={anonDescription} onChange={e=>setAnonDescription(e.target.value)}/></div>
@@ -139,9 +144,8 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
       <h3>{n.titre}</h3><p className="ec08-card-desc">{n.description}</p></div><button type="button" className="ec08-ghost-btn" onClick={()=>void expandNeed(n)} aria-expanded={expanded===n.id}>{expanded===n.id?'Réduire':'Gérer'} <ChevronDown size={15}/></button></div>
     <div className="ec08-demand-bottom"><span>{money(n.budget_centimes)}</span><span>{n.nb_reponses} proposition(s)</span><span>État public : <b>{LABELS[n.statut_suivi]}</b></span></div>
     {expanded===n.id&&<div className="ec08-detail-area">
-       <div className="ec08-detail-grid"><div>
+       <TagEditor type="besoin" id={n.id} editable={canPublish}/><div className="ec08-detail-grid"><div>
         <h4>Faire avancer la demande</h4>
-        <TagAssignmentEditor key={`besoin-${n.id}`} type="besoin" id={n.id} heading="Tags de la demande" description="Modifiez les mots-clés internes du besoin sans changer son statut."/>
         <form onSubmit={e=>void changeStatus(e,n)}>
          <div className="field"><label>Prochaine étape</label><select value={nextStatus} required onChange={e=>setNextStatus(e.target.value)}><option value="">Choisir une étape</option>{(transitions[n.statut_suivi]||[]).map(s=><option key={s} value={s}>{LABELS[s]}</option>)}</select></div>
          <div className="field"><label>Commentaire de suivi {['termine','sans_suite'].includes(nextStatus)?'(obligatoire)':'(facultatif)'}</label><input maxLength={500} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Ex. RDV confirmé, devis reçu…"/></div>
@@ -163,15 +167,15 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
    </div>
   </>}
   {scope==='marche'&&<>
-   <div className="ec08-filter-bar"><div className="ec08-search"><Search size={17}/><input aria-label="Rechercher un besoin" placeholder="Rechercher une compétence, une mission, un sujet…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button aria-label="Effacer la recherche" onClick={()=>setQuery('')}><X size={15}/></button>}</div>
+   <div className="ec08-filter-bar"><button type="button" className={`btn ghost small ${onlySaved?'active':''}`} onClick={()=>setOnlySaved(v=>!v)}><ClipboardList size={15}/>{onlySaved?'Toutes les demandes':'Mes besoins épinglés'}</button><div className="ec08-search"><Search size={17}/><input aria-label="Rechercher un besoin" placeholder="Rechercher une compétence, une mission, un sujet…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button aria-label="Effacer la recherche" onClick={()=>setQuery('')}><X size={15}/></button>}</div>
     <label className="ec08-filter"><SlidersHorizontal size={16}/><select value={filter} onChange={e=>setFilter(e.target.value)}><option value="">Tous les statuts</option>{STATES.map(s=><option key={s} value={s}>{LABELS[s]}</option>)}</select></label>
    </div>
    <div className="ec08-market-hint"><LockKeyhole size={16}/>
     {role==='prestataire'?'La startup est confidentielle en Free/Pro. Son identité est accessible au prestataire Premium.':'Les statuts sont partagés, mais les informations privées des startups restent protégées.'}</div>
-   <div className="ec08-market-grid">{market.map(n=>{
+   <div className="ec08-market-grid">{market.filter(n=>!onlySaved||saved.ids.includes(n.id)).map(n=>{
     const canReceive=!['termine','sans_suite','en_pause','en_realisation'].includes(n.statut_suivi);
     return <article className="ec08-market-card" key={n.id}>
-     <div className="ec08-card-meta"><Status value={n.statut_suivi}/><span>{dateLabel(n.created_at)}</span></div>
+     <div className="ec08-card-meta"><Status value={n.statut_suivi}/><span>{dateLabel(n.created_at)}</span><FavoriteToggle type="besoin" active={saved.ids.includes(n.id)} onClick={()=>void saved.toggle(n.id)}/></div>
      <h3>{n.titre}</h3><p>{n.description}</p>
      <div className="ec08-market-tags"><span>{money(n.budget_centimes)}</span>{n.score>0&&<span>Correspondance {n.score}</span>}</div>
      <div className="ec08-market-footer"><div>{n.identite_visible?<><Eye size={15}/><b>{n.demandeur||'Startup'}</b></>:<><EyeOff size={15}/><span>{n.demandeur||'Startup confidentielle'}</span></>}</div>
@@ -179,6 +183,7 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
      </div>
     </article>;
    })}{!market.length&&!busy&&<div className="empty">Aucun besoin ne correspond à tes critères.</div>}</div>
+   {saved.error&&<p className="field-error" role="alert">{saved.error}</p>}
    {responseFor&&<div className="ec08-modal-backdrop" onMouseDown={()=>setResponseFor('')}><div className="ec08-reply-modal" role="dialog" aria-modal="true" aria-label="Répondre au besoin" onMouseDown={e=>e.stopPropagation()}>
     <div className="ec08-modal-heading"><div><span className="section-eyebrow">Nouvelle candidature</span><h2>Répondre à un besoin</h2><p>{market.find(n=>n.id===responseFor)?.titre}</p></div><button className="ec08-ghost-btn" aria-label="Fermer" onClick={()=>setResponseFor('')}><X size={19}/></button></div>
     <div className="ec08-market-hint"><CheckCircle2 size={16}/> Le demandeur connaîtra le nom de ton entreprise. Son identité restera confidentielle jusqu’au plan Premium.</div>

@@ -26,10 +26,8 @@ for(const token of [
 const page=read('app/page.tsx');
 for(const token of ["setTab]=useState('dashboard')",'DashboardV08','DemandesV08','RendezVousV08','PublicImage','EntrepriseEtProfil'])
  if(!page.includes(token))throw new Error(`Missing app entry ${token}`);
-for(const token of ['ec08_fil_besoins','ec08_changer_statut_besoin'])
+for(const token of ['ec08_fil_besoins','ec08_changer_statut_besoin','ec08_publier_besoin'])
  if(!read('components/v08/DemandesV08.tsx').includes(token))throw new Error(`Missing need operation ${token}`);
-if(!['ec08_publier_besoin','ec09_publier_besoin_tags'].some(token=>read('components/v08/DemandesV08.tsx').includes(token)))
- throw new Error('Missing need creation operation');
 for(const token of ['ec08_reserver_rdv','ec08_proposer_creneau','ec08_annuler_rdv','ec08_lister_rdv'])
  if(!read('components/v08/RendezVousV08.tsx').includes(token))throw new Error(`Missing RDV operation ${token}`);
 for(const token of ["folder==='entreprises'?'logo'",'canvas.toBlob','object-fit:contain','object-fit:cover']){
