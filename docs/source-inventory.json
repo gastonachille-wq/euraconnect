@@ -1,0 +1,448 @@
+{
+  "functions": {
+    "creer_profil_auth": [
+      "202610140001_core.sql"
+    ],
+    "est_admin": [
+      "202610140001_core.sql"
+    ],
+    "mon_role": [
+      "202610140001_core.sql"
+    ],
+    "mon_organisation": [
+      "202610140001_core.sql"
+    ],
+    "mon_prestataire": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "protect_profile_columns": [
+      "202610140001_core.sql"
+    ],
+    "creer_prestataire": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "publier_offre": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "publier_besoin": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "envoyer_candidature_ouverte": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "lister_mes_candidatures": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "demander_mise_en_relation": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "repondre_mise_en_relation": [
+      "202610140001_core.sql"
+    ],
+    "admin_changer_role_par_email": [
+      "202610140001_core.sql"
+    ],
+    "admin_valider_prestataire": [
+      "202610140001_core.sql"
+    ],
+    "definir_avantage_incube": [
+      "202610140002_modules.sql"
+    ],
+    "proposer_disponibilite": [
+      "202610140002_modules.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "reserver_disponibilite": [
+      "202610140002_modules.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "marquer_notification_lue": [
+      "202610140002_modules.sql"
+    ],
+    "indicateurs_admin": [
+      "202610140002_modules.sql"
+    ],
+    "ec_set_competences": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_matching_besoins": [
+      "202610140003_intermediation.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec_ouvrir_conversation": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_envoyer_message": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_suivre_opportunite": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_mes_relations_acceptees": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "admin_lister_utilisateurs": [
+      "202610140004_admin_utilisateurs.sql"
+    ],
+    "admin_modifier_utilisateur": [
+      "202610140004_admin_utilisateurs.sql"
+    ],
+    "admin_reparer_profil": [
+      "202610140004_admin_utilisateurs.sql"
+    ],
+    "ec_verifier_role_entreprise": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_est_membre": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_peut_gerer_entreprise": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_publier_offre_riche": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_publier_besoin_riche": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_creer_entreprise": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_modifier_entreprise": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_sauver_personne": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_definir_competences_v06": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_sauver_fiche_entreprise": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_sauver_fiche_personne": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_mes_entreprises": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_lister_membres": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_admin_rattacher_membre": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_admin_lister_entreprises": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_annuaire_rechercher": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_dashboard_v06": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec_image_offre": [
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "ec07_droit_entreprise": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_est_assigne": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_droit_conversation": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_rattacher_besoin": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_lister_dossiers": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_besoins_disponibles": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_publier_besoin": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_candidater": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_demander_relation": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_repondre_relation": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_ouvrir_conversation": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_envoyer_message": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_suivre_opportunite": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_assigner_dossier": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_historique": [
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec08_premium_entreprise": [
+      "202610140007_experience_confidentialite.sql",
+      "202610150014_admin_premium.sql"
+    ],
+    "ec08_annonce_sure": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_publier_besoin": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_mes_besoins": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_modifier_annonce": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_changer_statut_besoin": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_historique_besoin": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_verifier_candidature": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_fil_besoins": [
+      "202610140007_experience_confidentialite.sql",
+      "202610150012_correctif_besoins.sql",
+      "202610150013_premium_prestataires.sql"
+    ],
+    "ec08_conversation_brute_autorisee": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_lister_messages": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_proposer_creneau": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_lister_creneaux": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_reserver_rdv": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_lister_rdv": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_annuler_rdv": [
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec085_normaliser_tag": [
+      "202610150009_favoris_tags.sql"
+    ],
+    "ec085_creer_tag": [
+      "202610150009_favoris_tags.sql"
+    ],
+    "ec085_peut_modifier_tags": [
+      "202610150009_favoris_tags.sql"
+    ],
+    "ec085_definir_tags": [
+      "202610150009_favoris_tags.sql"
+    ],
+    "ec087_matching_tags": [
+      "202610150011_matching_tags.sql"
+    ],
+    "ec088_tags_besoins": [
+      "202610150012_correctif_besoins.sql"
+    ],
+    "ec089_mon_plan": [
+      "202610150013_premium_prestataires.sql",
+      "202610150014_admin_premium.sql"
+    ],
+    "ec089_definir_contact": [
+      "202610150013_premium_prestataires.sql"
+    ],
+    "ec089_contact_besoin": [
+      "202610150013_premium_prestataires.sql"
+    ],
+    "ec089_mon_contact": [
+      "202610150013_premium_prestataires.sql"
+    ],
+    "ec090_admin_lister_prestataires": [
+      "202610150014_admin_premium.sql"
+    ],
+    "ec090_admin_definir_premium": [
+      "202610150014_admin_premium.sql"
+    ],
+    "ec91_manager_autorise": [
+      "202610150015_startup_manager.sql"
+    ],
+    "ec91_admin_managers": [
+      "202610150015_startup_manager.sql"
+    ],
+    "ec91_admin_portefeuilles": [
+      "202610150015_startup_manager.sql"
+    ],
+    "ec91_admin_modifier_manager": [
+      "202610150015_startup_manager.sql"
+    ],
+    "ec91_admin_assigner": [
+      "202610150015_startup_manager.sql"
+    ],
+    "ec91_mon_portefeuille": [
+      "202610150015_startup_manager.sql"
+    ]
+  },
+  "tables": [
+    "audit_log",
+    "candidatures",
+    "competences_ec",
+    "conversations_ec",
+    "disponibilites_rdv",
+    "ec07_assignations",
+    "ec07_historique_dossiers",
+    "ec089_contacts_besoin",
+    "ec08_historique_besoins",
+    "ec090_premium_admin",
+    "ec_manager_portefeuille",
+    "entreprise_competences_ec",
+    "entreprise_membres_ec",
+    "entreprises_ec",
+    "favoris_ec",
+    "messages_ec",
+    "mises_en_relation",
+    "notifications_ec",
+    "offres",
+    "offres_incubes",
+    "opportunites_ec",
+    "organisations",
+    "personne_competences_ec",
+    "personnes_annuaire_ec",
+    "plans",
+    "prestataire_competences_ec",
+    "prestataires",
+    "profiles",
+    "projet_competences_ec",
+    "projets",
+    "reservations_rdv",
+    "tags_ec",
+    "tags_liens_ec"
+  ],
+  "views": [],
+  "functions_redefined": {
+    "mon_prestataire": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "creer_prestataire": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "publier_offre": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql"
+    ],
+    "publier_besoin": [
+      "202610140001_core.sql",
+      "202610140005_entreprises_annuaire.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "envoyer_candidature_ouverte": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "lister_mes_candidatures": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "demander_mise_en_relation": [
+      "202610140001_core.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "proposer_disponibilite": [
+      "202610140002_modules.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "reserver_disponibilite": [
+      "202610140002_modules.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec_set_competences": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_matching_besoins": [
+      "202610140003_intermediation.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec_ouvrir_conversation": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_envoyer_message": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_suivre_opportunite": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec_mes_relations_acceptees": [
+      "202610140003_intermediation.sql",
+      "202610140006_collaboration_dossiers.sql"
+    ],
+    "ec07_lister_dossiers": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_besoins_disponibles": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_publier_besoin": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec07_envoyer_message": [
+      "202610140006_collaboration_dossiers.sql",
+      "202610140007_experience_confidentialite.sql"
+    ],
+    "ec08_premium_entreprise": [
+      "202610140007_experience_confidentialite.sql",
+      "202610150014_admin_premium.sql"
+    ],
+    "ec08_fil_besoins": [
+      "202610140007_experience_confidentialite.sql",
+      "202610150012_correctif_besoins.sql",
+      "202610150013_premium_prestataires.sql"
+    ],
+    "ec089_mon_plan": [
+      "202610150013_premium_prestataires.sql",
+      "202610150014_admin_premium.sql"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "cases": [
+    {
+      "test": "Unfavorite from directory thumbnail, desired state",
+      "status": "passed",
+      "action": "favorite"
+    },
+    {
+      "test": "Create contextual need: selected/custom tags and exact cents",
+      "status": "passed",
+      "action": "save_need"
+    },
+    {
+      "test": "Startup gives suite using canonical server status",
+      "status": "passed",
+      "action": "response_status"
+    },
+    {
+      "test": "Send message in existing dossier",
+      "status": "passed",
+      "action": "send_message"
+    },
+    {
+      "test": "Directory availability panel opens by company UUID",
+      "status": "passed"
+    }
+  ],
+  "page_errors": [],
+  "transport": "mocked Supabase; no database test"
+}

@@ -1,0 +1,18 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import ts from 'typescript';
+const read=p=>fs.readFile(new URL('../'+p,import.meta.url),'utf8');
+const sql=await read('supabase/01_INSTALL_V1.sql'),activate=await read('supabase/02_ACTIVER_V1.sql'),app=await read('src/app.ts');
+test('Premium is date bounded and depends on valid provider company',()=>{const p=sql.split('FUNCTION ec1.premium(')[1].split('$$;')[0];assert.match(p,/a\.active/);assert.match(p,/a\.expire_le>now\(\)/);assert.match(p,/p\.statut='valide'/);assert.doesNotMatch(p,/plan_code/);});
+test('old database tables are not dropped by install or cutover',()=>assert.doesNotMatch(sql+activate,/DROP\s+TABLE/i));
+test('private schema and grants applied',()=>{assert.match(sql,/REVOKE ALL ON SCHEMA ec1 FROM PUBLIC,anon,authenticated/);assert.match(sql,/ENABLE ROW LEVEL SECURITY/);assert.match(activate,/REVOKE ALL ON FUNCTION public\.%I/);});
+test('old public images become private at cutover',()=>assert.match(activate,/SET public=false WHERE id IN \('euraconnect-media','euraconnect-v1'\)/));
+test('all privileged functions pin the search path',()=>{for(const m of sql.matchAll(/CREATE OR REPLACE FUNCTION ([\w.]+)([\s\S]*?)AS \$\$/g)){if(/SECURITY DEFINER/.test(m[2]))assert.match(m[2],/SET search_path=''/,m[1]);}});
+test('no PLpgSQL variable shares a table alias',()=>{for(const m of sql.matchAll(/CREATE OR REPLACE FUNCTION ([\w.]+)[\s\S]*?AS \$\$([\s\S]*?)\$\$;/g)){const dec=m[2].match(/DECLARE([\s\S]*?)BEGIN/);if(!dec)continue;const vars=[...dec[1].matchAll(/(?:^|;)\s*(\w+)\s+/g)].map(x=>x[1]);const aliases=[...m[2].matchAll(/(?:FROM|JOIN)\s+[\w.]+\s+(\w+)/gi)].map(x=>x[1]);assert.deepEqual(vars.filter(v=>aliases.includes(v)),[],m[1]);}});
+test('favorite action writes desired boolean state, not a blind toggle',()=>{assert.match(app,/write\("favorite",\s*\{[^}]*value:/);assert.match(sql,/coalesce\(\(p_args->>'value'\)::boolean,false\)/);});
+test('new response is addressed by need id',()=>assert.match(app,/data-command="respond"|responseForm/));
+test('manager cannot send business response',()=>assert.match(sql,/a\.role NOT IN \('prestataire','admin'\)/));
+test('write operations reject inactive release',()=>assert.match(sql,/V1 en attente d activation/));
+test('startup follows up before free provider can message',()=>assert.match(sql,/r\.status='envoyee' AND NOT ec1\.member\(n\.company_id,true\)/));
+test('booking uses row and advisory locks',()=>{const p=sql.split("WHEN 'book_session' THEN")[1].split("WHEN 'cancel_booking'")[0];assert.match(p,/pg_advisory_xact_lock/);assert.match(p,/FOR UPDATE/);});
+test('source templates contain only ASCII DOM control attributes',async()=>{for(const name of await fs.readdir(new URL('../src',import.meta.url))){if(!name.endsWith('.ts'))continue;const source=await read('src/'+name);const sf=ts.createSourceFile(name,source,ts.ScriptTarget.Latest,true);function visit(n){if(ts.isStringLiteral(n)||ts.isTemplateLiteralToken(n)){for(const a of n.text.matchAll(/\b(?:class|id|name|for|role|type|data-[a-z_-]+)="([^"]*)"/g))assert.ok(!/[^\x00-\x7f]/.test(a[1]),name+': '+a[0]);assert.doesNotMatch(n.text,/<\/?d\u00e9tails/);}ts.forEachChild(n,visit);}visit(sf);}});
+test('build runs strict typecheck before compiling',async()=>{const pkg=JSON.parse(await read('package.json'));assert.match(pkg.scripts.build,/tsc --noEmit/);assert.match(pkg.scripts.check,/npm test/);});
+test('server secret guard exists',async()=>{const b=await read('scripts/build.mjs');assert.match(b,/sb_secret_/);assert.match(b,/service_role/);});

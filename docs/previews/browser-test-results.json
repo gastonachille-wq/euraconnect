@@ -1,0 +1,306 @@
+{
+  "cases": [
+    {
+      "test": "dashboard incubee desktop",
+      "title": "Bonjour Camille.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Camille.Voici ce qui mérite votre attention aujourd'hui.Publier une d"
+    },
+    {
+      "test": "incube: dashboard",
+      "title": "Bonjour Camille.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Camille.Voici ce qui mérite votre attention aujourd'hui.Publier une d"
+    },
+    {
+      "test": "incube: needs",
+      "title": "Mes demandes",
+      "overflow": false,
+      "error": false,
+      "text": "LES DEMANDES DE VOTRE ENTREPRISEMes demandesPubliez, comparez les propositions et choisissez à qui d"
+    },
+    {
+      "test": "incube: directory",
+      "title": "Un réseau à portee de main.",
+      "overflow": false,
+      "error": false,
+      "text": "ENTREPRISES & CONTACTSUn réseau à portee de main.Identifiez une expertise, gardez-la en favori et tr"
+    },
+    {
+      "test": "incube: offers",
+      "title": "L'expertise, en concret.",
+      "overflow": false,
+      "error": false,
+      "text": "CATALOGUE DE SERVICESL'expertise, en concret.Des offres lisibles, des prestations identifiees et des"
+    },
+    {
+      "test": "incube: messages",
+      "title": "Un dossier, un fil.",
+      "overflow": false,
+      "error": false,
+      "text": "RELATIONS & CONVERSATIONSUn dossier, un fil.Toutes les propositions et les échanges utiles, sans per"
+    },
+    {
+      "test": "incube: agenda",
+      "title": "Le bon rendez-vous, au bon moment.",
+      "overflow": false,
+      "error": false,
+      "text": "AGENDA DU RÉSEAULe bon rendez-vous, au bon moment.Vos rendez-vous, vos disponibilités et les permane"
+    },
+    {
+      "test": "incube: workshops",
+      "title": "Faites avancer vos projets, ensemble.",
+      "overflow": false,
+      "error": false,
+      "text": "ATELIERS & RENCONTRESFaites avancer vos projets, ensemble.Les ateliers sont ouverts aux membres. Ins"
+    },
+    {
+      "test": "incube: company",
+      "title": "Entreprise & profil",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE PRÉSENCE DANS LE RÉSEAUEntreprise & profilUne entreprise partagée. Des contacts et des experti"
+    },
+    {
+      "test": "prestataire: dashboard",
+      "title": "Bonjour Alex.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Alex.Voici ce qui mérite votre attention aujourd'hui.Trouver des oppo"
+    },
+    {
+      "test": "prestataire: needs",
+      "title": "Opportunités & projets",
+      "overflow": false,
+      "error": false,
+      "text": "BOURSE DES BESOINSOpportunités & projetsTout le contexte nécessaire pour proposer votre expertise.Le"
+    },
+    {
+      "test": "prestataire: directory",
+      "title": "Un réseau à portee de main.",
+      "overflow": false,
+      "error": false,
+      "text": "ENTREPRISES & CONTACTSUn réseau à portee de main.Identifiez une expertise, gardez-la en favori et tr"
+    },
+    {
+      "test": "prestataire: offers",
+      "title": "L'expertise, en concret.",
+      "overflow": false,
+      "error": false,
+      "text": "CATALOGUE DE SERVICESL'expertise, en concret.Des offres lisibles, des prestations identifiees et des"
+    },
+    {
+      "test": "prestataire: messages",
+      "title": "Un dossier, un fil.",
+      "overflow": false,
+      "error": false,
+      "text": "RELATIONS & CONVERSATIONSUn dossier, un fil.Toutes les propositions et les échanges utiles, sans per"
+    },
+    {
+      "test": "prestataire: agenda",
+      "title": "Le bon rendez-vous, au bon moment.",
+      "overflow": false,
+      "error": false,
+      "text": "AGENDA DU RÉSEAULe bon rendez-vous, au bon moment.Vos rendez-vous, vos disponibilités et les permane"
+    },
+    {
+      "test": "prestataire: workshops",
+      "title": "Faites avancer vos projets, ensemble.",
+      "overflow": false,
+      "error": false,
+      "text": "ATELIERS & RENCONTRESFaites avancer vos projets, ensemble.Les ateliers sont ouverts aux membres. Ins"
+    },
+    {
+      "test": "prestataire: company",
+      "title": "Entreprise & profil",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE PRÉSENCE DANS LE RÉSEAUEntreprise & profilUne entreprise partagée. Des contacts et des experti"
+    },
+    {
+      "test": "startup_manager: dashboard",
+      "title": "Bonjour Lea.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Lea.Chaque besoin est une occasion de faire avancer votre portefeuill"
+    },
+    {
+      "test": "startup_manager: needs",
+      "title": "Opportunités & projets",
+      "overflow": false,
+      "error": false,
+      "text": "BOURSE DES BESOINSOpportunités & projetsTout le contexte nécessaire pour proposer votre expertise.To"
+    },
+    {
+      "test": "startup_manager: directory",
+      "title": "Un réseau à portee de main.",
+      "overflow": false,
+      "error": false,
+      "text": "ENTREPRISES & CONTACTSUn réseau à portee de main.Identifiez une expertise, gardez-la en favori et tr"
+    },
+    {
+      "test": "startup_manager: offers",
+      "title": "L'expertise, en concret.",
+      "overflow": false,
+      "error": false,
+      "text": "CATALOGUE DE SERVICESL'expertise, en concret.Des offres lisibles, des prestations identifiees et des"
+    },
+    {
+      "test": "startup_manager: messages",
+      "title": "Un dossier, un fil.",
+      "overflow": false,
+      "error": false,
+      "text": "RELATIONS & CONVERSATIONSUn dossier, un fil.Toutes les propositions et les échanges utiles, sans per"
+    },
+    {
+      "test": "startup_manager: agenda",
+      "title": "Le bon rendez-vous, au bon moment.",
+      "overflow": false,
+      "error": false,
+      "text": "AGENDA DU RÉSEAULe bon rendez-vous, au bon moment.Vos rendez-vous, vos disponibilités et les permane"
+    },
+    {
+      "test": "startup_manager: workshops",
+      "title": "Faites avancer vos projets, ensemble.",
+      "overflow": false,
+      "error": false,
+      "text": "ATELIERS & RENCONTRESFaites avancer vos projets, ensemble.Les ateliers sont ouverts aux membres. Ins"
+    },
+    {
+      "test": "startup_manager: company",
+      "title": "Entreprise & profil",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE PRÉSENCE DANS LE RÉSEAUEntreprise & profilUne entreprise partagée. Des contacts et des experti"
+    },
+    {
+      "test": "startup_manager: portfolio",
+      "title": "Votre portefeuille en mouvement.",
+      "overflow": false,
+      "error": false,
+      "text": "STARTUP MANAGERVotre portefeuille en mouvement.Observez les signaux utiles, puis intervenez au bon e"
+    },
+    {
+      "test": "admin: dashboard",
+      "title": "Bonjour Administration.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Administration.Voici ce qui mérite votre attention aujourd'hui.Gérer "
+    },
+    {
+      "test": "admin: needs",
+      "title": "Opportunités & projets",
+      "overflow": false,
+      "error": false,
+      "text": "BOURSE DES BESOINSOpportunités & projetsTout le contexte nécessaire pour proposer votre expertise.No"
+    },
+    {
+      "test": "admin: directory",
+      "title": "Un réseau à portee de main.",
+      "overflow": false,
+      "error": false,
+      "text": "ENTREPRISES & CONTACTSUn réseau à portee de main.Identifiez une expertise, gardez-la en favori et tr"
+    },
+    {
+      "test": "admin: offers",
+      "title": "L'expertise, en concret.",
+      "overflow": false,
+      "error": false,
+      "text": "CATALOGUE DE SERVICESL'expertise, en concret.Des offres lisibles, des prestations identifiees et des"
+    },
+    {
+      "test": "admin: messages",
+      "title": "Un dossier, un fil.",
+      "overflow": false,
+      "error": false,
+      "text": "RELATIONS & CONVERSATIONSUn dossier, un fil.Toutes les propositions et les échanges utiles, sans per"
+    },
+    {
+      "test": "admin: agenda",
+      "title": "Le bon rendez-vous, au bon moment.",
+      "overflow": false,
+      "error": false,
+      "text": "AGENDA DU RÉSEAULe bon rendez-vous, au bon moment.Vos rendez-vous, vos disponibilités et les permane"
+    },
+    {
+      "test": "admin: workshops",
+      "title": "Faites avancer vos projets, ensemble.",
+      "overflow": false,
+      "error": false,
+      "text": "ATELIERS & RENCONTRESFaites avancer vos projets, ensemble.Les ateliers sont ouverts aux membres. Ins"
+    },
+    {
+      "test": "admin: company",
+      "title": "Entreprise & profil",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE PRÉSENCE DANS LE RÉSEAUEntreprise & profilUne entreprise partagée. Des contacts et des experti"
+    },
+    {
+      "test": "admin: portfolio",
+      "title": "Votre portefeuille en mouvement.",
+      "overflow": false,
+      "error": false,
+      "text": "STARTUP MANAGERVotre portefeuille en mouvement.Observez les signaux utiles, puis intervenez au bon e"
+    },
+    {
+      "test": "admin: admin",
+      "title": "Une plateforme sous contrôle.",
+      "overflow": false,
+      "error": false,
+      "text": "ADMINISTRATION DU RÉSEAUUne plateforme sous contrôle.Comptes, entreprises, Premium et perimetres d'a"
+    },
+    {
+      "test": "fiche besoin",
+      "title": "Mes demandes",
+      "overflow": false,
+      "error": false,
+      "text": "LES DEMANDES DE VOTRE ENTREPRISEMes demandesPubliez, comparez les propositions et choisissez à qui d"
+    },
+    {
+      "test": "mobile dashboard",
+      "title": "Bonjour Camille.",
+      "overflow": false,
+      "error": false,
+      "text": "VOTRE ESPACE DE TRAVAILBonjour Camille.Voici ce qui mérite votre attention aujourd'hui.Publier une d"
+    },
+    {
+      "test": "mobile needs",
+      "title": "Mes demandes",
+      "overflow": false,
+      "error": false,
+      "text": "LES DEMANDES DE VOTRE ENTREPRISEMes demandesPubliez, comparez les propositions et choisissez à qui d"
+    },
+    {
+      "test": "mobile directory",
+      "title": "Un réseau à portee de main.",
+      "overflow": false,
+      "error": false,
+      "text": "ENTREPRISES & CONTACTSUn réseau à portee de main.Identifiez une expertise, gardez-la en favori et tr"
+    },
+    {
+      "test": "mobile agenda",
+      "title": "Le bon rendez-vous, au bon moment.",
+      "overflow": false,
+      "error": false,
+      "text": "AGENDA DU RÉSEAULe bon rendez-vous, au bon moment.Vos rendez-vous, vos disponibilités et les permane"
+    },
+    {
+      "test": "mobile workshops",
+      "title": "Faites avancer vos projets, ensemble.",
+      "overflow": false,
+      "error": false,
+      "text": "ATELIERS & RENCONTRESFaites avancer vos projets, ensemble.Les ateliers sont ouverts aux membres. Ins"
+    },
+    {
+      "test": "mobile messages",
+      "title": "Un dossier, un fil.",
+      "overflow": false,
+      "error": false,
+      "text": "RELATIONS & CONVERSATIONSUn dossier, un fil.Toutes les propositions et les échanges utiles, sans per"
+    }
+  ],
+  "page_errors": []
+}
