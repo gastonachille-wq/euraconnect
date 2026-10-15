@@ -4,6 +4,7 @@ import {Building2,Globe2,Users,UserRound,Plus,Save} from 'lucide-react';
 import {db} from '@/lib/supabase';
 import RichEditor,{RichContent} from './RichEditor';
 import {ImageUpload,PublicImage,SkillPicker} from './MediaAndSkills';
+import {TagAssignmentEditor} from '@/components/v09/SmartTags';
 
 type Ent={id:string;nom:string;type:string;statut:string;presentation_html:string;site_web:string|null;logo_path:string|null;role_membre:string};
 type Member={profile_id:string;nom_public:string;role_membre:string;actif:boolean};
@@ -71,7 +72,7 @@ export default function EntrepriseEtProfil({userId,role,defaultName,onChanged}:{
     {companies.length>1&&<select aria-label="Choisir une entreprise" value={selected} onChange={e=>setSelected(e.target.value)}>{companies.map(e=><option value={e.id} key={e.id}>{e.nom}</option>)}</select>}
    </div>
    <div className="v06-columns"><div className="panel"><div className="section-heading"><div><span className="section-eyebrow">Identite et contenu</span><h3>Fiche entreprise</h3></div><Building2 size={20}/></div>
-    {canManage?<form onSubmit={saveCompany}>
+    {canManage?<><form onSubmit={saveCompany}>
      <div className="field"><label>Nom officiel / public</label><input value={name} onChange={e=>setName(e.target.value)} required minLength={2} maxLength={160}/></div>
      <div className="field"><label>Site web (optionnel)</label><div className="input-icon"><Globe2 size={17}/><input type="url" placeholder="https://..." value={site} onChange={e=>setSite(e.target.value)}/></div></div>
      <ImageUpload folder="entreprises" id={selected} current={logo} onUploaded={setLogo} label="Importer un logo"/>
@@ -80,6 +81,8 @@ export default function EntrepriseEtProfil({userId,role,defaultName,onChanged}:{
      <label className="check-row"><input type="checkbox" checked={publish} onChange={e=>setPublish(e.target.checked)}/>Publier ma fiche dans l annuaire</label>
      <p className="field-hint">Une entreprise prestataire doit etre validee par l administration avant de figurer dans l annuaire.</p>
      <button className="btn" disabled={busy}><Save size={16}/> Enregistrer la fiche</button></form>
+     <TagAssignmentEditor key={`entreprise-${selected}`} type="entreprise" id={selected} heading="Mots-clés de l’entreprise" description="Ajoutez les marchés, technologies et thématiques pour améliorer la recherche dans l’annuaire."/>
+     </>
     :<><RichContent html={ent?.presentation_html||''}/><div className="selected-skills">{entSkills.length} competence(s) associee(s)</div><p className="muted">Seuls un proprietaire ou un gestionnaire peuvent modifier cette fiche.</p></>}
    </div><div className="panel"><div className="section-heading"><div><span className="section-eyebrow">Travail en equipe</span><h3>Collaborateurs</h3></div><Users size={20}/></div>
     <p className="muted">Chaque compte conserve son identite, tout en etant rattache a la meme entreprise.</p>
@@ -98,7 +101,9 @@ export default function EntrepriseEtProfil({userId,role,defaultName,onChanged}:{
     <label className="check-row"><input type="checkbox" checked={visible} onChange={e=>setVisible(e.target.checked)}/>Rendre ma fiche visible aux utilisateurs connectes</label>
     <p className="field-hint">La publication exige une entreprise rattachee. Votre email et votre numero de telephone ne sont jamais affiches dans cet annuaire.</p>
     <button className="btn" disabled={busy}><Save size={16}/> Enregistrer mon profil</button>
-   </form></div><div className="panel"><span className="section-eyebrow">Aperçu annuaire</span><div className="profile-preview"><PublicImage path={avatar} alt={personName||'Personne'} className="profile-large-avatar" variant="avatar"/>
+   </form>
+   <TagAssignmentEditor key={`personne-${userId}`} type="personne" id={userId} heading="Mots-clés de mon profil" description="Ajoutez vos spécialités et centres d’intérêt pour être mieux identifié dans l’annuaire."/>
+   </div><div className="panel"><span className="section-eyebrow">Aperçu annuaire</span><div className="profile-preview"><PublicImage path={avatar} alt={personName||'Personne'} className="profile-large-avatar" variant="avatar"/>
     <h3>{personName||'Nom non renseigne'}</h3><p className="muted">{title||'Votre fonction'}</p>
     <span className={`status-chip ${visible?'online':'offline'}`}>{visible?'Visibilite demandee':'Prive'}</span><RichContent html={bio}/>
     <p className="muted">{person?'Fiche deja enregistree':'Fiche non encore enregistree'}</p>

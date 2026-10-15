@@ -5,6 +5,7 @@ import {ArrowRight,CheckCircle2,ChevronDown,ClipboardList,Clock3,Eye,EyeOff,
 import {db} from '@/lib/supabase';
 import RichEditor,{richPlainText} from '@/components/v06/RichEditor';
 import {SkillPicker} from '@/components/v06/MediaAndSkills';
+import {SmartTagPicker,TagAssignmentEditor} from '@/components/v09/SmartTags';
 
 type Company={id:string;nom:string;type:string;role_membre:string};
 type Need={id:string;entreprise_id:string|null;titre:string;titre_anonyme:string;description:string;
@@ -38,7 +39,7 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
  const [creating,setCreating]=useState(false),[expanded,setExpanded]=useState('');
  const [title,setTitle]=useState(''),[description,setDescription]=useState('');
  const [anonTitle,setAnonTitle]=useState(''),[anonDescription,setAnonDescription]=useState('');
- const [price,setPrice]=useState(''),[skills,setSkills]=useState<string[]>([]);
+ const [price,setPrice]=useState(''),[skills,setSkills]=useState<string[]>([]),[tags,setTags]=useState<string[]>([]);
  const [responseFor,setResponseFor]=useState(''),[response,setResponse]=useState('');
  const [nextStatus,setNextStatus]=useState(''),[reason,setReason]=useState('');
  const [anonEdit,setAnonEdit]=useState<string|null>(null),[editTitle,setEditTitle]=useState(''),[editSummary,setEditSummary]=useState('');
@@ -74,13 +75,11 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
    const plain=richPlainText(description);if(plain.length<50)throw new Error('Ajoute une description complète d’au moins 50 caractères.');
    const cents=price.trim()?Math.round(Number(price)*100):null;
    if(cents!==null&&(!Number.isSafeInteger(cents)||cents<0))throw new Error('Budget incorrect.');
-   const r=await db().rpc('ec08_publier_besoin',{p_entreprise:companyId,p_titre:title,
+   const r=await db().rpc('ec09_publier_besoin_tags',{p_entreprise:companyId,p_titre:title,
     p_description:plain,p_titre_anonyme:anonTitle,p_annonce_anonyme:anonDescription,
-    p_budget_centimes:cents,p_html:description});
+    p_budget_centimes:cents,p_html:description,p_competences:skills,p_tags:tags});
    if(r.error)throw r.error;
-   if(skills.length&&r.data){const x=await db().rpc('ec_set_competences',{
-    p_cible:'projet',p_id:r.data,p_competences:skills});if(x.error)throw new Error(`Besoin créé, mais compétences non enregistrées : ${x.error.message}`);}
-   setCreating(false);setTitle('');setDescription('');setAnonTitle('');setAnonDescription('');setSkills([]);setPrice('');
+   setCreating(false);setTitle('');setDescription('');setAnonTitle('');setAnonDescription('');setSkills([]);setTags([]);setPrice('');
   },'Besoin publié, avec une annonce anonymisée accessible aux prestataires Free/Pro.');
  }
  async function apply(e:FormEvent){e.preventDefault();if(!responseFor||!companyId)return;
@@ -128,6 +127,7 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
      <RichEditor label="Contexte et livrables (description complète)" value={description} onChange={setDescription}/>
      <div className="fields"><div className="field"><label>Budget indicatif (€)</label><input type="number" min={0} step="0.01" value={price} onChange={e=>setPrice(e.target.value)}/></div></div>
      <SkillPicker value={skills} onChange={setSkills} limit={10} label="Compétences recherchées"/>
+     <SmartTagPicker value={tags} onChange={setTags} label="Thématiques & mots-clés du besoin" hint="Tags internes au besoin. Pour protéger la startup, ils ne sont pas publiés dans l’annonce anonyme."/>
      <div className="ec08-anon-box"><div className="ec08-section-caption"><EyeOff size={22}/><div><h3>Annonce visible avant Premium</h3><p>Retire noms d’entreprises, contacts, liens et indices permettant de t’identifier.</p></div></div>
       <div className="field"><label>Titre anonymisé</label><input minLength={8} maxLength={150} value={anonTitle} required onChange={e=>setAnonTitle(e.target.value)} placeholder="Ex. Recherche expertise réglementaire santé"/></div>
       <div className="field"><label>Résumé anonymisé (50 à 1 500 caractères)</label><textarea rows={4} required minLength={50} maxLength={1500} value={anonDescription} onChange={e=>setAnonDescription(e.target.value)}/></div>
@@ -141,6 +141,7 @@ export default function DemandesV08({role,onNavigate}:{role:'admin'|'incube'|'pr
     {expanded===n.id&&<div className="ec08-detail-area">
        <div className="ec08-detail-grid"><div>
         <h4>Faire avancer la demande</h4>
+        <TagAssignmentEditor key={`besoin-${n.id}`} type="besoin" id={n.id} heading="Tags de la demande" description="Modifiez les mots-clés internes du besoin sans changer son statut."/>
         <form onSubmit={e=>void changeStatus(e,n)}>
          <div className="field"><label>Prochaine étape</label><select value={nextStatus} required onChange={e=>setNextStatus(e.target.value)}><option value="">Choisir une étape</option>{(transitions[n.statut_suivi]||[]).map(s=><option key={s} value={s}>{LABELS[s]}</option>)}</select></div>
          <div className="field"><label>Commentaire de suivi {['termine','sans_suite'].includes(nextStatus)?'(obligatoire)':'(facultatif)'}</label><input maxLength={500} value={reason} onChange={e=>setReason(e.target.value)} placeholder="Ex. RDV confirmé, devis reçu…"/></div>

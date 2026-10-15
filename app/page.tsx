@@ -18,6 +18,7 @@ import DashboardV08 from '@/components/v08/DashboardV08';
 import DemandesV08 from '@/components/v08/DemandesV08';
 import RendezVousV08 from '@/components/v08/RendezVousV08';
 import NotificationCenterV084 from '@/components/v08/NotificationCenterV084';
+import {SmartTagPicker,TagAssignmentEditor} from '@/components/v09/SmartTags';
 
 type Role='admin'|'incube'|'prestataire';
 type Profile={id:string;role:Role;nom:string|null;entreprise_id:string|null;statut:string};
@@ -36,6 +37,7 @@ export default function Home(){
  const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[signup,setSignup]=useState(false);
  const [name,setName]=useState(''),[providerName,setProviderName]=useState(''),[description,setDescription]=useState('');
  const [offerTitle,setOfferTitle]=useState(''),[offerDescription,setOfferDescription]=useState(''),[offerPrice,setOfferPrice]=useState(''),[offerFormat,setOfferFormat]=useState('distance');
+ const [offerTags,setOfferTags]=useState<string[]>([]);
  const [adminEmail,setAdminEmail]=useState(''),[adminRole,setAdminRole]=useState<'incube'|'prestataire'>('incube');
  const [catalogueQuery,setCatalogueQuery]=useState('');
  useEffect(()=>{let live=true;let unsubscribe=()=>{};
@@ -95,9 +97,9 @@ export default function Home(){
   const plain=richPlainText(offerDescription);if(plain.length<50)throw new Error('Description : 50 caractères minimum.');
   const cents=offerPrice?Math.round(Number(offerPrice)*100):null;
   if(cents!==null&&(!Number.isSafeInteger(cents)||cents<0))throw new Error('Tarif incorrect.');
-  const r=await db().rpc('ec_publier_offre_riche',{
-   p_titre:offerTitle,p_description:plain,p_html:offerDescription,p_format:offerFormat,p_tarif_centimes:cents});
-  if(r.error)throw r.error;setOfferTitle('');setOfferDescription('');setOfferPrice('');
+  const r=await db().rpc('ec09_publier_offre_tags',{
+   p_titre:offerTitle,p_description:plain,p_html:offerDescription,p_format:offerFormat,p_tarif_centimes:cents,p_tags:offerTags});
+  if(r.error)throw r.error;setOfferTitle('');setOfferDescription('');setOfferPrice('');setOfferTags([]);
  },'Offre publiée. Tu peux maintenant ajouter son illustration.');}
  async function adminAction(e:FormEvent){e.preventDefault();await run(async()=>{
   const r=await db().rpc('admin_changer_role_par_email',{p_email:adminEmail,p_role:adminRole});
@@ -173,9 +175,14 @@ export default function Home(){
             <form onSubmit={addOffer} className="ec08-form-compact"><div className="fields"><div className="field"><label>Titre de la prestation</label><input required minLength={8} maxLength={100} value={offerTitle} onChange={e=>setOfferTitle(e.target.value)}/></div>
              <div className="field"><label>Modalité</label><select value={offerFormat} onChange={e=>setOfferFormat(e.target.value)}><option value="distance">À distance</option><option value="site">Sur site</option><option value="mixte">Mixte</option></select></div></div>
              <RichEditor label="Description enrichie de la prestation" value={offerDescription} onChange={setOfferDescription}/>
+             <SmartTagPicker value={offerTags} onChange={setOfferTags} label="Tags et catégories de l’offre" hint="Pour permettre aux startups de trouver cette prestation par expertise ou technologie."/>
              <div className="field"><label>Tarif indicatif (€)</label><input type="number" min={0} step="0.01" value={offerPrice} onChange={e=>setOfferPrice(e.target.value)}/></div>
              <button className="btn" disabled={sending}>Publier l’offre <ArrowRight size={15}/></button></form></details>}
           <div className="panel ec08-offer-images"><h2>Illustrations de mes offres</h2><OffreImages offers={offers.filter(o=>o.prestataire_id===provider.id)} onChanged={()=>void reload(user.id)}/></div>
+          <div className="panel ec09-offer-tags"><h2>Tags de mes prestations</h2><p className="muted">Complétez ou modifiez les mots-clés de chaque offre sans devoir la recréer.</p>
+           {offers.filter(o=>o.prestataire_id===provider.id).map(o=><div key={o.id} className="ec09-offer-row"><h3>{o.titre}</h3>
+             <TagAssignmentEditor type="offre" id={o.id} heading="Catégories de l’offre"/></div>)}
+           {!offers.some(o=>o.prestataire_id===provider.id)&&<p className="muted">Publiez une première offre pour y associer des tags.</p>}</div>
          </>}
       </section>}
       {tab==='entreprise'&&<section className="ec08-page"><div className="ec08-page-title"><div><span className="section-eyebrow">Votre identité professionnelle</span><h1>Entreprise, collaborateurs & profil</h1>
@@ -196,7 +203,7 @@ export default function Home(){
          <button className="btn" disabled={sending}>Enregistrer</button></form>
         <button className="btn ghost" onClick={()=>void run(async()=>{const r=await db().auth.signOut({scope:'global'});if(r.error)throw r.error;})}>Déconnecter tous mes appareils</button></section>}
      </section></div>}
-  </main><footer className="footer ec08-footer"><div className="shell">EURACONNECT V0.8 · Plateforme de services · Protection des identités selon le plan · Paiement Stripe non activé</div></footer>
+  </main><footer className="footer ec08-footer"><div className="shell">EURACONNECT V0.8.5 · Plateforme de services · Protection des identités selon le plan · Paiement Stripe non activé</div></footer>
  </>;
 }
 function AdminProviders({onDone}:{onDone:()=>void}){
