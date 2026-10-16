@@ -1,5 +1,5 @@
 {
-  "version": "2.5.0",
+  "version": "2.8.0",
   "files": {
     "agenda-v12.js": {
       "bytes": 14362,
@@ -14,20 +14,20 @@
       "sha256": "8bd2c8cf51dc37a630d8daa45cd22b97f6ae116b655306799947f05d81ae4601"
     },
     "app.js": {
-      "bytes": 66477,
-      "sha256": "75450eb5ee3eff0a82442c295bdc548c67fb79a07a48aa790d0583cfc36d61a1"
+      "bytes": 67124,
+      "sha256": "4cdec808f3c0b97b8c390387448659babe5fc0480f1ee228dba95e90fb1ac2aa"
     },
     "config.js": {
       "bytes": 74,
-      "sha256": "ab9da42c1c19ec8e3eafe60f59776be00c1360e73af919cab7b2521234a8ed0f"
+      "sha256": "8f13c5d8d89ebf7ddd9900fa19e6bfa6c188e0b995d15572f0a45d90b9c3e3ce"
     },
     "demo.js": {
       "bytes": 24220,
       "sha256": "450e7f9376e412c01fb48363ce0226fa97af6d729215e189b82bc9e1175fb45b"
     },
     "directory-v12.js": {
-      "bytes": 13354,
-      "sha256": "fbccae1dd3348cc5a6e92f487bdb3b9766c1c5e17a21d611c8f4ea4d731f3d84"
+      "bytes": 12848,
+      "sha256": "5f2634ede97dfb062d819ad629e7651148b3131bb6eaa7f28f78c914a8ca1833"
     },
     "domain.js": {
       "bytes": 7563,
@@ -70,8 +70,8 @@
       "sha256": "7b54f32e6eb07260e97b6009e6226e9e67b6c55f2cba682faa9310cb337afe45"
     },
     "index.html": {
-      "bytes": 1313,
-      "sha256": "d73e88fc8d7baea1c9212aeda0cbc832c924e67351026d481ada3548bfd5ad90"
+      "bytes": 1439,
+      "sha256": "19d696c563fbdb4048233e6879fefd335bcb002f3ec425ffc102ca4479faed8e"
     },
     "manager-v20.js": {
       "bytes": 8780,
@@ -117,9 +117,21 @@
       "bytes": 1705,
       "sha256": "e74e348f2fd91f3327b2f40d8578cd71bd43bab513276cb454896c477477d7a5"
     },
+    "ux-v26.css": {
+      "bytes": 5704,
+      "sha256": "3a5f0f35af2115aef69e10b2153d4b559650f81e106744d06ed492eba5f12ec1"
+    },
+    "ux-v27.css": {
+      "bytes": 16057,
+      "sha256": "877bc9f9f8bb3f835a77dc407da5bb30fb0f4415d90c711d04e5f1dde7ac2dba"
+    },
+    "ux-v28.css": {
+      "bytes": 8037,
+      "sha256": "5d55b83b81179687ecc58cf1646fb54185e55913a3961dfa217bda0a3511c038"
+    },
     "views.js": {
-      "bytes": 39905,
-      "sha256": "ceafcdd37d032924bc33d4d189bde92f899659ba7cf182a6e59e970fc4e99730"
+      "bytes": 47220,
+      "sha256": "6233b4a0ae9272b3ff6e51ba1dee7e93b941b98f92381ead383e29e5074d6703"
     },
     "visual-refresh.css": {
       "bytes": 6674,

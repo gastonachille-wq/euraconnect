@@ -1,6 +1,6 @@
 import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc } from "./api.js";
 import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs, localDate, markdown, label } from "./domain.js";
-import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles } from "./views.js";
+import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles, offerSummary } from "./views.js";
 import { needForm, needDetail, responseForm, responseDetail, statusForm, sessionForm, sessionDetail, companyPage, companyForm, profileForm, offerForm } from "./forms.js";
 import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button, empty, field, selectField, checkField, footerSubmit, badge, tags } from "./ui.js";
 import { icon } from "./icons.js";
@@ -148,7 +148,7 @@ async function render() {
                 break;
             }
             case "offers": {
-                const data = await read("offers", args);
+                const data = await read("offers", { ...args, size: 100 });
                 listOffers = data.items;
                 html = offersView(ctx, data);
                 break;
@@ -430,6 +430,10 @@ async function action(el) {
         case "page":
             filter("page", el.dataset.page || "0");
             return;
+        case "offer-view": {
+            filter("view", el.dataset.view || "grid");
+            return;
+        }
         case "clear-filters":
             navigate(ctx.route);
             return;
@@ -583,7 +587,7 @@ async function action(el) {
                 modal("Modifier mon offre", offerForm(o) + button("Ajouter une image", "upload", { id, icon: "upload", extra: "data-type=\"offer\"" }), { wide: true });
                 return;
             }
-            modal("Offre de service", `<p class="eyebrow">${e(o.provider)}</p><h2>${e(o.title)}</h2>${tags(o.tags)}<div class="prose">${markdown(o.description)}</div>${o.benefit ? "<div class=\"inline-note\">" + e(o.benefit) + "</div>" : ""}<footer class="form-footer">${button("Voir les disponibilit\u00E9s", "directory-slots", { id: o.company_id, icon: "calendar", class: "primary", extra: "data-kind=\"company\"" })}</footer>`, { wide: true });
+            modal("Offre de service", `<div class="ec27-detail"><p class="eyebrow">${e(o.provider)}</p><h2>${e(o.title)}</h2>${tags(o.tags)}<div class="prose">${e(offerSummary(o.description).text)}</div>${o.benefit ? `<div class="inline-note">${e(o.benefit)}</div>` : ""}<div class="ec27-detail-actions">${button("Consulter le prestataire", "company-detail", { id: o.company_id, class: "ghost", icon: "company" })}${button("Voir les créneaux", "directory-slots", { id: o.company_id, icon: "calendar", class: "primary", extra: 'data-kind="company"' })}</div></div>`, { wide: true });
             return;
         }
         case "manager-invite": {
@@ -1066,7 +1070,15 @@ let filterTimer;
 let restoreFilterFocus = false;
 document.addEventListener('input', ev => {
     const input = ev.target;
-    if (!input.closest('#filter-form') || !(input instanceof HTMLInputElement) || !['q', 'tag', 'city', 'expertise'].includes(input.name))
+    if (!(input instanceof HTMLInputElement))
+        return;
+    if (input.id === 'ec28-quick-search') {
+        window.clearTimeout(filterTimer);
+        const value = input.value;
+        filterTimer = window.setTimeout(() => filter('q', value), 450);
+        return;
+    }
+    if (!input.closest('#filter-form') || !['q', 'tag', 'city', 'expertise'].includes(input.name))
         return;
     window.clearTimeout(filterTimer);
     const value = input.value;
@@ -1090,6 +1102,10 @@ document.addEventListener("change", event => {
         }
         p.delete('page');
         navigate(current.route + (current.id ? '/' + current.id : ''), p);
+        return;
+    }
+    if (el.id === "ec28-quick-search" && el instanceof HTMLInputElement) {
+        filter("q", el.value);
         return;
     }
     if (el.id === "ec22-sort") {

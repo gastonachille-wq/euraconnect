@@ -952,7 +952,9 @@ let filterTimer:number|undefined;
 let restoreFilterFocus=false;
 document.addEventListener('input',ev=>{
    const input=ev.target as HTMLElement;
-   if(!input.closest('#filter-form') || !(input instanceof HTMLInputElement) || !['q','tag','city','expertise'].includes(input.name))return;
+   if(!(input instanceof HTMLInputElement))return;
+   if(input.id === 'ec28-quick-search'){window.clearTimeout(filterTimer);const value=input.value;filterTimer=window.setTimeout(()=>filter('q',value),450);return;}
+   if(!input.closest('#filter-form') || !['q','tag','city','expertise'].includes(input.name))return;
    window.clearTimeout(filterTimer);
    const value=input.value;
    restoreFilterFocus=true;
@@ -966,6 +968,7 @@ document.addEventListener("change", event => {
         for(const [key,value] of Object.entries(values)){if(value===false || value==='' || value==null)p.delete(key);else p.set(key,String(value));}
         p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);return;
     }
+    if (el.id === "ec28-quick-search" && el instanceof HTMLInputElement) { filter("q", el.value); return; }
     if (el.id === "ec22-sort") { filter("sort", el.value); return; }
     if (el.id === "company-switch") {
         activeCompany = el.value || null;
