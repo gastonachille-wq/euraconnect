@@ -124,7 +124,7 @@ async function render(): Promise<void> {
                 if (id) {
                     const detail = await read<NeedDetail>("need", { id });
                     detail.responses.forEach(r => responses.set(r.id,r));
-                    html = `<a class="ec13-back" href="#needs">← Retour aux demandes</a>` + needDetail(ctx,detail);
+                    html = `<a class="ec13-back" href="#needs">← Retour aux demandes</a>` + `<section id="ec22-views" class="ec22-stats" aria-live="polite">Consultations et propositions : chargement…</section>` + needDetail(ctx,detail);
                     if(ctx.boot.user.role==="incube" && detail.need.owned) {
                         html+=`<section class="ec20-help"><div><span class="ec20-eyebrow">ACCOMPAGNEMENT</span><h3>Besoin d’un coup de pouce ?</h3><p>Votre Startup Manager peut vous orienter vers une expertise, débloquer une situation ou vous aider à préciser la demande.</p></div><button class="btn primary" data-action="ask-manager" data-id="${e(detail.need.id)}">${icon('send',16)} Solliciter mon Startup Manager</button></section>`;
                     }
@@ -224,7 +224,14 @@ async function render(): Promise<void> {
             return;
         out.innerHTML = html;
         document.body.classList.toggle("ec13-mobile-thread",route==="messages" && Boolean(id));
-        await hydrateImages(out);
+        await hydrateImages(document.body);
+        if (route === "needs" && id && !demo) {
+            void rpc<{views:number;responses:number;providers:null|Array<{company_id:string;name:string;viewed_at:string;responded:boolean}>}>("ec22_view",{p_need:id,p_company:activeCompany}).then(stats=>{
+                const node=document.getElementById("ec22-views");if(!node)return;
+                const role=ctx.boot.user.role;
+                node.innerHTML=`<strong>${stats.views} prestataire${stats.views>1?"s":""} ayant consulté</strong><span>${stats.responses} proposition${stats.responses>1?"s":""} transmise${stats.responses>1?"s":""}</span>` + (role==="startup_manager" && stats.providers ? `<details><summary>Voir les prestataires intéressés (${stats.providers.length})</summary><ul>${stats.providers.map(p=>`<li>${p.name.replace(/&/g,"&amp;").replace(/</g,"&lt;")} · ${p.responded?"A répondu":"A consulté"}</li>`).join("")}</ul></details>` : "");
+            }).catch(()=>{const node=document.getElementById("ec22-views");if(node)node.textContent="Statistiques disponibles après installation de la migration V2.2.";});
+        }
         if(restoreFilterFocus && !modalOpen()){
            const field=out.querySelector<HTMLInputElement>('#filter-form input[name="q"]');
            if(field){field.focus({preventScroll:true});const n=field.value.length;field.setSelectionRange(n,n);}
@@ -283,8 +290,12 @@ async function showCompany(id:string):Promise<void>{
     modal("Fiche entreprise · "+c.name,companyDetailV12(c,offers),{wide:true});
 }
 async function showPerson(id:string):Promise<void>{
-    const person=await read<DirectoryItem>("person",{id});
-    modal("Fiche contact · "+person.name,personDetailV12(person),{wide:true});
+    try {
+        const person=await read<DirectoryItem>("person",{id});
+        modal("Fiche contact · "+person.name,personDetailV12(person),{wide:true});
+    } catch {
+        modal("Contact non disponible", `<div class="ec22-contact-fallback"><h3>Ce contact n’est pas encore accessible dans l’annuaire</h3><p>La fiche est peut-être privée ou le compte n’a pas encore publié son profil. Vous pouvez retrouver les contacts autorisés depuis l’onglet Contacts de l’annuaire.</p><a class="btn primary" href="#directory?kind=person">Consulter l’annuaire des contacts</a></div>`);
+    }
 }
 
 function simpleForm(command: string, body: string, id = "", submit = "Enregistrer"): string { return `<form id="command-form" data-command="${e(command)}" data-id="${e(id)}">${body}${footerSubmit(submit)}</form>`; }
@@ -404,6 +415,16 @@ async function action(el: HTMLElement): Promise<void> {
             modal("Modifier la demande · 3 étapes", needForm(ctx, data.need, ctx.boot.user.role === "admin" ? (await getAdmin()).companies : []), { wide: true });
             setupWizard(true);
             return;
+        }
+        case "need-archive": {
+            if (!confirm("Archiver cette demande ? Elle ne sera plus proposée aux prestataires. L’historique restera accessible.")) return;
+            await rpc("ec22_archive", { p_need: id });
+            toast("Demande archivée."); await render(); return;
+        }
+        case "need-delete": {
+            if (!confirm("Supprimer définitivement cette demande sans réponse ? Cette opération est irréversible.")) return;
+            await rpc("ec22_delete", { p_need: id });
+            toast("Demande supprimée."); navigate("needs"); return;
         }
         case "need-status": {
             const data = await read<NeedDetail>("need", { id });
@@ -886,11 +907,11 @@ let filterTimer:number|undefined;
 let restoreFilterFocus=false;
 document.addEventListener('input',ev=>{
    const input=ev.target as HTMLElement;
-   if(!input.closest('#filter-form') || !(input instanceof HTMLInputElement) || input.name!=='q')return;
+   if(!input.closest('#filter-form') || !(input instanceof HTMLInputElement) || !['q','tag','city','expertise'].includes(input.name))return;
    window.clearTimeout(filterTimer);
    const value=input.value;
    restoreFilterFocus=true;
-   filterTimer=window.setTimeout(()=>{const current=routeParts();const p=new URLSearchParams(current.params);if(value)p.set('q',value);else p.delete('q');p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);},550);
+   filterTimer=window.setTimeout(()=>{const current=routeParts();const p=new URLSearchParams(current.params);if(value)p.set(input.name,value);else p.delete(input.name);p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);},550);
 });
 document.addEventListener("change", event => {
     const el = event.target as HTMLInputElement;
@@ -900,6 +921,7 @@ document.addEventListener("change", event => {
         for(const [key,value] of Object.entries(values)){if(value===false || value==='' || value==null)p.delete(key);else p.set(key,String(value));}
         p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);return;
     }
+    if (el.id === "ec22-sort") { filter("sort", el.value); return; }
     if (el.id === "company-switch") {
         activeCompany = el.value || null;
         if (activeCompany)

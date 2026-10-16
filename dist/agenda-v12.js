@@ -57,7 +57,7 @@ export function sessionsViewV12(ctx, data, workshops = false, proposals = []) {
     const view = agendaViewParam(ctx.params);
     const range = agendaRange(ctx.params);
     const canCreate = ['prestataire', 'startup_manager', 'admin'].includes(ctx.boot.user.role);
-    const title = workshops ? 'Ateliers et rencontres' : 'Trouver un rendez-vous';
+    const title = workshops ? 'Ateliers et rencontres' : scope === 'mine' ? 'Mes rendez-vous' : 'Trouver un créneau';
     const action = canCreate ? button(workshops ? 'Proposer un atelier' : 'Publier mes disponibilités', 'new-session', { icon: 'plus', class: 'primary', extra: `data-kind="${workshops ? 'atelier' : 'creneau'}"` }) : button('Explorer les disponibilités', 'agenda-scope', { icon: 'search', class: 'primary', extra: 'data-scope="all"' });
     let html = `<div class="page-head ec12-agenda-head"><div><p class="eyebrow">${workshops ? 'PROGRAMMATION' : 'AGENDA & DISPONIBILITÉS'}</p><h1>${title}</h1><p>${workshops ? 'Des ateliers collectifs organisés par les prestataires et les équipes d’accompagnement.' : 'Explorez par expertise, modalité ou type de rencontre. Basculez entre calendrier et résultats détaillés.'}</p></div><div class="page-actions">${action}</div></div>`;
     if (workshops) {
@@ -65,7 +65,7 @@ export function sessionsViewV12(ctx, data, workshops = false, proposals = []) {
         return html;
     }
     html += proposalStrip(proposals);
-    html += `<div class="ec12-agenda-controls"><div class="ec12-scope-tabs">${[['mine', 'Mes rendez-vous'], ['all', 'Toutes les disponibilités']].map(([val, text]) => button(text || '', 'agenda-scope', { class: scope === val ? 'selected' : '', extra: `data-scope="${val}"` })).join('')}</div><div class="ec12-view-tabs" role="group" aria-label="Modes d’affichage">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['list', 'Liste'], ['table', 'Tableau']].map(([v, text]) => button(text || '', 'agenda-view', { class: view === v ? 'selected' : '', extra: `data-view="${v}"` })).join('')}</div></div>`;
+    html += `<div class="ec12-agenda-controls"><div class="ec12-scope-tabs">${[['mine', 'Mes rendez-vous'], ['all', 'Créneaux disponibles']].map(([val, text]) => button(text || '', 'agenda-scope', { class: scope === val ? 'selected' : '', extra: `data-scope="${val}"` })).join('')}</div><div class="ec12-view-tabs" role="group" aria-label="Modes d’affichage">${[['day', 'Jour'], ['week', 'Semaine'], ['month', 'Mois'], ['list', 'Liste'], ['table', 'Tableau']].map(([v, text]) => button(text || '', 'agenda-view', { class: view === v ? 'selected' : '', extra: `data-view="${v}"` })).join('')}</div></div>`;
     const mode = ctx.params.get('mode') || '';
     const kind = ctx.params.get('kind') || '';
     const sort = ctx.params.get('sort') || 'date';

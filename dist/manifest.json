@@ -1,33 +1,33 @@
 {
-  "version": "1.3.0",
+  "version": "2.2.0",
   "files": {
     "agenda-v12.js": {
-      "bytes": 14331,
-      "sha256": "6a79d5347c87a17d3b7120a0573668a067ad68e022077eeaeac0d2e9d098c339"
+      "bytes": 14362,
+      "sha256": "f072e8a9cd0315eb083f7415a8015e2f81f224e51a4a222879d5bd2972eafa38"
     },
     "api.js": {
-      "bytes": 7437,
-      "sha256": "47550133a2dca351db3182c379d1096871dbee0d4f1a722c8591f69e5828aeef"
+      "bytes": 7694,
+      "sha256": "a1d629425ff8646977b777d3266127954f986298f59e19a9aa2f4cd4c28f98dd"
     },
     "app.css": {
       "bytes": 48382,
       "sha256": "8bd2c8cf51dc37a630d8daa45cd22b97f6ae116b655306799947f05d81ae4601"
     },
     "app.js": {
-      "bytes": 52858,
-      "sha256": "20238b9ad15a20428c4e59a71c693b3c895e575c27c30d274c0e1dcfc548abe9"
+      "bytes": 60275,
+      "sha256": "f0e61de1192c6a2231f326c98f54070c66db4ebd057a574056bd8fa8b9aee89c"
     },
     "config.js": {
       "bytes": 74,
-      "sha256": "1c40e68e07ac12e84b4751dbe2f8e9cacf02870b13d5f77b90de4003a250f98a"
+      "sha256": "4a47b828f157e72ebc145c639bf234b567a4c3af7f5a2265b2430f07d24023c3"
     },
     "demo.js": {
       "bytes": 24220,
       "sha256": "450e7f9376e412c01fb48363ce0226fa97af6d729215e189b82bc9e1175fb45b"
     },
     "directory-v12.js": {
-      "bytes": 12955,
-      "sha256": "43f4a6128795a17a1f8dc488a215a5736e79de9ae5de14e022f29eafcb5817da"
+      "bytes": 13354,
+      "sha256": "fbccae1dd3348cc5a6e92f487bdb3b9766c1c5e17a21d611c8f4ea4d731f3d84"
     },
     "domain.js": {
       "bytes": 7563,
@@ -62,16 +62,20 @@
       "sha256": "ff031613d52c8aad0497849b30eea4d815d88cd5a0ab41195d59460cdfd56bfd"
     },
     "forms.js": {
-      "bytes": 31799,
-      "sha256": "6d65113854968cab048c024aef573e94aa5db4c2b9d386dca0fe36d4092c4e8a"
+      "bytes": 33942,
+      "sha256": "54b5e628bc766464833a3c6274c93c68046540ac9e3ae61839979549755e4c1c"
     },
     "icons.js": {
       "bytes": 4184,
       "sha256": "7b54f32e6eb07260e97b6009e6226e9e67b6c55f2cba682faa9310cb337afe45"
     },
     "index.html": {
-      "bytes": 1058,
-      "sha256": "7f41093ef11a1a1274caa4127e2e771edb81ec0dfae7ded7d6cc8fa2f04a7666"
+      "bytes": 1185,
+      "sha256": "2080cbab2b2e3fbae34f8cb82555beca507760977abf6ca2063efa69a8fb8f1c"
+    },
+    "manager-v20.js": {
+      "bytes": 8438,
+      "sha256": "b3399e9ef22644af1276e7813a2e9f414d24603dad8064436ae8453469727c60"
     },
     "ui.js": {
       "bytes": 16841,
@@ -89,9 +93,21 @@
       "bytes": 4514,
       "sha256": "a97d08920647e7160365641d233ba5fd6b1ca8e7feffa7d80357ac8d07d8c709"
     },
+    "ux-v20.css": {
+      "bytes": 6931,
+      "sha256": "a9b4f48d72301342a727bcc4defc1606c9c556bfce6cc383eb6c88c03b6057b3"
+    },
+    "ux-v21.css": {
+      "bytes": 5237,
+      "sha256": "4ca13513ba0b19a3367cbdf3b16f293e60e2de919918c8e729dcd7247187f836"
+    },
+    "ux-v22.css": {
+      "bytes": 3752,
+      "sha256": "11bde05f6a1dc542d6efc421e5c67542e4f912efd1e4b9f982e3be57cc738e17"
+    },
     "views.js": {
-      "bytes": 37282,
-      "sha256": "55c6993a6ac9ea4a33cd9cff02e10250c74b0dca8e44d42152ff104a8266401a"
+      "bytes": 37235,
+      "sha256": "f337887b36e8f7c962344fd16babbaa6af79cfd45bd7a81295b1e449701591f9"
     },
     "visual-refresh.css": {
       "bytes": 6674,
