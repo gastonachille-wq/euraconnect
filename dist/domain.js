@@ -1,0 +1,92 @@
+export const roleLabels = { incube: "Incub\u00E9", prestataire: "Prestataire", startup_manager: "Startup Manager", admin: "Administrateur" };
+export const statusLabels = { brouillon: "Brouillon", ouvert: "Ouvert aux propositions", en_echanges: "En discussion", rdv_planifie: "Rendez-vous planifi\u00E9", devis_recu: "Devis re\u00E7u", en_realisation: "Mission en cours", termine: "R\u00E9solu", en_pause: "En pause", sans_suite: "Sans suite", envoyee: "Nouvelle proposition", en_discussion: "Discussion ouverte", retenue: "Proposition retenue", declinee: "Non retenue", retiree: "Retir\u00E9e", creneau: "Disponibilit\u00E9", permanence: "Permanence", atelier: "Atelier", proposition: "Cr\u00E9neau propos\u00E9", confirme: "Confirm\u00E9", attente: "Liste d'attente", annule: "Annul\u00E9", present: "Pr\u00E9sent", absent: "Absent", realise: "R\u00E9alis\u00E9", publiee: "Publi\u00E9e", masquee: "Masqu\u00E9e", valide: "Valid\u00E9", en_validation: "En validation", suspendu: "Suspendu", actif: "Actif" };
+export const needStatuses = ["ouvert", "en_echanges", "rdv_planifie", "devis_recu", "en_realisation", "termine", "en_pause", "sans_suite"];
+export const labels = { startup: "Startup incub\u00E9e", prestataire: "Prestataire", autre: "Partenaire", company: "Soci\u00E9t\u00E9", person: "Contact", incube: "Incub\u00E9", startup_manager: "Startup Manager", admin: "Administrateur", distance: "\u00C0 distance", site: "Sur site", mixte: "Hybride", visio: "Visioconf\u00E9rence", telephone: "T\u00E9l\u00E9phone", sur_site: "Pr\u00E9sentiel", proprietaire: "Propri\u00E9taire", gestionnaire: "Gestionnaire", collaborateur: "Collaborateur" };
+export const label = (v) => statusLabels[v] || labels[v] || v;
+export function escapeHtml(value) { return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c] || c)); }
+export function normalizeTag(value) { return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+export function uniqueTags(terms) {
+    const seen = new Set();
+    return terms.map(t => t.trim().replace(/\s+/g, " ")).filter(t => {
+        const key = normalizeTag(t);
+        if (key.length < 2 || t.length > 60 || seen.has(key))
+            return false;
+        seen.add(key);
+        return true;
+    }).slice(0, 20);
+}
+export function money(cents) { return cents == null ? "Budget \u00E0 d\u00E9finir" : new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(cents / 100); }
+export function cents(value) {
+    if (!value.trim())
+        return null;
+    const n = Number(value.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n < 0 || !Number.isSafeInteger(Math.round(n * 100)))
+        throw new Error("Montant invalide.");
+    return Math.round(n * 100);
+}
+export function dateText(value, withTime = false) {
+    if (!value)
+        return "Non renseign\u00E9";
+    const d = new Date(value);
+    if (Number.isNaN(d.valueOf()))
+        return "Date invalide";
+    return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", ...(withTime ? { timeStyle: "short" } : {}), timeZone: "Europe/Paris" }).format(d);
+}
+export function timeText(value) { return new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(new Date(value)); }
+export function dayLabel(value) { return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(new Date(value)); }
+export function localDate(value = new Date()) { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(value); }
+export function initials(value) { return value.split(/\s+/).filter(Boolean).slice(0, 2).map(v => v[0] || "").join("").toUpperCase(); }
+export function isClosed(status) { return ["termine", "sans_suite", "declinee", "retiree", "annule"].includes(status); }
+export function canRespond(role, company, need) { return role === "prestataire" && company?.type === "prestataire" && company.provider_status === "valide" && company.member_role !== "collaborateur" && ["ouvert", "en_echanges", "rdv_planifie", "devis_recu"].includes(need.status) && (!need.deadline || new Date(need.deadline) > new Date()) && !need.my_response; }
+export function errorMessage(error) {
+    const x = (error && typeof error === "object") ? error : {};
+    const raw = typeof x.message === "string" ? x.message : typeof x.error_description === "string" ? x.error_description : typeof x.error === "string" ? x.error : typeof error === "string" ? error : "";
+    if (raw.includes("email rate limit"))
+        return "Limite d'envoi email atteinte. Patientez ou utilisez un compte de recette d\u00E9j\u00E0 confirm\u00E9.";
+    if (raw.includes("Invalid login credentials"))
+        return "Adresse email ou mot de passe incorrect.";
+    if (raw.includes("Email not confirmed"))
+        return "Confirmez votre adresse email avant de vous connecter.";
+    if (raw.includes("Failed to fetch") || raw.includes("NetworkError"))
+        return "Connexion interrompue. V\u00E9rifiez votre acc\u00E8s Internet puis r\u00E9essayez.";
+    if (x.code === "PGRST202" || raw.includes("Could not find the function"))
+        return "La migration V1 est manquante. Executez 01_INSTALL_V1.sql puis 02_ACTIVER_V1.sql.";
+    if (x.code === "42702" || x.code === "42P01")
+        return "La base doit \u00EAtre mise \u00E0 jour. Transmettez le code " + x.code + " \u00E0 votre administrateur.";
+    return raw && raw !== "[object Object]" ? raw : "Op\u00E9ration non aboutie. Actualisez la page et r\u00E9essayez.";
+}
+export function markdown(text) {
+    return escapeHtml(text).split(/\n/).map(line => {
+        let s = line.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
+        if (s.startsWith("### "))
+            return "<h4>" + s.slice(4) + "</h4>";
+        if (/^[-*] /.test(s))
+            return "<p class=\"list-line\">&#8226; " + s.slice(2) + "</p>";
+        return "<p>" + (s || "<br>") + "</p>";
+    }).join("");
+}
+function icsEscape(value) { return value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;").replace(/\r/g, ""); }
+function foldLine(line) {
+    const chunks = [];
+    let current = "";
+    let bytes = 0;
+    const enc = new TextEncoder();
+    for (const char of line) {
+        const n = enc.encode(char).length;
+        if (bytes + n > 73) {
+            chunks.push(current);
+            current = " ";
+            bytes = 1;
+        }
+        current += char;
+        bytes += n;
+    }
+    chunks.push(current);
+    return chunks.join("\r\n");
+}
+export function calendarIcs(session) {
+    const stamp = (s) => new Date(s).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+    return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//EURACONNECT//Agenda//FR", "CALSCALE:GREGORIAN", "BEGIN:VEVENT", "UID:" + session.id + "@euraconnect", "DTSTAMP:" + stamp(new Date().toISOString()), "DTSTART:" + stamp(session.starts_at), "DTEND:" + stamp(session.ends_at),
+        "SUMMARY:" + icsEscape(session.title), "DESCRIPTION:" + icsEscape(session.host_name + "\n" + session.description + "\n" + (session.purpose || "")),
+        "LOCATION:" + icsEscape(session.location || label(session.mode)), "STATUS:" + (session.status === "annule" ? "CANCELLED" : "CONFIRMED"), "END:VEVENT", "END:VCALENDAR"].map(foldLine).join("\r\n") + "\r\n";
+}

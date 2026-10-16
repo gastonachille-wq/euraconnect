@@ -1,0 +1,213 @@
+/* EURACONNECT 1.2 — annuaire, disponibilites et proposition commerciale.
+   Pure CSS. Aucun composant externe. */
+:root{--ec12-ink:#18273c;--ec12-muted:#718197;--ec12-border:#e3eaf1;--ec12-soft:#f6f8fb;--ec12-pink:#c72d4c;--ec12-navy:#172b46}
+.ec12-directory-tabs,.ec12-agenda-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.ec12-directory-tabs{padding:6px;background:#eef2f7;border-radius:14px;width:max-content;max-width:100%}
+.ec12-directory-tabs .btn,.ec12-scope-tabs .btn,.ec12-view-tabs .btn,.ec12-display-switch .btn{border:0;background:transparent;box-shadow:none!important;color:#60738c;font-size:12px;min-height:39px;white-space:nowrap;border-radius:9px;padding:9px 14px}
+.ec12-directory-tabs .btn.selected,.ec12-scope-tabs .btn.selected,.ec12-view-tabs .btn.selected,.ec12-display-switch .btn.selected{color:#193451;background:white;box-shadow:0 2px 8px #20365317!important}
+.ec12-directory-count{font-size:11px;color:#697991;white-space:nowrap;padding:0 12px}
+.ec12-dir-layout{display:grid;grid-template-columns:minmax(215px,255px) minmax(0,1fr);align-items:start;gap:19px}
+.ec12-facets,.ec12-dir-results{min-width:0}
+.ec12-facets{background:#fff;border:1px solid var(--ec12-border);border-radius:16px;padding:18px;box-shadow:0 4px 22px #21345108;position:sticky;top:20px}
+.ec12-facet-head{display:flex;align-items:center;justify-content:space-between;gap:7px;padding-bottom:16px;border-bottom:1px solid var(--ec12-border)}
+.ec12-facet-head>strong{display:flex;align-items:center;gap:8px;font-size:13px;color:#253952}
+.ec12-facet-form{display:grid;gap:14px;padding-top:17px}
+.ec12-facet-form>label:not(.ec12-favorite-check),.ec12-agenda-filters>label{display:flex;flex-direction:column;gap:7px;color:#526882;font-size:11px;font-weight:740;line-height:1.5;min-width:0}
+.ec12-facet-form input:not([type=checkbox]),.ec12-facet-form select,.ec12-agenda-filters input,.ec12-agenda-filters select{min-height:41px;width:100%;max-width:100%;padding:9px 11px;border:1px solid #dfe6ef;border-radius:9px;background:#fff;font-size:12px;color:#223851;box-shadow:none}
+.ec12-facet-form input:focus,.ec12-facet-form select:focus,.ec12-agenda-filters input:focus,.ec12-agenda-filters select:focus{border-color:#8c9dbb;outline:2px solid #dce7f8;outline-offset:0}
+.ec12-favorite-check{display:flex;align-items:center;gap:9px;font-size:12px;color:#485c75;font-weight:700}
+.ec12-favorite-check input{width:16px;height:16px;accent-color:#c72d4c}
+.ec12-privacy-hint{display:flex;gap:8px;margin-top:15px;padding:12px 11px;background:#f3f6fa;border-radius:10px;font-size:11px;color:#6d8198;line-height:1.55}
+.ec12-privacy-hint svg{flex-shrink:0;margin-top:2px}
+.ec12-dir-results-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;min-height:66px;margin-bottom:14px}
+.ec12-dir-results-head>div:first-child{display:grid;gap:5px}
+.ec12-dir-results-head strong{font-size:16px;color:#21334b}
+.ec12-dir-results-head small{font-size:11px;color:#7b89a0}
+.ec12-display-switch,.ec12-scope-tabs,.ec12-view-tabs{display:flex;align-items:center;gap:3px;padding:4px;background:#eef2f7;border-radius:11px;max-width:100%;overflow:auto}
+.ec12-display-switch .btn{font-size:11px;padding:8px 11px;min-height:35px}
+.ec12-directory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ec12-directory-grid.detailed{grid-template-columns:1fr}
+.ec12-dir-card{background:#fff;border:1px solid #e2e9f1;border-radius:15px;padding:17px 18px;min-width:0;display:flex;flex-direction:column;gap:14px;box-shadow:0 5px 22px #1b315408;transition:border-color .2s,transform .2s,box-shadow .2s}
+.ec12-dir-card:hover{border-color:#bec9db;box-shadow:0 10px 28px #15314a10;transform:translateY(-1px)}
+.ec12-dir-top{display:flex;gap:13px;align-items:flex-start;min-width:0}
+.ec12-dir-avatar{flex:0 0 auto}
+.ec12-dir-avatar .avatar{width:56px;height:56px;border-radius:13px;font-size:19px}
+.ec12-dir-avatar .avatar.company-logo{width:58px;height:58px;border-radius:13px}
+.ec12-dir-intro{min-width:0;flex:1;display:grid;gap:5px}
+.ec12-dir-name{font-size:15px;font-weight:800;letter-spacing:-.2px;text-align:left;color:#1e3650;line-height:1.3;padding:0;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.ec12-dir-name:hover{text-decoration:underline;text-underline-offset:3px}
+.ec12-dir-intro>small{font-size:11px;line-height:1.5;color:#6e7e92;min-height:14px}
+.ec12-dir-top>.favorite{flex-shrink:0;align-self:start}
+.ec12-labels{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.ec12-type-pill,.ec12-affiliation{display:inline-flex;gap:5px;align-items:center;font-size:10px;font-weight:760;line-height:1.25;padding:5px 8px;border-radius:7px;max-width:100%}
+.ec12-type-pill{background:#edf3f8;color:#526a83}
+.ec12-affiliation{background:#fff0f4;color:#ac3455}
+.ec12-affiliation.premium{background:#e8f3ef;color:#26705a}
+.ec12-affiliation.institutionnel{background:#eaf0fc;color:#3764a5}
+.ec12-affiliation.pop{background:#f2ebfc;color:#7348a0}
+.ec12-affiliation.intervenant_atelier{background:#fff5e8;color:#9b642d}
+.ec12-dir-mini-tags .tags{display:flex;flex-wrap:wrap;gap:5px}
+.ec12-dir-desc{font-size:12px;line-height:1.7;color:#64748a}
+.ec12-dir-bottom{margin-top:auto;border-top:1px solid #edf0f5;padding-top:13px;display:grid;gap:11px}
+.ec12-dir-bottom>small{color:#708299;display:flex;align-items:center;gap:6px;font-size:11px}
+.ec12-dir-bottom>div{display:flex;flex-wrap:wrap;gap:7px}
+.ec12-dir-bottom .btn{font-size:11px;min-height:34px;padding:7px 11px}
+.ec12-dir-table{background:#fff;border:1px solid var(--ec12-border);border-radius:13px;overflow:auto}
+.ec12-dir-table table,.ec12-agenda-table table{width:100%;min-width:820px;border-collapse:collapse}
+.ec12-dir-table th,.ec12-agenda-table th{font-size:11px;font-weight:750;color:#677990;background:#f5f7fa;padding:14px 13px;text-align:left;white-space:nowrap}
+.ec12-dir-table td,.ec12-agenda-table td{vertical-align:middle;padding:15px 13px;border-bottom:1px solid #edf0f5;font-size:12px;color:#40536b}
+.ec12-dir-table tbody tr:hover,.ec12-agenda-table tbody tr:hover{background:#fafbfe}
+.ec12-table-identity{display:flex;align-items:center;gap:10px;min-width:170px}
+.ec12-table-identity .avatar{width:38px;height:38px;border-radius:9px;flex-shrink:0}
+.ec12-table-identity>div{min-width:0;display:grid;gap:3px}
+.ec12-table-identity strong{font-size:12px;color:#263952}
+.ec12-table-identity small{font-size:11px;color:#8090a4}
+.ec12-table-actions{white-space:nowrap}
+.ec12-table-actions .btn{margin-right:5px}
+.ec12-entity-header{display:flex;align-items:center;gap:19px;padding:12px 0 23px;border-bottom:1px solid #e6ecf2}
+.ec12-entity-header>.avatar{width:86px;height:86px;flex-shrink:0;border-radius:18px;font-size:24px}
+.ec12-entity-header>div{min-width:0}
+.ec12-entity-header h2{font-size:25px;margin:5px 0 8px;line-height:1.2;overflow-wrap:anywhere}
+.ec12-entity-header p{font-size:12px;color:#697c92;margin:5px 0}
+.ec12-entity-section{padding:21px 0;border-bottom:1px solid #e9edf3;display:grid;gap:13px;min-width:0}
+.ec12-entity-section:last-of-type{border-bottom:0}
+.ec12-entity-section h3{display:flex;gap:8px;align-items:center;font-size:16px;color:#243952;margin:0}
+.ec12-entity-section>.prose{line-height:1.75;font-size:13px}
+.ec12-contact-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ec12-contact-mini{display:flex;align-items:center;gap:10px;min-width:0;padding:11px;border:1px solid #e5ebf2;border-radius:11px;background:#fafbfe}
+.ec12-contact-mini>.avatar{width:44px;height:44px;flex-shrink:0;border-radius:50%}
+.ec12-contact-mini>div{flex:1;min-width:0;display:grid;gap:4px}
+.ec12-contact-mini strong{color:#263a55;font-size:12px}
+.ec12-contact-mini span,.ec12-contact-mini a{font-size:11px;color:#73849a}
+.ec12-contact-mini .btn{min-height:32px;flex-shrink:0}
+.ec12-inline-offers{display:grid;gap:8px}
+.ec12-inline-offers details,.ec12-proposal-offer{border:1px solid #e1e8f0;border-radius:10px;padding:14px;background:#fafcfe}
+.ec12-inline-offers summary,.ec12-proposal-offer summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:9px;color:#273b56}
+.ec12-inline-offers summary strong,.ec12-proposal-offer strong{font-size:12px}
+.ec12-inline-offers summary span,.ec12-proposal-offer small{font-size:11px;color:#657d96}
+.ec12-inline-offers details[open] .prose,.ec12-proposal-offer[open] .prose{margin:13px 0;font-size:12px;line-height:1.7;color:#53677f}
+.ec12-linkedin-link{display:inline-flex;margin-top:12px;font-size:12px;color:#16618f;font-weight:740;text-decoration:none}
+.ec12-linkedin-link:hover{text-decoration:underline}
+/* Agenda — cinq vues sur les memes sessions, sans API supplementaire */
+.ec12-agenda-head .page-actions{margin-left:auto}
+.ec12-proposal-inbox{display:grid;grid-template-columns:minmax(200px,1fr) minmax(240px,1.45fr);gap:15px;padding:19px 22px;margin:0 0 19px;border:1px solid #dcdcf3;border-radius:16px;background:linear-gradient(120deg,#eef2fc,#fbf8fe);box-shadow:0 5px 22px #1b315408}
+.ec12-proposal-intro{display:flex;align-items:flex-start;gap:12px}
+.ec12-pulse-icon{background:#e3e7fc;color:#5a5bb0;padding:11px;display:inline-flex;border-radius:12px;flex-shrink:0}
+.ec12-proposal-intro h2{font-size:17px;line-height:1.4;margin:4px 0 7px;color:#243a59}
+.ec12-proposal-intro p:not(.eyebrow){font-size:11px;line-height:1.6;color:#677d95}
+.ec12-proposal-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ec12-proposal-item{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;border:1px solid #e3e6f1;border-radius:10px;padding:12px}
+.ec12-proposal-item strong{font-size:12px;color:#233a54;line-height:1.4}
+.ec12-proposal-item>span{font-size:11px;color:#687e96;line-height:1.5}
+.ec12-proposal-item>.btn{margin-top:auto;min-height:32px}
+.ec12-agenda-controls{justify-content:space-between;margin:20px 0 15px}
+.ec12-agenda-filters{display:grid;grid-template-columns:minmax(160px,1.4fr) repeat(4,minmax(110px,1fr)) auto;align-items:end;gap:11px;background:#fff;border:1px solid #e2eaf3;border-radius:14px;padding:17px;margin-bottom:14px;box-shadow:0 3px 15px #1a315008}
+.ec12-agenda-filters label>svg{display:none}
+.ec12-agenda-filters>label{font-size:10px;gap:6px}
+.ec12-agenda-filters .btn{min-height:41px;font-size:11px}
+.ec12-agenda-filters .ghost{grid-column:1/-1;width:max-content;margin-left:auto;min-height:26px}
+.ec12-agenda-strip{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:14px 0;padding:0 3px;color:#657890;font-size:12px}
+.ec12-agenda-range{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.ec12-agenda-range strong{font-size:13px;color:#263a52;font-weight:800;margin-left:7px}
+.ec12-agenda-range .btn{min-height:34px}
+.ec12-timezone{color:#94a2b5}
+.ec12-calendar-week{display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));gap:0;border:1px solid #e2e9f2;border-radius:15px;background:#fff;min-height:410px;overflow-x:auto}
+.ec12-calendar-week.is-day{grid-template-columns:minmax(0,1fr);min-height:360px}
+.ec12-calendar-column{min-width:99px;border-right:1px solid #edf0f5;min-height:350px}
+.ec12-calendar-column:last-child{border-right:0}
+.ec12-calendar-day{display:grid;gap:5px;text-align:center;padding:16px 8px;background:#f7f9fc;border-bottom:1px solid #edf0f5}
+.ec12-calendar-day strong{font-size:11px;text-transform:capitalize;color:#4a637f}
+.ec12-calendar-day small{font-size:10px;color:#bb3d58;font-weight:750}
+.ec12-calendar-column.today .ec12-calendar-day{background:#fff1f4}
+.ec12-calendar-events{padding:8px 6px;display:grid;gap:6px;align-content:start;min-height:180px}
+.ec12-event-card{display:grid;gap:5px;background:#eef4fb;border-left:3px solid #6692ca;border-radius:7px;padding:9px 7px;text-align:left;color:#334f74;min-width:0;width:100%}
+.ec12-event-card:hover{background:#e2eaf6}
+.ec12-event-card strong{font-size:10px;line-height:1.4;word-break:break-word}
+.ec12-event-card>small{font-size:9px;color:#66809f;line-height:1.4}
+.ec12-event-time{font-size:10px;font-weight:800;color:#416391}
+.ec12-event-proposition,.ec12-event-card.needs-action{border-color:#c64d68;background:#fff1f3;color:#92344a}
+.ec12-event-permanence{border-color:#60a289;background:#eef8f3}
+.ec12-event-atelier{border-color:#926cb9;background:#f4effa}
+.ec12-pending{font-size:9px;font-weight:750;background:#fff;border-radius:5px;padding:4px 6px;width:max-content}
+.ec12-calendar-blank{font-size:10px;color:#b2bfce;text-align:center;margin-top:24px}
+.ec12-month-calendar{overflow:auto;border:1px solid #e2e9f2;border-radius:15px;background:#fff}
+.ec12-month-days,.ec12-month-grid{display:grid;grid-template-columns:repeat(7,minmax(97px,1fr));min-width:720px}
+.ec12-month-days strong{text-align:center;padding:12px 6px;background:#f4f7fb;color:#73879e;font-size:11px;border-bottom:1px solid #e5eaf1}
+.ec12-month-day{min-height:112px;padding:9px 7px;border-right:1px solid #e9edf3;border-bottom:1px solid #e9edf3;min-width:0}
+.ec12-month-day.outside{background:#fafbfd;opacity:.55}
+.ec12-month-day.today{background:#fff8fa}
+.ec12-month-date{font-weight:800;font-size:12px;color:#5c718d;margin-bottom:8px}
+.ec12-month-day.today .ec12-month-date{display:grid;place-items:center;background:#c72d4c;color:#fff;width:25px;height:25px;border-radius:50%}
+.ec12-month-event{display:block;text-align:left;overflow:hidden;max-width:100%;text-overflow:ellipsis;white-space:nowrap;padding:5px 6px;margin-bottom:4px;border-radius:5px;background:#edf3fa;color:#456b9a;font-size:9px}
+.ec12-month-event.is-proposal{background:#fff0f3;color:#b23959}
+.ec12-more{font-size:9px;color:#8294a7}
+.ec12-agenda-list{border:1px solid #e3e9f0;border-radius:15px;overflow:hidden;background:#fff}
+.ec12-agenda-list-row{display:flex;align-items:center;gap:17px;padding:16px 19px;border-bottom:1px solid #edf0f4;width:100%;text-align:left;background:white;min-height:93px;color:inherit}
+.ec12-agenda-list-row:last-child{border:0}
+.ec12-agenda-list-row:hover{background:#fafbfe}
+.ec12-date-tile{width:52px;flex-shrink:0;display:grid;gap:1px;border:1px solid #e1e9f1;background:#f6f8fb;border-radius:10px;padding:9px 5px;text-align:center}
+.ec12-date-tile strong{font-size:21px;color:#253e60}
+.ec12-date-tile small{font-size:10px;color:#7b90a5;text-transform:uppercase}
+.ec12-agenda-info{flex:1;display:grid;gap:5px;min-width:0}
+.ec12-agenda-info strong{font-size:14px;color:#263c58;line-height:1.45}
+.ec12-agenda-info small{font-size:11px;color:#8190a4;line-height:1.5}
+.ec12-agenda-info .tags{margin-top:3px}
+.ec12-agenda-facts{display:flex;flex-direction:column;align-items:flex-end;gap:5px;font-size:11px;color:#73849a}
+.ec12-agenda-facts>svg{display:inline}
+.ec12-agenda-list-row>svg{flex-shrink:0;color:#9ba9bc}
+.ec12-agenda-table{background:#fff;border:1px solid #e2e9f2;border-radius:14px;overflow:auto}
+.ec12-agenda-table td small{display:block;margin-top:7px}
+.ec12-workshops-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.ec12-workshop-card{display:grid;align-content:start;gap:12px;padding:19px;background:#fff;border:1px solid var(--ec12-border);border-radius:14px;box-shadow:0 5px 17px #21345108}
+.ec12-workshop-top,.ec12-workshop-meta{display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;font-size:11px;color:#6d8199}
+.ec12-workshop-top>span{display:flex;align-items:center;gap:7px;background:#f5eef9;color:#7d529a;font-weight:750;padding:8px;border-radius:8px}
+.ec12-workshop-top>time{font-weight:700}
+.ec12-workshop-card h3{font-size:18px;line-height:1.35;color:#1e334e}
+.ec12-workshop-card p{font-size:12px;line-height:1.7;color:#66778d}
+.ec12-workshop-meta span{display:inline-flex;gap:5px;align-items:center}
+.ec12-workshop-card>.btn{align-self:end;margin-top:auto}
+.ec12-thread-appointments{padding:15px 20px;border-top:1px solid #edf0f4;border-bottom:1px solid #edf0f4;background:#f9fbfe;display:grid;gap:12px}
+.ec12-thread-appointments .section-heading{margin:0;display:flex;align-items:center;justify-content:space-between;gap:9px}
+.ec12-thread-appointments .section-heading h3{font-size:13px;display:flex;align-items:center;gap:7px;color:#25405f}
+.ec12-thread-appointments .section-heading p{font-size:11px}
+.ec12-thread-appointments>p{font-size:11px}
+.ec12-thread-slots{display:grid;gap:7px;max-height:183px;overflow-y:auto;padding-right:2px}
+.ec12-thread-slot{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #e4eaf1;border-radius:8px;background:#fff;padding:9px 11px}
+.ec12-thread-slot.action-required{border-color:#edc1cc;background:#fff9fa}
+.ec12-thread-slot>div{display:grid;gap:4px;min-width:0}
+.ec12-thread-slot strong{font-size:11px;color:#2c435e}
+.ec12-thread-slot small{font-size:10px;color:#75869b}
+.ec12-thread-slot>div:last-child{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ec12-thread-slot .btn{min-height:30px}
+/* Proposition commerciale complete : documentation, prestataire, contact et services */
+.ec12-response-preview{grid-column:1/-1;font-size:12px;line-height:1.65;color:#63778f;margin:0}
+.response-row:has(.ec12-response-preview){grid-template-columns:1.4fr auto auto;align-items:center}
+.response-row:has(.ec12-response-preview)>.btn{grid-column:1/-1;width:max-content}
+.ec12-proposal-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(245px,.9fr);gap:20px;align-items:start}
+.ec12-proposal-identity{display:flex;align-items:center;gap:14px;padding:19px;border-radius:13px;background:linear-gradient(120deg,#f6f9fc,#f0f4f8);border:1px solid #e3ebf4}
+.ec12-proposal-identity>.avatar{width:64px;height:64px;flex-shrink:0;border-radius:13px}
+.ec12-proposal-identity h2{font-size:18px;margin:6px 0}
+.ec12-proposal-identity p{font-size:11px;color:#73859c;margin-top:7px}
+.ec12-proposal-facts{margin:15px 0 13px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.ec12-proposal-section{padding:18px;background:#fff;border:1px solid #e2e9f1;border-radius:12px;margin-bottom:12px;min-width:0}
+.ec12-proposal-section h3{font-size:14px;display:flex;align-items:center;gap:9px;margin:0 0 12px;color:#233951}
+.ec12-proposal-section .prose{font-size:12px;line-height:1.8;color:#52667e}
+.ec12-proposal-section>.muted{font-size:11px;line-height:1.6}
+.ec12-proposal-sidebar{min-width:0}
+.ec12-proposal-company{display:flex;align-items:flex-start;gap:11px;flex-wrap:wrap}
+.ec12-proposal-company>.avatar{width:46px;height:46px;border-radius:11px;flex-shrink:0}
+.ec12-proposal-company>div{flex:1;min-width:135px;display:grid;gap:4px}
+.ec12-proposal-company strong{font-size:12px;color:#283f59}
+.ec12-proposal-company small,.ec12-proposal-company p{font-size:11px;color:#788ca1;line-height:1.6}
+.ec12-proposal-company>.btn{margin-left:auto}
+.ec12-proposal-offer{margin:8px 0}
+.ec12-proposal-offer summary span{display:grid;gap:6px;min-width:0}
+.ec12-proposal-offer .tags{margin-top:12px}
+.ec12-service-benefit{padding:10px;background:#ebf7f3;color:#327860;border-radius:7px;font-size:11px;margin-top:10px}
+@media(max-width:1250px){.ec12-agenda-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.ec12-agenda-filters>.btn{width:max-content}.ec12-workshops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ec12-proposal-inbox{grid-template-columns:1fr}.ec12-dir-layout{grid-template-columns:215px minmax(0,1fr)}.ec12-directory-grid{grid-template-columns:1fr}}
+@media(max-width:920px){.ec12-dir-layout{grid-template-columns:minmax(0,1fr)}.ec12-facets{position:static}.ec12-facet-form{grid-template-columns:repeat(2,minmax(0,1fr))}.ec12-facet-form>.full{grid-column:1/-1}.ec12-privacy-hint{display:none}.ec12-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ec12-contact-list{grid-template-columns:1fr}.ec12-proposal-layout{grid-template-columns:1fr}.ec12-proposal-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ec12-proposal-sidebar>.ec12-proposal-section{margin:0}.ec12-proposal-sidebar>.ec12-proposal-section:last-child{grid-column:1/-1}.ec12-calendar-week{min-width:700px}.ec12-calendar-week.is-day{min-width:0}}
+@media(max-width:680px){.ec12-directory-tabs{width:100%;justify-content:center}.ec12-directory-count{margin-left:auto}.ec12-facets{padding:14px}.ec12-facet-form{grid-template-columns:minmax(0,1fr)}.ec12-directory-grid{grid-template-columns:1fr}.ec12-dir-results-head{align-items:flex-start}.ec12-dir-card{padding:15px}.ec12-display-switch{width:100%;justify-content:space-between}.ec12-display-switch .btn{flex:1}.ec12-dir-avatar .avatar,.ec12-dir-avatar .avatar.company-logo{width:48px;height:48px}.ec12-dir-intro small{min-height:0}.ec12-agenda-head .page-actions{margin-left:0}.ec12-proposal-inbox{padding:16px}.ec12-proposal-items{grid-template-columns:1fr}.ec12-agenda-controls{align-items:stretch}.ec12-scope-tabs,.ec12-view-tabs{width:100%;justify-content:flex-start}.ec12-scope-tabs .btn,.ec12-view-tabs .btn{min-width:54px;padding:9px 11px}.ec12-agenda-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:13px;gap:10px}.ec12-agenda-filters .ec12-wide{grid-column:1/-1}.ec12-agenda-filters>.btn.primary{grid-column:1/-1;width:100%}.ec12-agenda-strip{align-items:flex-start}.ec12-agenda-range strong{width:100%;margin:4px 0 0}.ec12-calendar-week{min-width:700px}.ec12-calendar-week.is-day{min-width:0}.ec12-calendar-week.is-day .ec12-calendar-column{min-height:240px}.ec12-workshops-grid{grid-template-columns:1fr}.ec12-agenda-list-row{padding:12px;gap:10px}.ec12-date-tile{width:44px}.ec12-date-tile strong{font-size:19px}.ec12-agenda-facts{display:none}.ec12-thread-appointments{padding:13px}.ec12-thread-appointments .section-heading{align-items:flex-start;flex-direction:column}.ec12-thread-slot{align-items:flex-start;flex-direction:column}.ec12-thread-slot>div:last-child{align-self:flex-start;flex-wrap:wrap}.ec12-contact-list{grid-template-columns:1fr}.ec12-proposal-sidebar{grid-template-columns:1fr}.ec12-proposal-sidebar>.ec12-proposal-section:last-child{grid-column:auto}.ec12-proposal-facts{grid-template-columns:1fr 1fr}.ec12-entity-header>.avatar{width:64px;height:64px}.ec12-entity-header h2{font-size:20px}.response-row:has(.ec12-response-preview){grid-template-columns:1fr 1fr}}
+@media(max-width:390px){.ec12-agenda-filters{grid-template-columns:1fr}.ec12-directory-tabs .btn{padding:9px 8px}.ec12-dir-bottom>div>.btn{flex:1}.ec12-proposal-facts{grid-template-columns:1fr}}
+
+/* Identite visuelle EURACONNECT : logo transmis par l'utilisateur. */
+.ec12-brand-logo{width:42px;height:42px;object-fit:contain;border-radius:11px;flex-shrink:0;background:#fff} .auth-brand .ec12-brand-logo{width:48px;height:48px;border-radius:12px} .sidebar .ec12-brand-logo{box-shadow:0 2px 10px #00000015}

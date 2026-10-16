@@ -1,0 +1,101 @@
+{
+  "version": "1.3.0",
+  "files": {
+    "agenda-v12.js": {
+      "bytes": 14331,
+      "sha256": "6a79d5347c87a17d3b7120a0573668a067ad68e022077eeaeac0d2e9d098c339"
+    },
+    "api.js": {
+      "bytes": 7437,
+      "sha256": "47550133a2dca351db3182c379d1096871dbee0d4f1a722c8591f69e5828aeef"
+    },
+    "app.css": {
+      "bytes": 48382,
+      "sha256": "8bd2c8cf51dc37a630d8daa45cd22b97f6ae116b655306799947f05d81ae4601"
+    },
+    "app.js": {
+      "bytes": 52858,
+      "sha256": "20238b9ad15a20428c4e59a71c693b3c895e575c27c30d274c0e1dcfc548abe9"
+    },
+    "config.js": {
+      "bytes": 74,
+      "sha256": "1c40e68e07ac12e84b4751dbe2f8e9cacf02870b13d5f77b90de4003a250f98a"
+    },
+    "demo.js": {
+      "bytes": 24220,
+      "sha256": "450e7f9376e412c01fb48363ce0226fa97af6d729215e189b82bc9e1175fb45b"
+    },
+    "directory-v12.js": {
+      "bytes": 12955,
+      "sha256": "43f4a6128795a17a1f8dc488a215a5736e79de9ae5de14e022f29eafcb5817da"
+    },
+    "domain.js": {
+      "bytes": 7563,
+      "sha256": "3a528fcb3c3f6a8f7fddce61d4fdf77cbdcd117a0df2271d14d27c4d9ae20df4"
+    },
+    "euraconnect-180.png": {
+      "bytes": 52011,
+      "sha256": "071eb72661e0f1e7222b9295dfd36c183d6b2ac647bc0cc420ee0eb1b92038d7"
+    },
+    "euraconnect-192.png": {
+      "bytes": 58109,
+      "sha256": "97149fbc519ccba514da9c27988b18fbd5a4fd17014cf152117bc0b5c8d44738"
+    },
+    "euraconnect-32.png": {
+      "bytes": 2858,
+      "sha256": "7ede835042af3059c188bd9ed8a8646a02e6736883a5e805062ea6b80d1de555"
+    },
+    "euraconnect-512.png": {
+      "bytes": 323779,
+      "sha256": "e4d1f67f328eb16f979840d77c52308f96e6e107310c96fefff041345b84a3dd"
+    },
+    "euraconnect-64.png": {
+      "bytes": 9255,
+      "sha256": "656772e7ab77098809b2eed4c6d2726a242245946c918278fc6bdcf68f659da1"
+    },
+    "euraconnect-logo.png": {
+      "bytes": 1505626,
+      "sha256": "01c65d7c95b8b06a751f3aa33f84a5994e37c2c9b3ef8f793cae4766542b16b6"
+    },
+    "favicon.svg": {
+      "bytes": 247,
+      "sha256": "ff031613d52c8aad0497849b30eea4d815d88cd5a0ab41195d59460cdfd56bfd"
+    },
+    "forms.js": {
+      "bytes": 31799,
+      "sha256": "6d65113854968cab048c024aef573e94aa5db4c2b9d386dca0fe36d4092c4e8a"
+    },
+    "icons.js": {
+      "bytes": 4184,
+      "sha256": "7b54f32e6eb07260e97b6009e6226e9e67b6c55f2cba682faa9310cb337afe45"
+    },
+    "index.html": {
+      "bytes": 1058,
+      "sha256": "7f41093ef11a1a1274caa4127e2e771edb81ec0dfae7ded7d6cc8fa2f04a7666"
+    },
+    "ui.js": {
+      "bytes": 16841,
+      "sha256": "612bbdfddea0be9c6ec2f516343331f02277a5ecc63e71de7f5df982125d1e95"
+    },
+    "ux-v11.css": {
+      "bytes": 19443,
+      "sha256": "c090b90f7291216bae84deaa1a3aad184a4fe228e1a6a230d9d5fdf84a2b833c"
+    },
+    "ux-v12.css": {
+      "bytes": 22638,
+      "sha256": "ea689b711b11d719b9f7fbd4b06afce777f0c0ec8f73c809403584fcb92cc931"
+    },
+    "ux-v13.css": {
+      "bytes": 4514,
+      "sha256": "a97d08920647e7160365641d233ba5fd6b1ca8e7feffa7d80357ac8d07d8c709"
+    },
+    "views.js": {
+      "bytes": 37282,
+      "sha256": "55c6993a6ac9ea4a33cd9cff02e10250c74b0dca8e44d42152ff104a8266401a"
+    },
+    "visual-refresh.css": {
+      "bytes": 6674,
+      "sha256": "d7591ce90111059010b4b91ee7b229acfb2859f3ab974990b38601f292832475"
+    }
+  }
+}
