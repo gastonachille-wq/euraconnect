@@ -1,50 +1,47 @@
-# EURACONNECT 1.0 — Refonte des parcours
+# EURACONNECT 1.1 — Parcours prioritaires & ergonomie
 
-**Release candidate : code compilé et interfaces testées ; migration Supabase et droits à valider en recette.**
+**Version Cloudflare Workers / Supabase — application TypeScript statique.**
 
-Une demande, des propositions identifiées, une décision de la startup, puis un dossier de discussion et des rendez-vous. Le Premium concerne exclusivement les entreprises prestataires et reste activé manuellement par l'administrateur. Aucun paiement.
+Cette version ameliore les parcours utilisateur et les composants visuels de la version 1.0 **sans aucune nouvelle table Supabase, aucune nouvelle API et aucune dependance npm**. Les autorisations et les regles Premium restent appliquees par la base Supabase existante.
 
-## Ce qui est livré
+## Pour mettre a jour la version deja deployee
 
-- Quatre espaces : Incubé, Prestataire, Startup Manager, Administrateur.
-- Dashboard, besoins contextualisés, propositions, décisions et messagerie par dossier.
-- Annuaire entreprises/contacts, typologies distinctes, favoris filtrés côté base, tags suggérés et personnalisés.
-- Agenda individuel et collectif, propositions de créneaux depuis les dossiers, permanences hebdomadaires, ateliers et listes d'attente.
-- Supervision des startups affectées, notes internes et actions de suivi pour les managers.
-- Administration des comptes, entreprises, membres, portefeuilles et activations Premium avec expiration.
-- Photos et logos privés, redimensionnement, éditeur enrichi contrôlé.
+**Lire d'abord `docs/V11_DEPLOIEMENT_CLOUDFLARE.md`.**
 
-## Changement d'architecture explicite
+- Conserver le meme depot GitHub `gastonachille-wq/euraconnect` et le meme Cloudflare Worker `euraconnect`.
+- Importer les fichiers de cette version dans le depot, en respectant les sous-dossiers. Un ZIP leger de mise a jour est fourni separement.
+- Cloudflare reconstruit le site avec `npm run check`, puis `npx wrangler deploy`.
+- Les deux variables de **compilation** Cloudflare doivent rester presentes : `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **AUCUN SCRIPT SQL a executer pour passer de 1.0 a 1.1.** Ne pas relancer les migrations initiales.
 
-Le frontal Next.js/React historique est **remplacé par une application TypeScript statique**, compilée sur Netlify. Les données, l'authentification et les opérations transactionnelles restent dans Supabase. Ce n'est ni une page HTML locale avec de fausses sauvegardes, ni une mise à jour cosmétique de `app/page.tsx`.
+L'URL existante est conservee : https://euraconnect.gaston-achille.workers.dev
 
-**Le site Netlify doit publier `dist`, plus `.next`. Supprimer l'extension `@netlify/plugin-nextjs` configurée dans l'interface Netlify.** Le nouveau `netlify.toml` remplace l'ancien.
+## Changements principaux
 
-Le choix réduit les dépendances de compilation et supprime les anciennes interfaces concurrentes. En contrepartie, cette release n'offre pas le rendu serveur SEO des fiches publiques envisagé dans le cahier initial. L'application est centrée sur l'espace authentifié.
+1. Tableau de bord par profil avec une action prioritaire et des indicateurs navigables.
+2. Fiches besoins avec les quatre etapes du parcours, propositions bien visibles, boutons de decision explicites, historique replie.
+3. Formulaires de besoin et de reponse restructures en blocs hierarchises et lisibles.
+4. Navigation de messagerie qui ouvre automatiquement une conversation existante ; actualisation manuelle protegee contre la perte de brouillon.
+5. Portefeuille Startup Manager qui selectionne directement la premiere startup accompagnee.
+6. Agenda mobile avec une vue liste par defaut ; ateliers et inscriptions plus explicites.
+7. Annuaire et fiches societes/contacts avec visuels harmonises, actions et filtres coherents.
+8. Menus, cartes, etats, espaces et couleurs repenses, y compris sur petits ecrans.
 
-## Commencer
+Le service est toujours **sans paiement en ligne**. Le Premium ne revele les identites des startups qu'aux prestataires autorises, selon les fonctions serveur historiques ; le front ne peut pas accorder ces droits.
 
-1. Lire `docs/INSTALLATION.md` et `docs/MIGRATION_ET_RETOUR.md` avant toute manipulation.
-2. Conserver une sauvegarde de la base, des fichiers Storage et du déploiement V0.9.1.
-3. Dans une copie de recette : `00_DIAGNOSTIC.sql`, puis `01_INSTALL_V1.sql`.
-4. Déployer ce projet sur un site Netlify de recette, avec les deux variables publiques existantes.
-5. Exécuter `02_ACTIVER_V1.sql`, `04_TESTS_METIER_RECETTE.sql`, puis `05_VERIFIER_BASCULE.sql`.
-6. Faire la recette multi-comptes. Ne basculer la production qu'après réussite.
+## Ce que cette mise a jour ne fait pas
 
-Commandes locales :
+Pas de push temps reel des messages, pas d'envoi email ajoute, pas de synchronisation Google/Outlook, pas de nouveaux objets Supabase ni de modification des politiques SQL. Voir `docs/V11_VALIDATION_ET_LIMITES.md`.
+
+## Tester le design sans Supabase
+
+Ouvrir `docs/previews/APERCU_INTERACTIF.html` dans le navigateur. Toutes les donnees sont **fictives, en lecture seule**. Cet apercu n'est pas une preuve de fonctionnement sur votre propre base.
+
+## Verifications techniques
 
 ```sh
 npm ci
 npm run check
-npm run preview
 ```
 
-Configuration conservée : `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` (clé publique anon ou publishable). Aucune clé `service_role`, aucun secret de paiement.
-
-## Aperçu sans installation
-
-Ouvrir `docs/previews/APERCU_INTERACTIF.html` dans un navigateur. Le sélecteur de rôle montre les quatre espaces sur des **données fictives en lecture seule**. Cet aperçu n'utilise pas votre Supabase.
-
-## Validation et périmètre
-
-Voir `docs/VALIDATION.md`. Les tests PostgreSQL livrés n'ont pas été exécutés ici. La vérification sur votre configuration de recette reste une condition de bascule. L'ancien code est fourni dans `archives/V091_ORIGINALE.zip` uniquement pour analyse/retour contrôlé.
+L'archive complete conserve, pour archivage uniquement, la documentation et les SQL de migration **1.0**. **Ne pas les executer lors de cette mise a jour 1.1.**

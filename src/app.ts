@@ -129,6 +129,10 @@ async function render(): Promise<void> {
                 const threads = await read<List<ResponseItem>>("threads", args);
                 for (const r of threads.items)
                     responses.set(r.id, r);
+                if (!id && threads.items.length) {
+                    navigate("messages/" + threads.items[0]!.id, params);
+                    return;
+                }
                 const detail = id ? await read<ThreadDetail>("messages", { id }) : null;
                 if (detail)
                     responses.set(detail.thread.id, detail.thread);
@@ -156,9 +160,15 @@ async function render(): Promise<void> {
                 html = sessionsView(ctx, data, route === "workshops");
                 break;
             }
-            case "portfolio":
-                html = portfolioView(ctx, await read<Portfolio>("portfolio", { id }), id);
+            case "portfolio": {
+                const data = await read<Portfolio>("portfolio", { id });
+                if (!id && data.startups.length) {
+                    navigate("portfolio/" + data.startups[0]!.id, params);
+                    return;
+                }
+                html = portfolioView(ctx, data, id);
                 break;
+            }
             case "company":
                 html = companyPage(ctx, activeCompany ? await read<CompanyDetail>("company", { id: activeCompany }) : null);
                 break;
@@ -205,6 +215,26 @@ async function action(el: HTMLElement): Promise<void> {
         case "refresh":
             await render();
             return;
+        case "refresh-thread": {
+            const draft = document.querySelector<HTMLTextAreaElement>("#message-form textarea[name=body]");
+            if (draft?.value.trim()) {
+                toast("Votre message n'est pas envoy\u00E9. Envoyez-le avant d'actualiser pour ne pas perdre votre saisie.", true);
+                draft.focus();
+                return;
+            }
+            await render();
+            toast("Conversations actualis\u00E9es.");
+            return;
+        }
+        case "need-quick-status":
+            filter("status", el.dataset.status || null);
+            return;
+        case "go-responses": {
+            const section = document.getElementById("need-responses");
+            section?.scrollIntoView({ behavior: "smooth", block: "start" });
+            section?.querySelector<HTMLButtonElement>("button[data-action=view-response]")?.focus({ preventScroll: true });
+            return;
+        }
         case "menu":
             document.querySelector(".app-shell")?.classList.toggle("mobile-open");
             return;
@@ -293,7 +323,7 @@ async function action(el: HTMLElement): Promise<void> {
         }
         case "response-decision": {
             const s = el.dataset.status || "en_discussion";
-            modal(s === "declinee" ? "Ne pas donner suite" : s === "retenue" ? "Retenir cette proposition" : "Ouvrir la discussion", simpleForm("response_status", `<input name="status" type="hidden" value="${s}">${field("reason", s === "declinee" ? "Motif communique au prestataire" : "Message de d\u00E9cision", "", { type: "textarea", required: s === "declinee", help: "La d\u00E9cision est notifiee au prestataire." })}`, id, "Confirmer ma d\u00E9cision"));
+            modal(s === "declinee" ? "Ne pas donner suite" : s === "retenue" ? "Retenir cette proposition" : "Engager la discussion", simpleForm("response_status", `<input name="status" type="hidden" value="${s}">${field("reason", s === "declinee" ? "Motif communique au prestataire" : "Message de d\u00E9cision", "", { type: "textarea", required: s === "declinee", help: "La d\u00E9cision est notifiee au prestataire." })}`, id, "Enregistrer ma d\u00E9cision"));
             return;
         }
         case "open-thread":
@@ -524,6 +554,9 @@ async function submitCommand(form: HTMLFormElement): Promise<void> {
     closeModal();
     adminCache = null;
     await reloadBoot();
+    if (command === "response_status" && ["en_discussion", "retenue"].includes(String(args.status)) && typeof args.id === "string") {
+        navigate("messages/" + args.id);
+    }
     await render();
 }
 function authScreen(error = ""): void {
@@ -532,7 +565,7 @@ function authScreen(error = ""): void {
         authMode = "reset";
     }
     app.innerHTML = `<div class="auth-layout"><aside class="auth-brand"><a class="brand" href="#"><span class="brand-mark">E<span>+</span></span>EURACONNECT</a><p class="eyebrow">LE R\u00C9SEAU QUI FAIT AVANCER VOS PROJETS</p><h1>La bonne expertise.<br>La bonne rencontre.<br><em>Au bon moment.</em></h1><p>Startup, prestataire ou \u00E9quipe d'accompagnement : un espace commun pour transformer les besoins en collaborations.</p><div class="auth-steps">${[["needs", "Exprimer un besoin"], ["people", "Mobiliser une expertise"], ["calendar", "Passer \u00E0 l'action"]].map(([i, t]) => "<span>" + icon(i || "needs", 21) + e(t) + "</span>").join("")}</div><footer>EURASANTE &middot; Services et accompagnement</footer></aside><main class="auth-main"><div class="auth-card"><p class="eyebrow">BIENVENUE DANS VOTRE R\u00C9SEAU</p><h2>${authMode === "signup" ? "Rejoindre en tant que prestataire" : authMode === "recover" ? "Retrouver mon acc\u00E8s" : authMode === "reset" ? "Nouveau mot de passe" : "Se connecter"}</h2><p class="muted">${authMode === "signup" ? "Votre entreprise sera valid\u00E9e par l'\u00E9quipe avant publication. Les comptes incub\u00E9s et managers sont g\u00E9r\u00E9s par l'administrateur." : "Retrouvez vos projets, vos contacts et vos prochaines rencontres."}</p>
- ${!hasConfiguration() ? "<div class=\"warning-note\">Configuration Netlify requise : NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY. Reconstruisez le site apr\u00E8s enregistrement.</div>" : ""}<form id="auth-form">${authMode === "signup" ? field("name", "Pr\u00E9nom et nom", "", { required: true }) : ""}${authMode !== "reset" ? field("email", "Email professionnel", "", { type: "email", required: true }) : ""}${authMode !== "recover" ? field("password", "Mot de passe", "", { type: "password", required: true, help: authMode === "login" ? "" : "12 caract\u00E8res minimum." }) : ""}<div class="form-error" role="alert" ${error ? "" : "hidden"}>${e(error)}</div><button class="btn primary full" type="submit" ${!hasConfiguration() ? "disabled" : ""}>${authMode === "signup" ? "Cr\u00E9er mon compte" : authMode === "recover" ? "Envoyer le lien" : authMode === "reset" ? "Enregistrer le mot de passe" : "Entrer dans mon espace"}${icon("arrow", 17)}</button></form><div class="auth-links">${authMode === "login" ? "<button data-auth=\"recover\">Mot de passe oubli\u00E9 ?</button><button data-auth=\"signup\">Devenir prestataire</button>" : "<button data-auth=\"login\">Revenir \u00E0 la connexion</button>"}</div><div class="auth-demo"><span>D\u00E9couvrir les nouveaux parcours</span><a href="?demo=1">Ouvrir l'aper\u00E7u avec des donn\u00E9es fictives ${icon("arrow", 15)}</a></div></div><footer>Vos identifiants restent g\u00E9r\u00E9s par Supabase Auth.</footer></main></div>`;
+ ${!hasConfiguration() ? "<div class=\"warning-note\">Configuration Supabase requise : ajoutez les deux variables NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans les variables de compilation de Cloudflare, puis relancez le d\u00E9ploiement.</div>" : ""}<form id="auth-form">${authMode === "signup" ? field("name", "Pr\u00E9nom et nom", "", { required: true }) : ""}${authMode !== "reset" ? field("email", "Email professionnel", "", { type: "email", required: true }) : ""}${authMode !== "recover" ? field("password", "Mot de passe", "", { type: "password", required: true, help: authMode === "login" ? "" : "12 caract\u00E8res minimum." }) : ""}<div class="form-error" role="alert" ${error ? "" : "hidden"}>${e(error)}</div><button class="btn primary full" type="submit" ${!hasConfiguration() ? "disabled" : ""}>${authMode === "signup" ? "Cr\u00E9er mon compte" : authMode === "recover" ? "Envoyer le lien" : authMode === "reset" ? "Enregistrer le mot de passe" : "Entrer dans mon espace"}${icon("arrow", 17)}</button></form><div class="auth-links">${authMode === "login" ? "<button data-auth=\"recover\">Mot de passe oubli\u00E9 ?</button><button data-auth=\"signup\">Devenir prestataire</button>" : "<button data-auth=\"login\">Revenir \u00E0 la connexion</button>"}</div><div class="auth-demo"><span>D\u00E9couvrir les nouveaux parcours</span><a href="?demo=1">Ouvrir l'aper\u00E7u avec des donn\u00E9es fictives ${icon("arrow", 15)}</a></div></div><footer>Vos identifiants restent g\u00E9r\u00E9s par Supabase Auth.</footer></main></div>`;
 }
 document.addEventListener("click", event => {
     const el = (event.target as HTMLElement).closest<HTMLElement>("[data-action],[data-auth]");
@@ -665,6 +698,9 @@ document.addEventListener("change", event => {
 });
 document.addEventListener("keydown", event => {
     const t = event.target as HTMLElement;
+    if (event.key === "Escape" && document.querySelector(".mobile-open")) {
+        document.querySelector(".app-shell")?.classList.remove("mobile-open");
+    }
     if (event.key === "/" && !modalOpen() && !["INPUT", "TEXTAREA"].includes(t.tagName) && !t.isContentEditable) {
         event.preventDefault();
         navigate("directory");
@@ -675,6 +711,7 @@ window.addEventListener("hashchange", () => {
     if (pendingNavigation)
         return;
     closeModal();
+    document.querySelector(".app-shell")?.classList.remove("mobile-open");
     if (boot)
         void render();
 });

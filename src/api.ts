@@ -24,7 +24,7 @@ let refreshing: Promise<Session> | null = null;
 function config(): Config {
     const c = window.EC_CONFIG;
     if (!c?.supabaseUrl || !c.supabaseKey)
-        throw new Error("Configurez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans Netlify puis redeployez.");
+        throw new Error("Configurez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans les variables de compilation Cloudflare, puis relancez le deploy.");
     return c;
 }
 export function hasConfiguration(): boolean { return Boolean(window.EC_CONFIG?.supabaseUrl && window.EC_CONFIG?.supabaseKey); }
