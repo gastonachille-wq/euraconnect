@@ -1,0 +1,13 @@
+EURACONNECT V2.8 - DEPOT GITHUB ALLEGE
+
+Ce ZIP contient les sources, les assets publics, les migrations SQL, les tests et les fichiers necessaires a la compilation Cloudflare. Le dossier dist/ est volontairement exclu car il est genere par npm run build.
+
+Configuration Cloudflare Workers (Git integration):
+- Build command: npm run build
+- Deploy command: npx wrangler deploy
+- Node.js 22 ou superieur
+- Variables de build: NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+Attention: config.js est genere dans dist au build. Verifier que les variables sont disponibles au moment du build et ne jamais utiliser de cle Supabase service_role.
+
+Les migrations SQL historiques ne doivent pas etre rejouees aveuglement sur une base existante.
