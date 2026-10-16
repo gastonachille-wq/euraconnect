@@ -1,0 +1,366 @@
+[
+  {
+    "test": "incube: every sidebar entry is visible",
+    "passed": true
+  },
+  {
+    "test": "incube: no collapsible category",
+    "passed": true
+  },
+  {
+    "test": "incube: toggle is at the bottom",
+    "passed": true
+  },
+  {
+    "test": "incube: dashboard renders",
+    "passed": true
+  },
+  {
+    "test": "incube: needs renders",
+    "passed": true
+  },
+  {
+    "test": "incube: directory renders",
+    "passed": true
+  },
+  {
+    "test": "incube: offers renders",
+    "passed": true
+  },
+  {
+    "test": "incube: messages renders",
+    "passed": true
+  },
+  {
+    "test": "incube: agenda renders",
+    "passed": true
+  },
+  {
+    "test": "incube: workshops renders",
+    "passed": true
+  },
+  {
+    "test": "incube: company renders",
+    "passed": true
+  },
+  {
+    "test": "incube: no uncaught JavaScript exception",
+    "passed": true
+  },
+  {
+    "test": "prestataire: every sidebar entry is visible",
+    "passed": true
+  },
+  {
+    "test": "prestataire: no collapsible category",
+    "passed": true
+  },
+  {
+    "test": "prestataire: toggle is at the bottom",
+    "passed": true
+  },
+  {
+    "test": "prestataire: dashboard renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: needs renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: directory renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: offers renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: messages renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: agenda renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: workshops renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: company renders",
+    "passed": true
+  },
+  {
+    "test": "prestataire: no uncaught JavaScript exception",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: every sidebar entry is visible",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: no collapsible category",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: toggle is at the bottom",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: dashboard renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: needs renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: directory renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: offers renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: messages renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: agenda renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: workshops renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: company renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: portfolio renders",
+    "passed": true
+  },
+  {
+    "test": "startup_manager: no uncaught JavaScript exception",
+    "passed": true
+  },
+  {
+    "test": "admin: every sidebar entry is visible",
+    "passed": true
+  },
+  {
+    "test": "admin: no collapsible category",
+    "passed": true
+  },
+  {
+    "test": "admin: toggle is at the bottom",
+    "passed": true
+  },
+  {
+    "test": "admin: dashboard renders",
+    "passed": true
+  },
+  {
+    "test": "admin: needs renders",
+    "passed": true
+  },
+  {
+    "test": "admin: directory renders",
+    "passed": true
+  },
+  {
+    "test": "admin: offers renders",
+    "passed": true
+  },
+  {
+    "test": "admin: messages renders",
+    "passed": true
+  },
+  {
+    "test": "admin: agenda renders",
+    "passed": true
+  },
+  {
+    "test": "admin: workshops renders",
+    "passed": true
+  },
+  {
+    "test": "admin: company renders",
+    "passed": true
+  },
+  {
+    "test": "admin: admin renders",
+    "passed": true
+  },
+  {
+    "test": "admin: no uncaught JavaScript exception",
+    "passed": true
+  },
+  {
+    "test": "Compact sidebar: 68 px",
+    "passed": true
+  },
+  {
+    "test": "Collapsed state persisted",
+    "passed": true
+  },
+  {
+    "test": "Icon tooltip visible",
+    "passed": true
+  },
+  {
+    "test": "All entries remain available after navigating collapsed",
+    "passed": true
+  },
+  {
+    "test": "Toggle semantics stay collapsed on a new page",
+    "passed": true
+  },
+  {
+    "test": "Directory search keeps focus",
+    "passed": true
+  },
+  {
+    "test": "Directory search creates a removable chip",
+    "passed": true
+  },
+  {
+    "test": "Facets stay open after selection",
+    "passed": true
+  },
+  {
+    "test": "Clear filters preserves Contacts tab and Table view",
+    "passed": true
+  },
+  {
+    "test": "Company logo opens its detail",
+    "passed": true
+  },
+  {
+    "test": "Global palette: keyboard navigation reaches a result",
+    "passed": true
+  },
+  {
+    "test": "Messages: filter preserves conversation id",
+    "passed": true
+  },
+  {
+    "test": "Messages: draft survives filtering",
+    "passed": true
+  },
+  {
+    "test": "Messages: draft survives refresh",
+    "passed": true
+  },
+  {
+    "test": "Interactions: no JavaScript exception",
+    "passed": true
+  },
+  {
+    "test": "360px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "360px: hidden drawer is inert",
+    "passed": true
+  },
+  {
+    "test": "360px: all navigation entries in drawer",
+    "passed": true
+  },
+  {
+    "test": "360px: background is inert",
+    "passed": true
+  },
+  {
+    "test": "360px: footer button closes drawer",
+    "passed": true
+  },
+  {
+    "test": "390px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "390px: hidden drawer is inert",
+    "passed": true
+  },
+  {
+    "test": "390px: all navigation entries in drawer",
+    "passed": true
+  },
+  {
+    "test": "390px: background is inert",
+    "passed": true
+  },
+  {
+    "test": "390px: footer button closes drawer",
+    "passed": true
+  },
+  {
+    "test": "768px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "768px: hidden drawer is inert",
+    "passed": true
+  },
+  {
+    "test": "768px: all navigation entries in drawer",
+    "passed": true
+  },
+  {
+    "test": "768px: background is inert",
+    "passed": true
+  },
+  {
+    "test": "768px: footer button closes drawer",
+    "passed": true
+  },
+  {
+    "test": "1024px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "1440px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "1920px: no horizontal page overflow",
+    "passed": true
+  },
+  {
+    "test": "Manager: invalid dates produce an inline error",
+    "passed": true
+  },
+  {
+    "test": "Manager: invalid dates are not sent",
+    "passed": true
+  },
+  {
+    "test": "Manager: invitation dispatcher calls the dedicated RPC once",
+    "passed": true
+  },
+  {
+    "test": "Manager: submit prevents form reload and closes on success",
+    "passed": true
+  },
+  {
+    "test": "Lifecycle: view uses ec22 endpoint with p_need",
+    "passed": true
+  },
+  {
+    "test": "Lifecycle: archive uses ec22 endpoint with p_need",
+    "passed": true
+  },
+  {
+    "test": "Lifecycle: delete uses ec22 endpoint with p_need",
+    "passed": true
+  },
+  {
+    "test": "Mock transport: no uncaught JavaScript exception",
+    "passed": true
+  }
+]

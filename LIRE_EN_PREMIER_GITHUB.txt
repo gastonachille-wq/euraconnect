@@ -1,13 +1,21 @@
-EURACONNECT V2.8 - DEPOT GITHUB ALLEGE
+EURACONNECT 2.9.0 - MISE A JOUR COMPLETE DEPUIS V2.8
 
-Ce ZIP contient les sources, les assets publics, les migrations SQL, les tests et les fichiers necessaires a la compilation Cloudflare. Le dossier dist/ est volontairement exclu car il est genere par npm run build.
+1. Sauvegardez votre depot GitHub actuel (Download ZIP).
+2. Decompressez cette archive. Importez tout son CONTENU a la racine du depot.
+   Remplacez les fichiers de meme nom et gardez les dossiers src/, public/, etc.
+   N'effacez pas les autres fichiers de votre depot.
+3. Enregistrez en UN commit : EURACONNECT 2.9 - Navigation et interactions.
+4. Cloudflare : Build command = npm run check ; Deploy = npx wrangler deploy.
+   Root directory = / ; Node.js >= 22.
+5. Conservez les variables de BUILD : NEXT_PUBLIC_SUPABASE_URL et
+   NEXT_PUBLIC_SUPABASE_ANON_KEY. Aucune cle service_role ou sb_secret_.
+6. Attendez le deploiement reussi et rechargez l'application.
 
-Configuration Cloudflare Workers (Git integration):
-- Build command: npm run build
-- Deploy command: npx wrangler deploy
-- Node.js 22 ou superieur
-- Variables de build: NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY
+AUCUNE NOUVELLE MIGRATION SQL pour cette mise a jour.
+Les SQL historiques sont conserves pour les tests et la documentation :
+ne les rejouez pas si vous avez deja installe V2.8.
 
-Attention: config.js est genere dans dist au build. Verifier que les variables sont disponibles au moment du build et ne jamais utiliser de cle Supabase service_role.
+Le dossier dist est reconstruit automatiquement. Ne pas importer node_modules.
+Les tests sont executes apres generation de dist, y compris dans un depot propre.
 
-Les migrations SQL historiques ne doivent pas etre rejouees aveuglement sur une base existante.
+Lire README_V29.md et VALIDATION_V29.md avant la mise en ligne.

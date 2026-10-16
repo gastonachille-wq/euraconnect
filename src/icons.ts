@@ -1,4 +1,6 @@
 const paths: Record<string, string> = {
+    panel: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18m8-13-4 4 4 4"/>',
+    filter: '<path d="M4 6h16M7 12h10M10 18h4"/><circle cx="8" cy="6" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/>',
     dashboard: "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"2\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"2\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"2\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"2\"/>",
     needs: "<path d=\"M8 4H6a2 2 0 0 0-2 2v14h16V6a2 2 0 0 0-2-2h-2\"/><rect x=\"8\" y=\"2\" width=\"8\" height=\"4\" rx=\"1\"/><path d=\"M8 10h8M8 14h8M8 18h5\"/>",
     people: "<circle cx=\"9\" cy=\"7\" r=\"3\"/><path d=\"M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5\"/>",

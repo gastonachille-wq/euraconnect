@@ -198,3 +198,11 @@ export async function managerRpc<T>(action: 'list'|'mine'|'recommend'|'ask', arg
 export async function managerMeetingRpc<T>(action:'contacts'|'list'|'invite'|'respond', args:Record<string,unknown>={}):Promise<T> {
     return await request('/rest/v1/rpc/ec23_manager_meeting','POST',{p_action:action,p_args:args},await accessToken()) as T;
 }
+
+/** V2.2 exposes dedicated RPCs, not ec1_api actions. Keep an explicit allowlist. */
+export async function needLifecycleRpc<T>(operation: "view" | "archive" | "delete", needId: string, company: string | null = null): Promise<T> {
+    const payload: Record<string, unknown> = { p_need: needId };
+    if (operation === "view") payload.p_company = company;
+    const endpoint = { view: "ec22_view", archive: "ec22_archive", delete: "ec22_delete" }[operation];
+    return await request("/rest/v1/rpc/" + endpoint, "POST", payload, await accessToken()) as T;
+}

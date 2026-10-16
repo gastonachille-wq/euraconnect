@@ -59,18 +59,18 @@ export function modal(title: string, body: string, options: {
     subtitle?: string;
     onClose?: () => void;
 } = {}): void {
-    beforeModal = document.activeElement as HTMLElement;
+    if (!modalOpen()) beforeModal = document.activeElement as HTMLElement;
     closeCb = options.onClose || null;
     const root = document.querySelector<HTMLElement>("#overlay")!;
-    root.innerHTML = `<div class="modal-backdrop"><section class="modal ${options.wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-head"><div><p class="eyebrow">EURACONNECT</p><h2 id="modal-title">${e(title)}</h2>${options.subtitle ? `<p>${e(options.subtitle)}</p>` : ""}</div>${iconButton("close", "Fermer", "close-modal")}</header><div class="modal-body">${body}</div></section></div>`;
+    root.innerHTML = `<div class="modal-backdrop"><section class="modal ${options.wide ? "wide" : ""}" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-title"><header class="modal-head"><div><p class="eyebrow">EURACONNECT</p><h2 id="modal-title">${e(title)}</h2>${options.subtitle ? `<p>${e(options.subtitle)}</p>` : ""}</div>${iconButton("close", "Fermer", "close-modal")}</header><div class="modal-body">${body}</div></section></div>`;
     document.body.classList.add("has-modal");
-    const first = root.querySelector<HTMLElement>("input,select,textarea,[contenteditable=true],button");
+    const first = root.querySelector<HTMLElement>(".modal-body input:not([type=hidden]),.modal-body select,.modal-body textarea,.modal-body [contenteditable=true]") || root.querySelector<HTMLElement>(".modal");
     first?.focus();
     setupTags(root);
     setupEditors(root);
     void hydrateImages(root);
 }
-export function closeModal(): void { document.querySelector("#overlay")!.innerHTML = ""; document.body.classList.remove("has-modal"); closeCb?.(); closeCb = null; beforeModal?.focus(); }
+export function closeModal(): void { if (!modalOpen()) return; document.querySelector("#overlay")!.innerHTML = ""; document.body.classList.remove("has-modal"); closeCb?.(); closeCb = null; if(beforeModal?.isConnected) beforeModal.focus({preventScroll:true}); else document.getElementById("main")?.focus({preventScroll:true}); }
 export function modalOpen(): boolean { return Boolean(document.querySelector("#overlay .modal")); }
 document.addEventListener("keydown", ev => {
     if (!modalOpen())

@@ -1,4 +1,5 @@
-import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc } from "./api.js";
+import { stored, store, stringList, filteredHash, clearFilterHash } from "./client-state.js";
+import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc, needLifecycleRpc } from "./api.js";
 import type { Boot, List, Need, NeedDetail, ResponseItem, ThreadDetail, DirectoryItem, SessionItem, Offer, CompanyDetail, AdminData, Notification, Dashboard, Portfolio, Role } from "./domain.js";
 import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs, localDate, markdown, label } from "./domain.js";
 import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles, offerSummary } from "./views.js";
@@ -19,13 +20,16 @@ let authMode = "login";
 let authBusy = false;
 let demo = new URLSearchParams(location.search).get("demo") === "1";
 let demoRole: Role = "incube";
-let activeCompany: string | null = localStorage.getItem("euraconnect.company.v1");
+let activeCompany: string | null = stored("euraconnect.company.v1");
 let adminCache: AdminData | null = null;
 let managerProviders: DirectoryItem[] = [];
 let managerPortfolio: Portfolio | null = null;
 let listOffers: Offer[] = [];
+const offerCache = new Map<string, Offer>();
+function cacheOffers(items: Offer[]): void { for (const item of items) offerCache.set(item.id,item); }
 const responses = new Map<string, ResponseItem>();
 const needDraftKey = "euraconnect.v13.needDraft";
+function draftKey():string{return needDraftKey+":"+(boot?.user.id||"guest")+":"+(activeCompany||"none");}
 let wizardPage = 0;
 function routeParts(): {
     route: string;
@@ -40,20 +44,15 @@ function context(): Context {
 }
 function navigate(route: string, params?: URLSearchParams): void {
     const hash = "#" + route + (params?.size ? "?" + params.toString() : "");
+    if (modalOpen()) closeModal();
     if (location.hash === hash)
         void render();
     else
         location.hash = hash;
 }
 function filter(key: string, value: string | null): void {
-    const r = routeParts();
-    if (value === null)
-        r.params.delete(key);
-    else
-        r.params.set(key, value);
-    if (key !== "page")
-        r.params.delete("page");
-    navigate(r.route, r.params);
+    const target = filteredHash(location.hash,{[key]: value});
+    if (target === location.hash) void render(); else location.hash = target;
 }
 async function read<T>(action: string, args: Record<string, unknown> = {}): Promise<T> { return demo ? demoRpc(action, args, demoRole) as T : rpc<T>(action, { company: activeCompany, ...args }); }
 async function write<T = Record<string, unknown>>(action: string, args: Record<string, unknown> = {}): Promise<T> {
@@ -66,9 +65,9 @@ async function reloadBoot(): Promise<void> {
     if (!boot.memberships.some(c => c.id === activeCompany))
         activeCompany = boot.memberships.find(c => c.id === boot?.user.company_id)?.id || boot.memberships[0]?.id || null;
     if (activeCompany)
-        localStorage.setItem("euraconnect.company.v1", activeCompany);
+        store("euraconnect.company.v1", activeCompany);
     else
-        localStorage.removeItem("euraconnect.company.v1");
+        store("euraconnect.company.v1", null);
 }
 async function counts(): Promise<void> {
     if (!boot || document.hidden || demo)
@@ -90,8 +89,59 @@ async function counts(): Promise<void> {
                 el.className = "counter";
             }
         }
+        const navCounter=document.getElementById("nav-message-counter");
+        if(navCounter){navCounter.hidden=next.unread_messages===0;navCounter.textContent=next.unread_messages>99?"99+":String(next.unread_messages);}
     }
     catch { /* No disruptive toast during background polling. */ }
+}
+let lastShellKey = "";
+let renderedHash = "";
+const scrollPositions = new Map<string,number>();
+const messageDrafts = new Map<string,string>();
+let displayedThreadKey = "";
+function rememberMessage(): void {
+    const input = document.querySelector<HTMLTextAreaElement>('#message-form textarea[name="body"]');
+    if (input && displayedThreadKey) {
+        if (input.value) messageDrafts.set(displayedThreadKey,input.value); else messageDrafts.delete(displayedThreadKey);
+    }
+}
+interface FocusSnapshot {id:string;name:string;start:number|null;end:number|null;}
+function filterFocus(): FocusSnapshot | null {
+    const node=document.activeElement;
+    if (!(node instanceof HTMLInputElement || node instanceof HTMLSelectElement)) return null;
+    if (!node.closest('#filter-form') && node.id!=="ec28-quick-search" && node.id!=="ec22-sort") return null;
+    return {id:node.id,name:node.name,start:node instanceof HTMLInputElement?node.selectionStart:null,end:node instanceof HTMLInputElement?node.selectionEnd:null};
+}
+function restoreFocus(saved: FocusSnapshot | null): void {
+    if (!saved || modalOpen()) return;
+    const node=saved.id ? document.getElementById(saved.id) : Array.from(document.querySelectorAll<HTMLInputElement|HTMLSelectElement>('#filter-form input,#filter-form select')).find(el=>el.name===saved.name);
+    if (node instanceof HTMLInputElement || node instanceof HTMLSelectElement) {
+        node.focus({preventScroll:true});
+        if (node instanceof HTMLInputElement && saved.start!==null && ["text","search","email","url","tel"].includes(node.type))
+            node.setSelectionRange(saved.start,saved.end);
+    }
+}
+let menuOpener: HTMLElement | null = null;
+function syncSidebar():void {
+    const mobile=matchMedia('(max-width:800px)').matches;
+    const open=Boolean(document.querySelector('.app-shell.mobile-open'));
+    const compact=document.body.classList.contains('ec24-sidebar-collapsed');
+    const toggle=document.getElementById('sidebar-toggle');
+    const caption=mobile?'Fermer le menu':compact?'Agrandir le menu':'R\u00e9duire le menu';
+    if(toggle){toggle.setAttribute('aria-label',caption);toggle.setAttribute('title',caption);toggle.dataset.tooltip=caption;toggle.setAttribute('aria-expanded',String(mobile?open:!compact));}
+    const sidebar=document.querySelector<HTMLElement>('.ec29-sidebar');
+    const workspace=document.querySelector<HTMLElement>('.ec29-workspace');
+    if(sidebar)sidebar.inert=mobile&&!open;
+    if(workspace)workspace.inert=mobile&&open;
+    document.body.classList.toggle('has-mobile-menu',mobile&&open);
+    document.querySelectorAll('[data-action="menu"]').forEach(el=>{if(!el.classList.contains('mobile-shade'))el.setAttribute('aria-expanded',String(open));});
+}
+function setMobileMenu(open:boolean):void {
+    const shell=document.querySelector('.app-shell');if(!shell)return;
+    if(open)menuOpener=document.activeElement as HTMLElement;
+    shell.classList.toggle('mobile-open',open);syncSidebar();
+    if(open)document.querySelector<HTMLElement>('.ec29-nav-link.active')?.focus();
+    else if(menuOpener?.isConnected)menuOpener.focus({preventScroll:true});
 }
 async function render(): Promise<void> {
     if (!boot) {
@@ -105,9 +155,18 @@ async function render(): Promise<void> {
         navigate("dashboard");
         return;
     }
-    app.innerHTML = shell(ctx);
+    rememberMessage();
+    if (renderedHash) scrollPositions.set(renderedHash,window.scrollY);
+    const previousHash=renderedHash;
+    const samePage=previousHash.split('?')[0]===location.hash.split('?')[0];
+    const shellKey=[boot.user.id,boot.user.name,boot.user.role,activeCompany,route,boot.profile.media?.path,ctx.demo].join(':');
+    if (lastShellKey!==shellKey || !document.getElementById('page-content')) {
+        app.innerHTML = shell(ctx);lastShellKey=shellKey;syncSidebar();
+        void hydrateImages(document.querySelector('.ec29-topbar') || document);
+    }
     document.title = titles[route]?.[0] + " | EURACONNECT";
     const out = document.getElementById("page-content")!;
+    out.setAttribute("aria-busy","true");
     const args: Record<string, unknown> = { ...Object.fromEntries(params), page: ctx.page };
     try {
         let html = "";
@@ -133,7 +192,7 @@ async function render(): Promise<void> {
                         html+=`<section class="ec20-help"><div><span class="ec20-eyebrow">ACCOMPAGNEMENT</span><h3>Besoin d’un coup de pouce ?</h3><p>Votre Startup Manager peut vous orienter vers une expertise, débloquer une situation ou vous aider à préciser la demande.</p></div><button class="btn primary" data-action="ask-manager" data-id="${e(detail.need.id)}">${icon('send',16)} Solliciter mon Startup Manager</button></section>`;
                     }
                 } else {
-                    const dismissed = new Set(JSON.parse(localStorage.getItem("euraconnect.v13.dismissed")||"[]") as string[]);
+                    const dismissed = new Set(stringList("euraconnect.v13.dismissed"));
                     const shown = ctx.boot.user.role === "prestataire" ? {...data,items:data.items.filter(n=>!dismissed.has(n.id))} : data;
                     html = needsView(ctx, shown);
                 }
@@ -147,6 +206,7 @@ async function render(): Promise<void> {
             case "offers": {
                 const data = await read<List<Offer>>("offers", { ...args, size: 100 });
                 listOffers = data.items;
+                cacheOffers(data.items);
                 html = offersView(ctx, data);
                 break;
             }
@@ -230,20 +290,27 @@ async function render(): Promise<void> {
         }
         if (seq !== generation)
             return;
+        const focused=samePage?filterFocus():null;
+        const keepFacets=samePage && (new URLSearchParams(previousHash.split("?")[1]||"").get("kind")||"company")===(params.get("kind")||"company");
+        const openFacets=keepFacets?Array.from(out.querySelectorAll<HTMLDetailsElement>('details[open]')).map(d=>d.className).filter(Boolean):[];
         out.innerHTML = html;
+        out.setAttribute('aria-busy','false');
+        for (const className of openFacets) out.querySelectorAll<HTMLDetailsElement>('details').forEach(el=>{if(el.className===className)el.open=true;});
+        renderedHash=location.hash;
+        displayedThreadKey=route==='messages'&&id?[boot.user.id,activeCompany,id].join(':'):'';
+        const draftInput=out.querySelector<HTMLTextAreaElement>('#message-form textarea[name="body"]');
+        if(draftInput && displayedThreadKey)draftInput.value=messageDrafts.get(displayedThreadKey)||'';
+        restoreFocus(focused);
+        if(!samePage) window.scrollTo({top:scrollPositions.get(location.hash)||0,behavior:'instant'});
+        else if(previousHash!==location.hash) window.scrollTo({top:scrollPositions.get(previousHash)||0,behavior:'instant'});
         document.body.classList.toggle("ec13-mobile-thread",route==="messages" && Boolean(id));
-        await hydrateImages(document.body);
+        void hydrateImages(out);
         if (route === "needs" && id && !demo) {
-            void rpc<{views:number;responses:number;providers:null|Array<{company_id:string;name:string;viewed_at:string;responded:boolean}>}>("ec22_view",{p_need:id,p_company:activeCompany}).then(stats=>{
-                const node=document.getElementById("ec22-views");if(!node)return;
+            void needLifecycleRpc<{views:number;responses:number;providers:null|Array<{company_id:string;name:string;viewed_at:string;responded:boolean}>}>("view",id,activeCompany).then(stats=>{
+                const node=document.getElementById("ec22-views");if(!node || seq!==generation)return;
                 const role=ctx.boot.user.role;
                 node.innerHTML=`<strong>${stats.views} prestataire${stats.views>1?"s":""} ayant consulté</strong><span>${stats.responses} proposition${stats.responses>1?"s":""} transmise${stats.responses>1?"s":""}</span>` + (role==="startup_manager" && stats.providers ? `<details><summary>Voir les prestataires intéressés (${stats.providers.length})</summary><ul>${stats.providers.map(p=>`<li>${p.name.replace(/&/g,"&amp;").replace(/</g,"&lt;")} · ${p.responded?"A répondu":"A consulté"}</li>`).join("")}</ul></details>` : "");
             }).catch(()=>{const node=document.getElementById("ec22-views");if(node)node.textContent="Statistiques disponibles après installation de la migration V2.2.";});
-        }
-        if(restoreFilterFocus && !modalOpen()){
-           const field=out.querySelector<HTMLInputElement>('#filter-form input[name="q"]');
-           if(field){field.focus({preventScroll:true});const n=field.value.length;field.setSelectionRange(n,n);}
-           restoreFilterFocus=false;
         }
         const msgs = out.querySelector(".message-flow");
         if (msgs)
@@ -252,6 +319,7 @@ async function render(): Promise<void> {
     catch (err) {
         if (seq !== generation)
             return;
+        out.setAttribute("aria-busy","false");
         out.innerHTML = empty("Cet espace ne peut pas encore \u00EAtre affiche", errorMessage(err), button("R\u00E9essayer", "refresh", { class: "primary", icon: "refresh" }), "warning");
     }
 }
@@ -274,6 +342,7 @@ async function updatePalette(query:string):Promise<void>{
         ['Entreprises',companies.status==='fulfilled'?companies.value.items.map(x=>({id:x.id,name:x.name,kind:'company'})):[]],
         ['Contacts',people.status==='fulfilled'?people.value.items.map(x=>({id:x.id,name:x.name,kind:'person'})):[]]
     ];
+    if(offers.status==='fulfilled')cacheOffers(offers.value.items);
     host.innerHTML=blocks.map(([group,items])=>`<section><h3>${e(group)} · ${items.length}</h3>${items.map(x=>`<button class="ec13-result" data-action="palette-open" data-kind="${x.kind}" data-id="${e(x.id)}">${e(x.name)} ${icon('arrow',16)}</button>`).join('')||'<p class="muted">Aucun résultat</p>'}</section>`).join('');
 }
 function searchPalette():void{
@@ -281,6 +350,13 @@ function searchPalette():void{
     const input=document.querySelector<HTMLInputElement>('#ec13-palette-query');
     let timer:number|undefined;
     input?.addEventListener('input',()=>{window.clearTimeout(timer);timer=window.setTimeout(()=>{void updatePalette(input.value).catch(err=>{const x=document.querySelector('#ec13-palette-results');if(x)x.textContent=errorMessage(err);});},350);});
+    input?.addEventListener('keydown',ev=>{if(ev.key==='ArrowDown'){ev.preventDefault();document.querySelector<HTMLElement>('#ec13-palette-results button')?.focus();}});
+    document.querySelector('#ec13-palette-results')?.addEventListener('keydown',ev=>{
+        const key=(ev as KeyboardEvent).key;if(!['ArrowDown','ArrowUp','Home','End'].includes(key))return;
+        const items=Array.from(document.querySelectorAll<HTMLButtonElement>('#ec13-palette-results button'));
+        if(!items.length)return;ev.preventDefault();const current=items.indexOf(document.activeElement as HTMLButtonElement);
+        const index=key==='Home'?0:key==='End'?items.length-1:key==='ArrowDown'?(current+1)%items.length:(current-1+items.length)%items.length;items[index]?.focus();
+    });
     input?.focus();
 }
 async function openNeed(id: string): Promise<void> {
@@ -294,15 +370,26 @@ async function getAdmin(): Promise<AdminData> { return adminCache || await read<
 async function showCompany(id:string):Promise<void>{
     const c=await read<CompanyDetail>("company",{id});
     let offers:Offer[]=[];
-    try { offers=(await read<List<Offer>>("offers",{company_id:id,size:100})).items; } catch { /* company still accessible */ }
+    try { offers=(await read<List<Offer>>("offers",{company_id:id,size:100})).items;cacheOffers(offers); } catch { /* company still accessible */ }
     modal("Fiche entreprise · "+c.name,companyDetailV12(c,offers),{wide:true});
+}
+async function openOffer(id:string):Promise<void> {
+    let o=offerCache.get(id)||listOffers.find(item=>item.id===id);
+    if(!o){const fresh=await read<List<Offer>>('offers',{size:100});cacheOffers(fresh.items);o=offerCache.get(id);}
+    if(!o)throw new Error("Cette offre n'est plus accessible. Actualisez le catalogue puis r\u00e9essayez.");
+            if (o.can_edit) {
+                modal("Modifier mon offre", offerForm(o) + button("Ajouter une image", "upload", { id, icon: "upload", extra: "data-type=\"offer\"" }), { wide: true });
+                return;
+            }
+            modal("Offre de service", `<div class="ec27-detail"><p class="eyebrow">${e(o.provider)}</p><h2>${e(o.title)}</h2>${tags(o.tags)}<div class="prose">${e(offerSummary(o.description).text)}</div>${o.benefit ? `<div class="inline-note">${e(o.benefit)}</div>` : ""}<div class="ec27-detail-actions">${button("Consulter le prestataire", "company-detail", {id:o.company_id,class:"ghost",icon:"company"})}${button("Voir les créneaux", "directory-slots", { id: o.company_id, icon: "calendar", class: "primary", extra: 'data-kind="company"' })}</div></div>`, { wide: true });
+
 }
 async function showPerson(id:string):Promise<void>{
     try {
         const person=await read<DirectoryItem>("person",{id});
         modal("Fiche contact · "+person.name,personDetailV12(person),{wide:true});
-    } catch {
-        modal("Contact non disponible", `<div class="ec22-contact-fallback"><h3>Ce contact n’est pas encore accessible dans l’annuaire</h3><p>La fiche est peut-être privée ou le compte n’a pas encore publié son profil. Vous pouvez retrouver les contacts autorisés depuis l’onglet Contacts de l’annuaire.</p><a class="btn primary" href="#directory?kind=person">Consulter l’annuaire des contacts</a></div>`);
+    } catch (error) {
+        modal("Contact non disponible", `<div class="ec22-contact-fallback"><p class="warning-note">${e(errorMessage(error))}</p><h3>Ce contact n’est pas encore accessible dans l’annuaire</h3><p>La fiche est peut-être privée ou le compte n’a pas encore publié son profil. Vous pouvez retrouver les contacts autorisés depuis l’onglet Contacts de l’annuaire.</p><a class="btn primary" href="#directory?kind=person">Consulter l’annuaire des contacts</a></div>`);
     }
 }
 
@@ -323,15 +410,7 @@ async function action(el: HTMLElement): Promise<void> {
             await render();
             return;
         case "refresh-thread": {
-            const draft = document.querySelector<HTMLTextAreaElement>("#message-form textarea[name=body]");
-            if (draft?.value.trim()) {
-                toast("Votre message n'est pas envoy\u00E9. Envoyez-le avant d'actualiser pour ne pas perdre votre saisie.", true);
-                draft.focus();
-                return;
-            }
-            await render();
-            toast("Conversations actualis\u00E9es.");
-            return;
+            await render();toast("Conversations actualis\u00e9es. Votre brouillon est conserv\u00e9.");return;
         }
         case "need-quick-status":
             filter("status", el.dataset.status || null);
@@ -343,27 +422,20 @@ async function action(el: HTMLElement): Promise<void> {
             return;
         }
         case "collapse-sidebar": {
-            const collapsed = document.body.classList.toggle("ec24-sidebar-collapsed");
-            try { localStorage.setItem("euraconnect.nav.collapsed", collapsed ? "1" : "0"); } catch {}
-            const toggle = document.querySelector<HTMLButtonElement>(".ec25-collapse");
-            if (toggle) {
-                toggle.setAttribute("aria-label", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
-                toggle.setAttribute("title", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
-                toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
-
-            }
+            if(matchMedia('(max-width:800px)').matches){setMobileMenu(false);return;}
+            const collapsed=document.body.classList.toggle('ec24-sidebar-collapsed');
+            store('euraconnect.nav.collapsed',collapsed?'1':'0');syncSidebar();hideNavigationTooltip();
             return;
         }
         case "menu":
-            document.querySelector(".app-shell")?.classList.toggle("mobile-open");
-            return;
+            setMobileMenu(!document.querySelector('.app-shell.mobile-open'));return;
         case "logout":
             if (demo) {
                 location.href = location.pathname;
                 return;
             }
             await signOut();
-            releaseMedia();
+            releaseMedia();responses.clear();offerCache.clear();messageDrafts.clear();displayedThreadKey="";lastShellKey="";
             boot = null;
             closeModal();
             authScreen();
@@ -377,7 +449,7 @@ async function action(el: HTMLElement): Promise<void> {
         case "palette-open":
             closeModal();
             if(el.dataset.kind==='need')navigate('needs/'+id);
-            else if(el.dataset.kind==='offer'){navigate('offers');}
+            else if(el.dataset.kind==='offer')await openOffer(id);
             else if(el.dataset.kind==='company')await showCompany(id);
             else if(el.dataset.kind==='person')await showPerson(id);
             return;
@@ -391,12 +463,20 @@ async function action(el: HTMLElement): Promise<void> {
             filter("view", el.dataset.view || "grid");
             return;
         }
-        case "clear-filters":
-            navigate(ctx.route);
+        case "clear-filters": {
+            const hash=clearFilterHash(location.hash);
+            if(hash===location.hash)void render();else location.hash=hash;
             return;
-        case "directory-kind":
-            filter("kind", el.dataset.kind || null);
-            return;
+        }
+        case "remove-filter":
+            filter(el.dataset.key||"q",null);return;
+        case "close-filters":
+            el.closest('details')?.removeAttribute('open');return;
+
+        case "directory-kind": {
+            const hash=filteredHash(location.hash,{kind:el.dataset.kind||'company',type:null,label:null,premium:null});
+            location.hash=hash;return;
+        }
         case "directory-view":
             filter("view",el.dataset.view||"compact");
             return;
@@ -410,9 +490,12 @@ async function action(el: HTMLElement): Promise<void> {
             el.setAttribute("disabled", "");
             try {
                 await write("favorite", { id, type: el.dataset.type, value: el.dataset.value === "true" });
-                el.classList.toggle("on", el.dataset.value === "true");
-                el.setAttribute("aria-pressed", el.dataset.value || "false");
-                el.dataset.value = String(el.dataset.value !== "true");
+                const on=el.dataset.value==='true';
+                document.querySelectorAll<HTMLElement>('[data-action="favorite"]').forEach(target=>{
+                    if(target.dataset.id!==id || target.dataset.type!==el.dataset.type)return;
+                    target.classList.toggle('on',on);target.setAttribute('aria-pressed',String(on));target.dataset.value=String(!on);
+                    target.setAttribute('aria-label',on?'Retirer des favoris':'Ajouter aux favoris');target.title=on?'Retirer des favoris':'Ajouter aux favoris';
+                });
                 toast("Vos favoris sont \u00E0 jour.");
                 if (ctx.params.get("favorites") === "true")
                     await render();
@@ -442,12 +525,14 @@ async function action(el: HTMLElement): Promise<void> {
         }
         case "need-archive": {
             if (!confirm("Archiver cette demande ? Elle ne sera plus proposée aux prestataires. L’historique restera accessible.")) return;
-            await rpc("ec22_archive", { p_need: id });
+            if(demo)throw new Error("Aper\u00e7u en lecture seule.");
+            await needLifecycleRpc("archive", id);
             toast("Demande archivée."); await render(); return;
         }
         case "need-delete": {
             if (!confirm("Supprimer définitivement cette demande sans réponse ? Cette opération est irréversible.")) return;
-            await rpc("ec22_delete", { p_need: id });
+            if(demo)throw new Error("Aper\u00e7u en lecture seule.");
+            await needLifecycleRpc("delete", id);
             toast("Demande supprimée."); navigate("needs"); return;
         }
         case "need-status": {
@@ -465,8 +550,8 @@ async function action(el: HTMLElement): Promise<void> {
             return;
         case "dismiss-need": {
             const key="euraconnect.v13.dismissed";
-            const values=JSON.parse(localStorage.getItem(key)||"[]") as string[];
-            localStorage.setItem(key,JSON.stringify([...new Set([...values,id])]));
+            const values=stringList(key);
+            store(key,JSON.stringify([...new Set([...values,id])]));
             document.querySelectorAll<HTMLElement>("[data-need-id]").forEach(card=>{if(card.dataset.needId===id)card.remove();});
             toast("Cette opportunité est masquée sur cet appareil.");
             return;
@@ -503,7 +588,7 @@ async function action(el: HTMLElement): Promise<void> {
         case "directory-slots": {
             const r = el.dataset.kind || "company";
             closeModal();
-            const p = new URLSearchParams({ scope: "all", view: "list" });
+            const p = new URLSearchParams({ scope: "all", kind: "creneau", view: "list" });
             p.set(r === "company" ? "target_company" : "host_id", id);
             navigate("agenda", p);
             return;
@@ -521,19 +606,11 @@ async function action(el: HTMLElement): Promise<void> {
             }
             modal("Nouvelle offre", offerForm(), { wide: true });
             return;
-        case "offer-detail": {
-            const o = listOffers.find(x => x.id === id);
-            if (!o)
-                return;
-            if (o.can_edit) {
-                modal("Modifier mon offre", offerForm(o) + button("Ajouter une image", "upload", { id, icon: "upload", extra: "data-type=\"offer\"" }), { wide: true });
-                return;
-            }
-            modal("Offre de service", `<div class="ec27-detail"><p class="eyebrow">${e(o.provider)}</p><h2>${e(o.title)}</h2>${tags(o.tags)}<div class="prose">${e(offerSummary(o.description).text)}</div>${o.benefit ? `<div class="inline-note">${e(o.benefit)}</div>` : ""}<div class="ec27-detail-actions">${button("Consulter le prestataire", "company-detail", {id:o.company_id,class:"ghost",icon:"company"})}${button("Voir les créneaux", "directory-slots", { id: o.company_id, icon: "calendar", class: "primary", extra: 'data-kind="company"' })}</div></div>`, { wide: true });
-            return;
-        }
+        case "offer-detail":
+            await openOffer(id);return;
         case "manager-invite": {
             if(ctx.boot.user.role!=="startup_manager") {toast("Accès réservé aux Startup Managers.",true);return;}
+            if(demo)throw new Error("L\u2019aper\u00e7u est en lecture seule. Testez l\u2019invitation avec un compte manager connect\u00e9.");
             const contacts=await managerMeetingRpc<{id:string,name:string}[]>("contacts",{startup_id:id});
             if(!contacts.length){toast("Aucun contact incubé actif dans cette startup.",true);return;}
             const options=contacts.map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join("");
@@ -597,7 +674,7 @@ async function action(el: HTMLElement): Promise<void> {
             modal("Annuler votre inscription", simpleForm("cancel_booking", "<p>La place sera liberee. L'organisateur sera inform\u00E9.</p>", id, "Confirmer l'annulation"));
             return;
         case "cancel-session":
-            modal("Annuler cette rencontre", simpleForm("session_status", "<input type=\"hidden\" name=\"status\" value=\"annul\u00E9\"><p>Toutes les personnes inscrites seront notifiees dans EURACONNECT.</p>", id, "Annuler la rencontre"));
+            modal("Annuler cette rencontre", simpleForm("session_status", "<input type=\"hidden\" name=\"status\" value=\"annule\"><p>Toutes les personnes inscrites seront notifiees dans EURACONNECT.</p>", id, "Annuler la rencontre"));
             return;
         case "complete-session":
             await write("session_status", { id, status: "realise" });
@@ -756,8 +833,8 @@ function showWizard(step:number):void {
 function setupWizard(editing=false):void {
     const form=document.querySelector<HTMLFormElement>('.ec13-wizard');if(!form)return;
     wizardPage=0;
-    if(!editing){try{const draft=JSON.parse(sessionStorage.getItem(needDraftKey)||'{}') as Record<string,string>;for(const [k,v] of Object.entries(draft)){const f=form.elements.namedItem(k);if(f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement)f.value=v;}}catch{ /* no saved draft */ }}
-    form.addEventListener('input',()=>{if(editing)return;const values:Record<string,string>={};form.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('input[name],textarea[name]').forEach(x=>{if(x.type!=='hidden'&&x.type!=='password'&&x.type!=='checkbox')values[x.name]=x.value;});sessionStorage.setItem(needDraftKey,JSON.stringify(values));const state=form.querySelector('#ec13-draft-state');if(state)state.textContent='Brouillon sauvegardé sur cet appareil.';});
+    if(!editing){try{const draft=JSON.parse(stored(draftKey(),"session")||'{}') as Record<string,string>;for(const [k,v] of Object.entries(draft)){const f=form.elements.namedItem(k);if(f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement)f.value=v;}}catch{ /* no saved draft */ }}
+    form.addEventListener('input',()=>{if(editing)return;const values:Record<string,string>={};form.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('input[name],textarea[name]').forEach(x=>{if(x.type!=='hidden'&&x.type!=='password'&&x.type!=='checkbox')values[x.name]=x.value;});store(draftKey(),JSON.stringify(values),"session");const state=form.querySelector('#ec13-draft-state');if(state)state.textContent='Brouillon sauvegardé sur cet appareil.';});
     form.querySelector<HTMLSelectElement>('#ec13-template')?.addEventListener('change',ev=>{
        const k=(ev.target as HTMLSelectElement).value;
        const templates:Record<string,[string,string,string]>={audit:['Audit de notre organisation','Nous souhaitons analyser notre situation actuelle et identifier les priorités.','Diagnostic, recommandations et feuille de route.'],juridique:['Sécuriser notre cadre juridique','Nous recherchons un accompagnement juridique adapté à notre activité.','Analyse des risques et documents contractuels.'],recrutement:['Recruter un profil clé','Nous devons définir un poste et identifier des candidats qualifiés.','Définition du besoin, sourcing et présélection.'],financement:['Structurer notre financement','Nous souhaitons préparer notre stratégie de financement.','Plan de financement et dossier investisseurs.']};
@@ -794,7 +871,7 @@ async function submitCommand(form: HTMLFormElement): Promise<void> {
     }
     else
         await write(command, args);
-    if(command==="save_need") sessionStorage.removeItem(needDraftKey);
+    if(command==="save_need") store(draftKey(),null,"session");
     toast(command === "book_session" ? "Inscription enregistr\u00E9e. Consultez le statut de votre rendez-vous." : command === "respond" ? "Votre proposition a \u00E9t\u00E9 transmise \u00E0 la startup." : "Enregistrement effectu\u00E9.");
     closeModal();
     adminCache = null;
@@ -814,7 +891,7 @@ function authScreen(error = ""): void {
 }
 document.addEventListener("click", event => {
     const el = (event.target as HTMLElement).closest<HTMLElement>("[data-action],[data-auth]");
-    if (!el || el.hasAttribute("disabled"))
+    if (!el || el.hasAttribute("disabled") || el.dataset.running === "true")
         return;
     if (el.dataset.auth) {
         authMode = el.dataset.auth;
@@ -822,11 +899,14 @@ document.addEventListener("click", event => {
         return;
     }
     event.preventDefault();
-    void action(el).catch(err => toast(errorMessage(err), true));
+    el.dataset.running="true";el.setAttribute('aria-busy','true');el.classList.add('ec29-inline-loading');
+    void action(el).catch(err => toast(errorMessage(err), true)).finally(()=>{
+        el.dataset.running="false";el.removeAttribute('aria-busy');el.classList.remove('ec29-inline-loading');
+    });
 });
 document.addEventListener("submit", event => {
     const form = event.target as HTMLFormElement;
-    if (!["command-form", "auth-form", "message-form", "filter-form", "ec20-recommend-form", "ec20-help-form"].includes(form.id))
+    if (!["command-form", "auth-form", "message-form", "filter-form", "ec20-recommend-form", "ec20-help-form", "ec23-invite-form"].includes(form.id))
         return;
     event.preventDefault();
     if (form.classList.contains("ec13-wizard") && wizardPage < 2) { showWizard(wizardPage+1); return; }
@@ -841,7 +921,7 @@ document.addEventListener("submit", event => {
             else
                 p.set(k, String(v));
         });
-        navigate(r.route, p);
+        navigate(r.route+(r.id?"/"+r.id:""), p);
         return;
     }
     if (form.dataset.busy === "true")
@@ -862,7 +942,10 @@ document.addEventListener("submit", event => {
         if (form.id === "ec23-invite-form") {
             if(demo)throw new Error("Aperçu en lecture seule.");
             const v=formValues(form);
-            await managerMeetingRpc("invite",{...v,starts_at:new Date(String(v.starts_at)).toISOString(),ends_at:new Date(String(v.ends_at)).toISOString()});
+            const starts=new Date(String(v.starts_at)),ends=new Date(String(v.ends_at));
+            if(!Number.isFinite(starts.getTime())||!Number.isFinite(ends.getTime())||ends<=starts)throw new Error('Choisissez une fin post\u00e9rieure au d\u00e9but.');
+            if(starts.getTime()<=Date.now())throw new Error('Choisissez un cr\u00e9neau \u00e0 venir.');
+            await managerMeetingRpc("invite",{...v,starts_at:starts.toISOString(),ends_at:ends.toISOString()});
             toast("Créneau proposé à l'incubé. Vous serez informé de sa réponse.");
             closeModal();await render();return;
         }
@@ -925,6 +1008,8 @@ document.addEventListener("submit", event => {
         else if (form.id === "message-form") {
             const values = formValues(form);
             await write("send_message", { id: form.dataset.id, body: values.body });
+            const input=form.querySelector<HTMLTextAreaElement>('textarea[name="body"]');if(input)input.value="";
+            if(displayedThreadKey)messageDrafts.delete(displayedThreadKey);
             await render();
             void counts();
         }
@@ -949,16 +1034,15 @@ document.addEventListener("submit", event => {
     });
 });
 let filterTimer:number|undefined;
-let restoreFilterFocus=false;
 document.addEventListener('input',ev=>{
-   const input=ev.target as HTMLElement;
-   if(!(input instanceof HTMLInputElement))return;
-   if(input.id === 'ec28-quick-search'){window.clearTimeout(filterTimer);const value=input.value;filterTimer=window.setTimeout(()=>filter('q',value),450);return;}
-   if(!input.closest('#filter-form') || !['q','tag','city','expertise'].includes(input.name))return;
-   window.clearTimeout(filterTimer);
-   const value=input.value;
-   restoreFilterFocus=true;
-   filterTimer=window.setTimeout(()=>{const current=routeParts();const p=new URLSearchParams(current.params);if(value)p.set(input.name,value);else p.delete(input.name);p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);},550);
+    const input=ev.target;
+    if(!(input instanceof HTMLInputElement))return;
+    if(input.id!=='ec28-quick-search' && (!input.closest('#filter-form') || !['q','tag','city','expertise','maxprice'].includes(input.name)))return;
+    window.clearTimeout(filterTimer);
+    generation++;
+    const value=input.value,key=input.id==='ec28-quick-search'?'q':input.name;
+    const origin=location.hash.split('?')[0];
+    filterTimer=window.setTimeout(()=>{if(location.hash.split('?')[0]===origin)filter(key,value||null);},400);
 });
 document.addEventListener("change", event => {
     const el = event.target as HTMLInputElement;
@@ -968,17 +1052,18 @@ document.addEventListener("change", event => {
         for(const [key,value] of Object.entries(values)){if(value===false || value==='' || value==null)p.delete(key);else p.set(key,String(value));}
         p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);return;
     }
-    if (el.id === "ec28-quick-search" && el instanceof HTMLInputElement) { filter("q", el.value); return; }
+
     if (el.id === "ec22-sort") { filter("sort", el.value); return; }
     if (el.id === "company-switch") {
         activeCompany = el.value || null;
         if (activeCompany)
-            localStorage.setItem("euraconnect.company.v1", activeCompany);
-        releaseMedia();
+            store("euraconnect.company.v1", activeCompany);
+        releaseMedia();responses.clear();offerCache.clear();listOffers=[];adminCache=null;
         closeModal();
         void render();
     }
     if (el.id === "demo-role") {
+        responses.clear();offerCache.clear();messageDrafts.clear();displayedThreadKey="";
         demoRole = el.value as Role;
         void reloadBoot().then(() => { navigate("dashboard"); return render(); });
     }
@@ -988,20 +1073,34 @@ document.addEventListener("change", event => {
     }
 });
 document.addEventListener("keydown", event => {
-    const t = event.target as HTMLElement;
-    if (event.key === "Escape" && document.querySelector(".mobile-open")) {
-        document.querySelector(".app-shell")?.classList.remove("mobile-open");
+    const t=event.target as HTMLElement;
+    const open=Boolean(document.querySelector('.ec29-shell.mobile-open'));
+    if(event.key==='Escape') { hideNavigationTooltip(); if(open){event.preventDefault();setMobileMenu(false);return;} document.querySelectorAll<HTMLDetailsElement>('.ec22-facet-drawer[open],.ec27-facets[open]').forEach(el=>{el.open=false;el.querySelector<HTMLElement>('summary')?.focus();}); }
+    if(event.key==='Tab'&&open&&matchMedia('(max-width:800px)').matches){
+        const focusables=Array.from(document.querySelectorAll<HTMLElement>('.ec29-sidebar a[href],.ec29-sidebar button')).filter(x=>x.offsetParent!==null);
+        const first=focusables[0],last=focusables[focusables.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+        if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
     }
-    if (event.key === "/" && !modalOpen() && !["INPUT", "TEXTAREA"].includes(t.tagName) && !t.isContentEditable) {
-        event.preventDefault();
-        searchPalette();
-    }
+    const editing=['INPUT','TEXTAREA','SELECT'].includes(t.tagName)||t.isContentEditable;
+    if(!modalOpen() && ((event.key==='/'&&!editing)||((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'))){event.preventDefault();searchPalette();}
 });
+matchMedia('(max-width:800px)').addEventListener('change',()=>{document.querySelector('.app-shell')?.classList.remove('mobile-open');syncSidebar();});
+function hideNavigationTooltip():void {document.getElementById('nav-tooltip')?.remove();}
+function showNavigationTooltip(el:HTMLElement):void {
+    hideNavigationTooltip();if(!document.body.classList.contains('ec24-sidebar-collapsed')||matchMedia('(max-width:800px)').matches)return;
+    const text=el.dataset.tooltip;if(!text)return;
+    const rect=el.getBoundingClientRect();const tip=document.createElement('div');tip.id='nav-tooltip';tip.textContent=text;tip.setAttribute('role','tooltip');
+    tip.style.left=(rect.right+12)+'px';tip.style.top=Math.min(innerHeight-42,Math.max(6,rect.top+3))+'px';document.body.append(tip);
+}
+document.addEventListener('pointerover',ev=>{const el=(ev.target as HTMLElement).closest<HTMLElement>('[data-tooltip]');if(el)showNavigationTooltip(el);});
+document.addEventListener('pointerout',ev=>{if((ev.target as HTMLElement).closest('[data-tooltip]'))hideNavigationTooltip();});
+document.addEventListener('focusin',ev=>{const el=(ev.target as HTMLElement).closest<HTMLElement>('[data-tooltip]');if(el)showNavigationTooltip(el);else hideNavigationTooltip();});
 window.addEventListener("hashchange", () => {
     if (pendingNavigation)
         return;
-    closeModal();
-    document.querySelector(".app-shell")?.classList.remove("mobile-open");
+    closeModal();hideNavigationTooltip();
+    document.querySelector(".app-shell")?.classList.remove("mobile-open");syncSidebar();
     if (boot)
         void render();
 });
@@ -1052,4 +1151,11 @@ function managerMeetings(items:ManagerMeeting[],role:string):string {
 }
 
 // Navigation preferences are local to the browser and never alter user permissions.
-try { if (localStorage.getItem("euraconnect.nav.collapsed") === "1") document.body.classList.add("ec24-sidebar-collapsed"); } catch {}
+if (stored("euraconnect.nav.collapsed") === "1") document.body.classList.add("ec24-sidebar-collapsed");
+
+// Filter popovers close on an outside pointer interaction, not on field updates.
+document.addEventListener('pointerdown',event=>{
+ const target=event.target;
+ if(!(target instanceof Node))return;
+ document.querySelectorAll<HTMLDetailsElement>('.ec22-facet-drawer[open],.ec27-facets[open]').forEach(panel=>{if(!panel.contains(target))panel.open=false;});
+});
