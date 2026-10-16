@@ -345,6 +345,13 @@ async function action(el: HTMLElement): Promise<void> {
         case "collapse-sidebar": {
             const collapsed = document.body.classList.toggle("ec24-sidebar-collapsed");
             try { localStorage.setItem("euraconnect.nav.collapsed", collapsed ? "1" : "0"); } catch {}
+            const toggle = document.querySelector<HTMLButtonElement>(".ec25-collapse");
+            if (toggle) {
+                toggle.setAttribute("aria-label", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
+                toggle.setAttribute("title", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
+                toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+
+            }
             return;
         }
         case "menu":

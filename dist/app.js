@@ -383,6 +383,12 @@ async function action(el) {
                 localStorage.setItem("euraconnect.nav.collapsed", collapsed ? "1" : "0");
             }
             catch { }
+            const toggle = document.querySelector(".ec25-collapse");
+            if (toggle) {
+                toggle.setAttribute("aria-label", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
+                toggle.setAttribute("title", collapsed ? "Agrandir le menu latéral" : "Réduire le menu latéral");
+                toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+            }
             return;
         }
         case "menu":

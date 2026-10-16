@@ -1,0 +1,17 @@
+/* V2.5: sidebar dense, icon-only collapse, context switch outside navigation */
+.sidebar{position:relative}
+.sidebar>.brand{position:relative;padding-right:36px!important;margin-bottom:14px!important;min-height:58px}
+.ec25-collapse{position:absolute;right:14px;top:20px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff30;border-radius:10px;background:#ffffff0c;color:#e6edf6;cursor:pointer;z-index:3;transition:background .15s,border-color .15s}
+.ec25-collapse:hover,.ec25-collapse:focus-visible{background:#ffffff25;border-color:#ffffff80;outline-offset:3px}
+.sidebar .company-context,.sidebar .ec24-sidebar-tools{display:none!important}
+.ec24-nav-groups{gap:3px!important}
+.ec24-nav-group{padding-bottom:4px!important}
+.ec24-nav-group summary{padding:8px 12px!important}
+.ec24-nav-items .nav-link{min-height:40px!important}
+.ec24-sidebar-collapsed .sidebar>.brand{padding-right:0!important;padding-bottom:12px!important;justify-content:center!important}
+.ec24-sidebar-collapsed .ec25-collapse{position:static;margin:0 auto 9px;width:36px;height:36px}
+.ec24-sidebar-collapsed .sidebar>.brand img{width:36px;height:36px}
+.ec25-company-picker{display:flex;align-items:center;gap:7px;max-width:230px;font-size:11px;color:#617187}
+.ec25-company-picker select{max-width:165px;min-width:110px;border:1px solid #dbe2ea;border-radius:8px;padding:7px;background:white;color:#23344d;font:inherit}
+@media(max-width:800px){.ec25-collapse{display:none!important}.ec25-company-picker span{display:none}.ec25-company-picker select{max-width:125px}}
+.ec25-icon-open{display:none}.ec24-sidebar-collapsed .ec25-icon-open{display:block}.ec24-sidebar-collapsed .ec25-icon-close{display:none}

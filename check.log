@@ -1,0 +1,369 @@
+
+> euraconnect@2.4.0 check
+> npm run typecheck && npm test && npm run build
+
+
+> euraconnect@2.4.0 typecheck
+> tsc --noEmit
+
+
+> euraconnect@2.4.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: Premium is date bounded and depends on valid provider company
+ok 1 - Premium is date bounded and depends on valid provider company
+  ---
+  duration_ms: 0.915207
+  type: 'test'
+  ...
+# Subtest: old database tables are not dropped by install or cutover
+ok 2 - old database tables are not dropped by install or cutover
+  ---
+  duration_ms: 0.247796
+  type: 'test'
+  ...
+# Subtest: private schema and grants applied
+ok 3 - private schema and grants applied
+  ---
+  duration_ms: 0.136157
+  type: 'test'
+  ...
+# Subtest: old public images become private at cutover
+ok 4 - old public images become private at cutover
+  ---
+  duration_ms: 0.088044
+  type: 'test'
+  ...
+# Subtest: all privileged functions pin the search path
+ok 5 - all privileged functions pin the search path
+  ---
+  duration_ms: 0.276299
+  type: 'test'
+  ...
+# Subtest: no PLpgSQL variable shares a table alias
+ok 6 - no PLpgSQL variable shares a table alias
+  ---
+  duration_ms: 1.526934
+  type: 'test'
+  ...
+# Subtest: favorite action writes desired boolean state, not a blind toggle
+ok 7 - favorite action writes desired boolean state, not a blind toggle
+  ---
+  duration_ms: 0.15854
+  type: 'test'
+  ...
+# Subtest: new response is addressed by need id
+ok 8 - new response is addressed by need id
+  ---
+  duration_ms: 0.103427
+  type: 'test'
+  ...
+# Subtest: manager cannot send business response
+ok 9 - manager cannot send business response
+  ---
+  duration_ms: 0.272403
+  type: 'test'
+  ...
+# Subtest: write operations reject inactive release
+ok 10 - write operations reject inactive release
+  ---
+  duration_ms: 0.355538
+  type: 'test'
+  ...
+# Subtest: startup follows up before free provider can message
+ok 11 - startup follows up before free provider can message
+  ---
+  duration_ms: 0.146923
+  type: 'test'
+  ...
+# Subtest: booking uses row and advisory locks
+ok 12 - booking uses row and advisory locks
+  ---
+  duration_ms: 0.116526
+  type: 'test'
+  ...
+# Subtest: source templates contain only ASCII DOM control attributes
+ok 13 - source templates contain only ASCII DOM control attributes
+  ---
+  duration_ms: 136.084044
+  type: 'test'
+  ...
+# Subtest: build runs strict typecheck before compiling
+ok 14 - build runs strict typecheck before compiling
+  ---
+  duration_ms: 0.784779
+  type: 'test'
+  ...
+# Subtest: server secret guard exists
+ok 15 - server secret guard exists
+  ---
+  duration_ms: 0.670997
+  type: 'test'
+  ...
+# Subtest: escape HTML including quote payloads
+ok 16 - escape HTML including quote payloads
+  ---
+  duration_ms: 0.889488
+  type: 'test'
+  ...
+# Subtest: null values do not become undefined
+ok 17 - null values do not become undefined
+  ---
+  duration_ms: 0.094894
+  type: 'test'
+  ...
+# Subtest: rich text cannot inject script
+ok 18 - rich text cannot inject script
+  ---
+  duration_ms: 0.361468
+  type: 'test'
+  ...
+# Subtest: HTML attributes stay escaped in rich text
+ok 19 - HTML attributes stay escaped in rich text
+  ---
+  duration_ms: 0.111188
+  type: 'test'
+  ...
+# Subtest: tag normalization handles case accents spaces punctuation
+ok 20 - tag normalization handles case accents spaces punctuation
+  ---
+  duration_ms: 0.301166
+  type: 'test'
+  ...
+# Subtest: tag suggestions deduplicate without losing first spelling
+ok 21 - tag suggestions deduplicate without losing first spelling
+  ---
+  duration_ms: 0.637486
+  type: 'test'
+  ...
+# Subtest: tag length and number constraints
+ok 22 - tag length and number constraints
+  ---
+  duration_ms: 0.232622
+  type: 'test'
+  ...
+# Subtest: invalid short tags rejected
+ok 23 - invalid short tags rejected
+  ---
+  duration_ms: 0.103658
+  type: 'test'
+  ...
+# Subtest: cents parse French decimal format precisely
+ok 24 - cents parse French decimal format precisely
+  ---
+  duration_ms: 0.333145
+  type: 'test'
+  ...
+# Subtest: blank budget is not a fake zero
+ok 25 - blank budget is not a fake zero
+  ---
+  duration_ms: 0.28395
+  type: 'test'
+  ...
+# Subtest: negative and NaN prices fail
+ok 26 - negative and NaN prices fail
+  ---
+  duration_ms: 0.304081
+  type: 'test'
+  ...
+# Subtest: zero budget retained
+ok 27 - zero budget retained
+  ---
+  duration_ms: 0.109325
+  type: 'test'
+  ...
+# Subtest: plain Supabase error object readable
+ok 28 - plain Supabase error object readable
+  ---
+  duration_ms: 0.102966
+  type: 'test'
+  ...
+# Subtest: unrecognized errors never expose object Object
+ok 29 - unrecognized errors never expose object Object
+  ---
+  duration_ms: 0.064017
+  type: 'test'
+  ...
+# Subtest: SQL ambiguous id reported with actionable diagnostic
+ok 30 - SQL ambiguous id reported with actionable diagnostic
+  ---
+  duration_ms: 0.150148
+  type: 'test'
+  ...
+# Subtest: all four roles have human labels
+ok 31 - all four roles have human labels
+  ---
+  duration_ms: 0.075634
+  type: 'test'
+  ...
+# Subtest: a Free provider can respond
+ok 32 - a Free provider can respond
+  ---
+  duration_ms: 0.083486
+  type: 'test'
+  ...
+# Subtest: startup never responds as provider
+ok 33 - startup never responds as provider
+  ---
+  duration_ms: 0.048364
+  type: 'test'
+  ...
+# Subtest: collaborators cannot send company proposals
+ok 34 - collaborators cannot send company proposals
+  ---
+  duration_ms: 0.054983
+  type: 'test'
+  ...
+# Subtest: pending provider cannot respond
+ok 35 - pending provider cannot respond
+  ---
+  duration_ms: 0.046341
+  type: 'test'
+  ...
+# Subtest: closed need cannot receive new response
+ok 36 - closed need cannot receive new response
+  ---
+  duration_ms: 0.04612
+  type: 'test'
+  ...
+# Subtest: expired deadline cannot receive response
+ok 37 - expired deadline cannot receive response
+  ---
+  duration_ms: 0.102926
+  type: 'test'
+  ...
+# Subtest: existing response blocks duplicate form
+ok 38 - existing response blocks duplicate form
+  ---
+  duration_ms: 0.073702
+  type: 'test'
+  ...
+# Subtest: Paris calendar date does not drift at midnight
+ok 39 - Paris calendar date does not drift at midnight
+  ---
+  duration_ms: 16.906842
+  type: 'test'
+  ...
+# Subtest: Paris winter time rendered as local time
+ok 40 - Paris winter time rendered as local time
+  ---
+  duration_ms: 0.665799
+  type: 'test'
+  ...
+# Subtest: ICS event includes correct UTC times and stable uid
+ok 41 - ICS event includes correct UTC times and stable uid
+  ---
+  duration_ms: 0.685239
+  type: 'test'
+  ...
+# Subtest: ICS cannot inject new property through title
+ok 42 - ICS cannot inject new property through title
+  ---
+  duration_ms: 0.31649
+  type: 'test'
+  ...
+# Subtest: ICS UTF8 folded within 75 octets
+ok 43 - ICS UTF8 folded within 75 octets
+  ---
+  duration_ms: 0.353796
+  type: 'test'
+  ...
+# Subtest: cancelled ICS advertises cancellation
+ok 44 - cancelled ICS advertises cancellation
+  ---
+  duration_ms: 2.571917
+  type: 'test'
+  ...
+# Subtest: V1.3: deep links need and proposal
+ok 45 - V1.3: deep links need and proposal
+  ---
+  duration_ms: 0.63974
+  type: 'test'
+  ...
+# Subtest: V1.3: brief step navigation and four templates
+ok 46 - V1.3: brief step navigation and four templates
+  ---
+  duration_ms: 0.178451
+  type: 'test'
+  ...
+# Subtest: V1.3: comparison only 2 to 3 proposals
+ok 47 - V1.3: comparison only 2 to 3 proposals
+  ---
+  duration_ms: 0.161905
+  type: 'test'
+  ...
+# Subtest: V1.3: mobile navigation and manager urgency table
+ok 48 - V1.3: mobile navigation and manager urgency table
+  ---
+  duration_ms: 0.211601
+  type: 'test'
+  ...
+# Subtest: V2 manager: manager UI and follow-up are not mock buttons
+ok 49 - V2 manager: manager UI and follow-up are not mock buttons
+  ---
+  duration_ms: 0.65264
+  type: 'test'
+  ...
+# Subtest: V2 manager: recommendation reaches real server
+ok 50 - V2 manager: recommendation reaches real server
+  ---
+  duration_ms: 1.086476
+  type: 'test'
+  ...
+# Subtest: V2 manager: incubated startup can request help securely
+ok 51 - V2 manager: incubated startup can request help securely
+  ---
+  duration_ms: 0.209207
+  type: 'test'
+  ...
+# Subtest: V2 manager: permissions and anonymity stay server-side
+ok 52 - V2 manager: permissions and anonymity stay server-side
+  ---
+  duration_ms: 0.146091
+  type: 'test'
+  ...
+# Subtest: V2 manager: recommendation notification and trace
+ok 53 - V2 manager: recommendation notification and trace
+  ---
+  duration_ms: 0.179091
+  type: 'test'
+  ...
+# Subtest: V2 design: stylesheet is correctly loaded
+ok 54 - V2 design: stylesheet is correctly loaded
+  ---
+  duration_ms: 0.213654
+  type: 'test'
+  ...
+# Subtest: V2.3 invitation manager requires portfolio and active incubé membership
+ok 55 - V2.3 invitation manager requires portfolio and active incubé membership
+  ---
+  duration_ms: 0.708644
+  type: 'test'
+  ...
+# Subtest: V2.3 response is restricted to invitee and pending invitation
+ok 56 - V2.3 response is restricted to invitee and pending invitation
+  ---
+  duration_ms: 0.229979
+  type: 'test'
+  ...
+# Subtest: V2.3 startup manager invite and incubé accept or decline are wired
+ok 57 - V2.3 startup manager invite and incubé accept or decline are wired
+  ---
+  duration_ms: 0.796698
+  type: 'test'
+  ...
+1..57
+# tests 57
+# suites 0
+# pass 57
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 519.11744
+
+> euraconnect@2.4.0 build
+> tsc --noEmit && node scripts/build.mjs
+
+EURACONNECT 2.4.0: 30 fichiers compiles. Configuration Supabase a renseigner au deploiement.

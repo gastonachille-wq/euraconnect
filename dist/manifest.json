@@ -1,5 +1,5 @@
 {
-  "version": "2.4.0",
+  "version": "2.5.0",
   "files": {
     "agenda-v12.js": {
       "bytes": 14362,
@@ -14,12 +14,12 @@
       "sha256": "8bd2c8cf51dc37a630d8daa45cd22b97f6ae116b655306799947f05d81ae4601"
     },
     "app.js": {
-      "bytes": 66045,
-      "sha256": "12e59227d3c8f2f15e33b29ec65e9662f4daac2a3237bbce29ab8799a6b6c9d1"
+      "bytes": 66477,
+      "sha256": "75450eb5ee3eff0a82442c295bdc548c67fb79a07a48aa790d0583cfc36d61a1"
     },
     "config.js": {
       "bytes": 74,
-      "sha256": "03cf1361244035ecf3465f56779282156853be1b0b196e1514ecf93299314446"
+      "sha256": "ab9da42c1c19ec8e3eafe60f59776be00c1360e73af919cab7b2521234a8ed0f"
     },
     "demo.js": {
       "bytes": 24220,
@@ -70,8 +70,8 @@
       "sha256": "7b54f32e6eb07260e97b6009e6226e9e67b6c55f2cba682faa9310cb337afe45"
     },
     "index.html": {
-      "bytes": 1270,
-      "sha256": "8fd0ac7f12f57569227d595f7549a0192cea3a350422f55f61707f11e568551e"
+      "bytes": 1313,
+      "sha256": "d73e88fc8d7baea1c9212aeda0cbc832c924e67351026d481ada3548bfd5ad90"
     },
     "manager-v20.js": {
       "bytes": 8780,
@@ -113,9 +113,13 @@
       "bytes": 3923,
       "sha256": "f1365e5a208c2f756ea1d9afcd20075bda9bdc0d903f25ed1269a1aae923d522"
     },
+    "ux-v25.css": {
+      "bytes": 1705,
+      "sha256": "e74e348f2fd91f3327b2f40d8578cd71bd43bab513276cb454896c477477d7a5"
+    },
     "views.js": {
-      "bytes": 39513,
-      "sha256": "a74cfa4365a89fd1c2a3316c3a4155a0541ccc40ce5327c5cbd05b91fccede9e"
+      "bytes": 39905,
+      "sha256": "ceafcdd37d032924bc33d4d189bde92f899659ba7cf182a6e59e970fc4e99730"
     },
     "visual-refresh.css": {
       "bytes": 6674,
