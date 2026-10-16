@@ -193,3 +193,8 @@ export async function uploadImage(file: File, userId: string, kind: "company" | 
 export async function managerRpc<T>(action: 'list'|'mine'|'recommend'|'ask', args:Record<string,unknown>={}):Promise<T> {
     return await request('/rest/v1/rpc/ec20_manager_api','POST',{p_action:action,p_args:args},await accessToken()) as T;
 }
+
+/** Invitations de rendez-vous manager : toutes les autorisations sont vérifiées côté Supabase. */
+export async function managerMeetingRpc<T>(action:'contacts'|'list'|'invite'|'respond', args:Record<string,unknown>={}):Promise<T> {
+    return await request('/rest/v1/rpc/ec23_manager_meeting','POST',{p_action:action,p_args:args},await accessToken()) as T;
+}

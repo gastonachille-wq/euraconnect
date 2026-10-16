@@ -1,4 +1,4 @@
-import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc } from "./api.js";
+import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc } from "./api.js";
 import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs, localDate, markdown, label } from "./domain.js";
 import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles } from "./views.js";
 import { needForm, needDetail, responseForm, responseDetail, statusForm, sessionForm, sessionDetail, companyPage, companyForm, profileForm, offerForm } from "./forms.js";
@@ -116,6 +116,14 @@ async function render() {
                         html += `<p class="ec20-api-notice">Les recommandations du manager seront accessibles après installation de la migration V2.</p>`;
                     }
                 }
+                if (!demo && ["incube", "startup_manager"].includes(ctx.boot.user.role)) {
+                    try {
+                        html += managerMeetings(await managerMeetingRpc("list"), ctx.boot.user.role);
+                    }
+                    catch {
+                        html += '<p class="ec23-hint">Les invitations de votre manager seront disponibles après installation de la migration 09.</p>';
+                    }
+                }
                 break;
             case "needs": {
                 const data = id ? { items: [], total: 0 } : await read("needs", { ...args, scope: ctx.boot.user.role === "incube" ? "mine" : "all" });
@@ -198,6 +206,14 @@ async function render() {
                     to: null, size: 100
                 })).items;
                 html = sessionsView(ctx, results, workshop, inbox);
+                if (!workshop && !demo && ["incube", "startup_manager"].includes(ctx.boot.user.role)) {
+                    try {
+                        html = managerMeetings(await managerMeetingRpc("list"), ctx.boot.user.role) + html;
+                    }
+                    catch {
+                        html = '<p class="ec23-hint">Invitations manager : migration 09 requise.</p>' + html;
+                    }
+                }
                 break;
             }
             case "portfolio": {
@@ -554,6 +570,28 @@ async function action(el) {
                 return;
             }
             modal("Offre de service", `<p class="eyebrow">${e(o.provider)}</p><h2>${e(o.title)}</h2>${tags(o.tags)}<div class="prose">${markdown(o.description)}</div>${o.benefit ? "<div class=\"inline-note\">" + e(o.benefit) + "</div>" : ""}<footer class="form-footer">${button("Voir les disponibilit\u00E9s", "directory-slots", { id: o.company_id, icon: "calendar", class: "primary", extra: "data-kind=\"company\"" })}</footer>`, { wide: true });
+            return;
+        }
+        case "manager-invite": {
+            if (ctx.boot.user.role !== "startup_manager") {
+                toast("Accès réservé aux Startup Managers.", true);
+                return;
+            }
+            const contacts = await managerMeetingRpc("contacts", { startup_id: id });
+            if (!contacts.length) {
+                toast("Aucun contact incubé actif dans cette startup.", true);
+                return;
+            }
+            const options = contacts.map(x => `<option value="${e(x.id)}">${e(x.name)}</option>`).join("");
+            modal("Proposer un créneau à la startup", `<form id="ec23-invite-form"><input type="hidden" name="startup_id" value="${e(id)}"><label>Contact incubé<select name="invitee_id" required>${options}</select></label><label>Objet de la rencontre<input name="title" required minlength="5" maxlength="160" placeholder="Point d'accompagnement"></label><div class="form-grid"><label>Début<input name="starts_at" type="datetime-local" required></label><label>Fin<input name="ends_at" type="datetime-local" required></label></div><label>Modalité<select name="mode"><option value="visio">Visioconférence</option><option value="telephone">Téléphone</option><option value="sur_site">Sur place</option></select></label><label>Lien visio ou lieu<input name="location" maxlength="500" placeholder="Lien ou adresse (facultatif)"></label><label>Message d'accompagnement<textarea name="message" rows="3" maxlength="1500" placeholder="Objectif du rendez-vous"></textarea></label><p class="muted">La startup pourra accepter ou refuser. Aucun rendez-vous n'est confirmé avant son accord.</p><p class="form-error" role="alert" hidden></p><button type="submit" class="btn primary full">Envoyer la proposition</button></form>`, { wide: true });
+            return;
+        }
+        case "manager-meeting-response": {
+            if (!confirm(el.dataset.status === "accepted" ? "Accepter ce rendez-vous ?" : "Refuser cette proposition de rendez-vous ?"))
+                return;
+            await managerMeetingRpc("respond", { id, status: el.dataset.status });
+            toast(el.dataset.status === "accepted" ? "Rendez-vous accepté." : "Proposition refusée.");
+            await render();
             return;
         }
         case "new-session":
@@ -916,6 +954,16 @@ document.addEventListener("submit", event => {
         err.textContent = "";
     }
     const run = async () => {
+        if (form.id === "ec23-invite-form") {
+            if (demo)
+                throw new Error("Aperçu en lecture seule.");
+            const v = formValues(form);
+            await managerMeetingRpc("invite", { ...v, starts_at: new Date(String(v.starts_at)).toISOString(), ends_at: new Date(String(v.ends_at)).toISOString() });
+            toast("Créneau proposé à l'incubé. Vous serez informé de sa réponse.");
+            closeModal();
+            await render();
+            return;
+        }
         if (form.id === "ec20-help-form") {
             if (demo)
                 throw new Error("L'aperçu est en lecture seule.");
@@ -1108,3 +1156,8 @@ async function start() {
     }
 }
 void start();
+function managerMeetings(items, role) {
+    if (!items.length)
+        return '';
+    return `<section class="ec23-meetings"><div class="ec23-meetings-head"><div><span class="eyebrow">ACCOMPAGNEMENT</span><h2>${role === 'incube' ? 'Mes invitations du Startup Manager' : 'Rendez-vous proposés aux startups'}</h2></div><span>${items.filter(x => x.status === 'pending').length} en attente</span></div><div class="ec23-meetings-grid">${items.slice(0, 12).map(x => `<article class="ec23-meeting"><span class="ec23-state ${e(x.status)}">${x.status === 'pending' ? 'À confirmer' : x.status === 'accepted' ? 'Accepté' : 'Refusé'}</span><h3>${e(x.title)}</h3><p>${e(x.startup_name)} · ${role === 'incube' ? 'Avec ' + e(x.manager_name) : 'Pour ' + e(x.invitee_name)}</p><strong>${dateText(x.starts_at)} · ${new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(new Date(x.starts_at))}</strong><p>${e(x.mode === 'visio' ? 'Visio' : x.mode === 'telephone' ? 'Téléphone' : 'Sur place')}${x.location ? ' · ' + e(x.location) : ''}</p>${x.message ? `<p class="ec23-message">${e(x.message)}</p>` : ''}${x.can_respond && x.status === 'pending' ? `<div class="ec23-meeting-actions"><button class="btn primary small" data-action="manager-meeting-response" data-id="${e(x.id)}" data-status="accepted">Accepter</button><button class="btn ghost small" data-action="manager-meeting-response" data-id="${e(x.id)}" data-status="declined">Refuser</button></div>` : ''}</article>`).join('')}</div></section>`;
+}

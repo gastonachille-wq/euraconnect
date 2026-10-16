@@ -169,3 +169,7 @@ export async function uploadImage(file, userId, kind, targetId, company) {
 export async function managerRpc(action, args = {}) {
     return await request('/rest/v1/rpc/ec20_manager_api', 'POST', { p_action: action, p_args: args }, await accessToken());
 }
+/** Invitations de rendez-vous manager : toutes les autorisations sont vérifiées côté Supabase. */
+export async function managerMeetingRpc(action, args = {}) {
+    return await request('/rest/v1/rpc/ec23_manager_meeting', 'POST', { p_action: action, p_args: args }, await accessToken());
+}

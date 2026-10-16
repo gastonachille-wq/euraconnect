@@ -1,25 +1,25 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "files": {
     "agenda-v12.js": {
       "bytes": 14362,
       "sha256": "f072e8a9cd0315eb083f7415a8015e2f81f224e51a4a222879d5bd2972eafa38"
     },
     "api.js": {
-      "bytes": 7694,
-      "sha256": "a1d629425ff8646977b777d3266127954f986298f59e19a9aa2f4cd4c28f98dd"
+      "bytes": 7988,
+      "sha256": "7773da036435b4985d5cda21c554e5299249aed3231c5ffdcad53db51aef79db"
     },
     "app.css": {
       "bytes": 48382,
       "sha256": "8bd2c8cf51dc37a630d8daa45cd22b97f6ae116b655306799947f05d81ae4601"
     },
     "app.js": {
-      "bytes": 60275,
-      "sha256": "f0e61de1192c6a2231f326c98f54070c66db4ebd057a574056bd8fa8b9aee89c"
+      "bytes": 65515,
+      "sha256": "0af6b9b513efbe64a476ede18e428607ff7eacb2fc1fab9c121610d26c45e436"
     },
     "config.js": {
       "bytes": 74,
-      "sha256": "4a47b828f157e72ebc145c639bf234b567a4c3af7f5a2265b2430f07d24023c3"
+      "sha256": "c53cbcd798375c951e3cdfc22d9813543e6889f6b4010dbfbe6248da335ec21e"
     },
     "demo.js": {
       "bytes": 24220,
@@ -70,12 +70,12 @@
       "sha256": "7b54f32e6eb07260e97b6009e6226e9e67b6c55f2cba682faa9310cb337afe45"
     },
     "index.html": {
-      "bytes": 1185,
-      "sha256": "2080cbab2b2e3fbae34f8cb82555beca507760977abf6ca2063efa69a8fb8f1c"
+      "bytes": 1228,
+      "sha256": "410ef7a3575e15ce6acbbabdced7a8b4e0ad14a8cd068b63dc64a08210e89196"
     },
     "manager-v20.js": {
-      "bytes": 8438,
-      "sha256": "b3399e9ef22644af1276e7813a2e9f414d24603dad8064436ae8453469727c60"
+      "bytes": 8780,
+      "sha256": "9a7b025c0cf4fd1e59ff800c5df248ce5d435e97b49e1a55ee193049563ae177"
     },
     "ui.js": {
       "bytes": 16841,
@@ -104,6 +104,10 @@
     "ux-v22.css": {
       "bytes": 3752,
       "sha256": "11bde05f6a1dc542d6efc421e5c67542e4f912efd1e4b9f982e3be57cc738e17"
+    },
+    "ux-v23.css": {
+      "bytes": 1445,
+      "sha256": "cb21aef01fab9f24a3a29338b7be1eea5364921d7106b4992988e036f08e8675"
     },
     "views.js": {
       "bytes": 37235,
