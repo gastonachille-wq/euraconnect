@@ -4,9 +4,11 @@ import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs
 import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, portfolioView, adminView, notificationList, titles } from "./views.js";
 import type { Context } from "./views.js";
 import { needForm, needDetail, responseForm, responseDetail, statusForm, sessionForm, sessionDetail, companyPage, companyForm, profileForm, offerForm } from "./forms.js";
-import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button, empty, field, selectField, checkField, footerSubmit, avatar, badge, tags } from "./ui.js";
+import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button, empty, field, selectField, checkField, footerSubmit, badge, tags } from "./ui.js";
 import { icon } from "./icons.js";
 import { demoBoot, demoRpc } from "./demo.js";
+import { companyDetailV12, personDetailV12 } from "./directory-v12.js";
+import { agendaRange, shiftAgenda } from "./agenda-v12.js";
 const app = document.querySelector<HTMLElement>("#app")!;
 let boot: Boot | null = null;
 let generation = 0;
@@ -17,9 +19,10 @@ let demo = new URLSearchParams(location.search).get("demo") === "1";
 let demoRole: Role = "incube";
 let activeCompany: string | null = localStorage.getItem("euraconnect.company.v1");
 let adminCache: AdminData | null = null;
-let listDirectory: DirectoryItem[] = [];
 let listOffers: Offer[] = [];
 const responses = new Map<string, ResponseItem>();
+const needDraftKey = "euraconnect.v13.needDraft";
+let wizardPage = 0;
 function routeParts(): {
     route: string;
     id: string | null;
@@ -109,13 +112,20 @@ async function render(): Promise<void> {
                 html = dashboardView(ctx, await read<Dashboard>("dashboard"));
                 break;
             case "needs": {
-                const data = await read<List<Need>>("needs", { ...args, scope: ctx.boot.user.role === "incube" ? "mine" : "all" });
-                html = needsView(ctx, data);
+                const data = id ? {items:[],total:0} as List<Need> : await read<List<Need>>("needs", { ...args, scope: ctx.boot.user.role === "incube" ? "mine" : "all" });
+                if (id) {
+                    const detail = await read<NeedDetail>("need", { id });
+                    detail.responses.forEach(r => responses.set(r.id,r));
+                    html = `<a class="ec13-back" href="#needs">← Retour aux demandes</a>` + needDetail(ctx,detail);
+                } else {
+                    const dismissed = new Set(JSON.parse(localStorage.getItem("euraconnect.v13.dismissed")||"[]") as string[]);
+                    const shown = ctx.boot.user.role === "prestataire" ? {...data,items:data.items.filter(n=>!dismissed.has(n.id))} : data;
+                    html = needsView(ctx, shown);
+                }
                 break;
             }
             case "directory": {
-                const data = await read<List<DirectoryItem>>("directory", args);
-                listDirectory = data.items;
+                const data = await read<List<DirectoryItem>>("directory", { ...args, kind: params.get("kind") === "person" ? "person" : "company" });
                 html = directoryView(ctx, data);
                 break;
             }
@@ -125,39 +135,54 @@ async function render(): Promise<void> {
                 html = offersView(ctx, data);
                 break;
             }
+            case "proposal": {
+                if (!id) { navigate("needs"); return; }
+                let r = responses.get(id);
+                if (!r) r = (await read<ThreadDetail>("messages",{id})).thread;
+                const [co,off,person] = await Promise.allSettled([
+                    read<CompanyDetail>("company",{id:r.company_id}),
+                    read<List<Offer>>("offers",{company_id:r.company_id,size:100}),
+                    r.author_id ? read<DirectoryItem>("person",{id:r.author_id}) : Promise.resolve(null)
+                ]);
+                html = `<a class="ec13-back" href="#needs/${e(r.need_id)}">← Retour à la demande</a>` + responseDetail(r,co.status === "fulfilled"?co.value:null,person.status === "fulfilled"?person.value:null,off.status === "fulfilled"?off.value.items:[]);
+                break;
+            }
             case "messages": {
                 const threads = await read<List<ResponseItem>>("threads", args);
                 for (const r of threads.items)
                     responses.set(r.id, r);
-                if (!id && threads.items.length) {
+                if (!id && threads.items.length && !params.get("q")) {
                     navigate("messages/" + threads.items[0]!.id, params);
                     return;
                 }
                 const detail = id ? await read<ThreadDetail>("messages", { id }) : null;
                 if (detail)
                     responses.set(detail.thread.id, detail.thread);
-                html = messagesView(ctx, threads, detail);
+                const appointments = id ? await read<List<SessionItem>>("sessions", { response_id:id,scope:"all",size:100,from:null,to:null }) : null;
+                html = messagesView(ctx, threads, detail, appointments?.items || []);
                 if (detail && !demo)
                     void write("read_thread", { id, until: detail.read_until }).then(counts).catch(() => undefined);
                 break;
             }
             case "agenda":
             case "workshops": {
-                const monday = new Date((params.get("from") || localDate()) + "T12:00:00Z");
-                if (!params.has("from")) {
-                    const n = monday.getUTCDay();
-                    monday.setUTCDate(monday.getUTCDate() - (n === 0 ? 6 : n - 1));
-                }
-                const from = localDate(monday);
-                const end = new Date(monday);
-                end.setUTCDate(end.getUTCDate() + 7);
+                const workshop = route === "workshops";
+                const range = agendaRange(params);
                 const scope = params.get("scope") || "mine";
-                if (route === "agenda") {
-                    ctx.params.set("from", from);
-                    ctx.params.set("scope", scope);
-                }
-                const data = await read<List<SessionItem>>("sessions", { ...args, scope: route === "workshops" ? "all" : scope, from: route === "workshops" ? new Date().toISOString() : from, to: route === "workshops" ? null : localDate(end), kind: route === "workshops" ? "atelier" : params.get("kind"), host_id: params.get("host_id"), target_company: params.get("target_company"), size: 100 });
-                html = sessionsView(ctx, data, route === "workshops");
+                if (!workshop) ctx.params.set("scope", scope);
+                const results = await read<List<SessionItem>>("sessions", { ...args,
+                    scope:workshop?"all":scope,
+                    from:workshop?new Date().toISOString():range.from,
+                    to:workshop?null:range.to,
+                    kind:workshop?"atelier":params.get("kind"),
+                    mode:workshop?null:params.get("mode"),
+                    expertise:workshop?null:params.get("expertise"),
+                    host_id:params.get("host_id"),target_company:params.get("target_company"),size:100 });
+                const inbox = workshop ? [] : (await read<List<SessionItem>>("sessions", {
+                    scope:"mine",kind:"proposition",from:new Date().toISOString(),
+                    to:null,size:100
+                })).items;
+                html = sessionsView(ctx,results,workshop,inbox);
                 break;
             }
             case "portfolio": {
@@ -180,7 +205,13 @@ async function render(): Promise<void> {
         if (seq !== generation)
             return;
         out.innerHTML = html;
+        document.body.classList.toggle("ec13-mobile-thread",route==="messages" && Boolean(id));
         await hydrateImages(out);
+        if(restoreFilterFocus && !modalOpen()){
+           const field=out.querySelector<HTMLInputElement>('#filter-form input[name="q"]');
+           if(field){field.focus({preventScroll:true});const n=field.value.length;field.setSelectionRange(n,n);}
+           restoreFilterFocus=false;
+        }
         const msgs = out.querySelector(".message-flow");
         if (msgs)
             msgs.scrollTop = msgs.scrollHeight;
@@ -191,14 +222,53 @@ async function render(): Promise<void> {
         out.innerHTML = empty("Cet espace ne peut pas encore \u00EAtre affiche", errorMessage(err), button("R\u00E9essayer", "refresh", { class: "primary", icon: "refresh" }), "warning");
     }
 }
+let searchGeneration=0;
+async function updatePalette(query:string):Promise<void>{
+    const stamp=++searchGeneration;
+    const host=document.querySelector<HTMLElement>('#ec13-palette-results');if(!host)return;
+    if(!query.trim()){host.innerHTML='<p class="muted">Cherchez une demande, une offre, une entreprise ou une personne.</p>';return;}
+    host.textContent='Recherche en cours…';
+    const [needs,offers,companies,people]=await Promise.allSettled([
+        read<List<Need>>('needs',{q:query,size:5}),
+        read<List<Offer>>('offers',{q:query,size:5}),
+        read<List<DirectoryItem>>('directory',{q:query,kind:'company',size:5}),
+        read<List<DirectoryItem>>('directory',{q:query,kind:'person',size:5})
+    ]);
+    if(stamp!==searchGeneration || !host.isConnected)return;
+    const blocks:[string,Array<{id:string;name:string;kind:string}>][]=[
+        ['Demandes',needs.status==='fulfilled'?needs.value.items.map(x=>({id:x.id,name:x.title,kind:'need'})):[]],
+        ['Offres',offers.status==='fulfilled'?offers.value.items.map(x=>({id:x.id,name:x.title,kind:'offer'})):[]],
+        ['Entreprises',companies.status==='fulfilled'?companies.value.items.map(x=>({id:x.id,name:x.name,kind:'company'})):[]],
+        ['Contacts',people.status==='fulfilled'?people.value.items.map(x=>({id:x.id,name:x.name,kind:'person'})):[]]
+    ];
+    host.innerHTML=blocks.map(([group,items])=>`<section><h3>${e(group)} · ${items.length}</h3>${items.map(x=>`<button class="ec13-result" data-action="palette-open" data-kind="${x.kind}" data-id="${e(x.id)}">${e(x.name)} ${icon('arrow',16)}</button>`).join('')||'<p class="muted">Aucun résultat</p>'}</section>`).join('');
+}
+function searchPalette():void{
+    modal('Recherche dans EURACONNECT',`<label class="field">Rechercher dans le réseau<input id="ec13-palette-query" autocomplete="off" placeholder="Nom, compétence, demande, offre…" aria-label="Recherche globale"></label><div id="ec13-palette-results"></div>`,{wide:true});
+    const input=document.querySelector<HTMLInputElement>('#ec13-palette-query');
+    let timer:number|undefined;
+    input?.addEventListener('input',()=>{window.clearTimeout(timer);timer=window.setTimeout(()=>{void updatePalette(input.value).catch(err=>{const x=document.querySelector('#ec13-palette-results');if(x)x.textContent=errorMessage(err);});},350);});
+    input?.focus();
+}
 async function openNeed(id: string): Promise<void> {
     const data = await read<NeedDetail>("need", { id });
     for (const r of data.responses)
         responses.set(r.id, r);
-    modal("Fiche de besoin", needDetail(context(), data), { wide: true });
+    navigate("needs/" + id);
 }
 async function openSession(id: string): Promise<void> { const s = await read<SessionItem>("session", { id }); modal(label(s.kind), sessionDetail(context(), s), { wide: true }); }
 async function getAdmin(): Promise<AdminData> { return adminCache || await read<AdminData>("admin"); }
+async function showCompany(id:string):Promise<void>{
+    const c=await read<CompanyDetail>("company",{id});
+    let offers:Offer[]=[];
+    try { offers=(await read<List<Offer>>("offers",{company_id:id,size:100})).items; } catch { /* company still accessible */ }
+    modal("Fiche entreprise · "+c.name,companyDetailV12(c,offers),{wide:true});
+}
+async function showPerson(id:string):Promise<void>{
+    const person=await read<DirectoryItem>("person",{id});
+    modal("Fiche contact · "+person.name,personDetailV12(person),{wide:true});
+}
+
 function simpleForm(command: string, body: string, id = "", submit = "Enregistrer"): string { return `<form id="command-form" data-command="${e(command)}" data-id="${e(id)}">${body}${footerSubmit(submit)}</form>`; }
 async function members(id: string): Promise<void> { const c = await read<CompanyDetail>("company", { id }); modal("Membres de " + c.name, `<p class="muted">Rattachez un compte d\u00E9j\u00E0 cr\u00E9\u00E9. Aucun email n est envoy\u00E9 par cette action.</p><div class="member-list">${c.members.map(m => `<div class="contact-row"><div><strong>${e(m.name)}</strong><small>${e(m.email)}</small></div>${badge(m.role)}<span class="muted">${m.active ? "Actif" : "D\u00E9sactiv\u00E9"}</span></div>`).join("")}</div>` + simpleForm("set_member", `<input type="hidden" name="target_company" value="${id}">${field("email", "Email du compte existant", "", { type: "email", required: true })}${selectField("member_role", "Droits dans l'entreprise", ["proprietaire", "gestionnaire", "collaborateur"].map(v => ({ value: v, label: label(v) })), "collaborateur")}${checkField("active", "Rattachement actif", true)}`, "", "Enregistrer le rattachement")); }
 function showPremium(): void { const c = context().company; modal("Premium, uniquement pour les prestataires", `<div class="premium-hero">${icon("shield", 34)}<h3>Une identit\u00E9 revelee.<br>Un contexte toujours lisible.</h3></div><div class="comparison"><div><h4>Sans Premium</h4><p>Consultez les briefs, les tags et les budgets. Proposez vos services et echangez dans EURACONNECT.</p></div><div><h4>Avec Premium</h4><p>Identifiez les startups et consultez les coordonn\u00E9es qu elles ont autoris\u00E9es a partager. Les droits s appliquent \u00E0 l'entreprise.</p></div></div><div class="inline-note"><p>Activation et desactivation par l'administrateur. Aucun paiement en ligne. Les incub\u00E9s ne souscrivent jamais de Premium.</p></div>${c?.premium ? `<p class="good">Premium actif pour ${e(c.name)}${c.expires_at ? " jusqu au " + dateText(c.expires_at) : ""}.</p>` : "<p class=\"muted\">Pour une activation, rapprochez-vous de l'\u00E9quipe Eurasante.</p>"}`); }
@@ -254,9 +324,13 @@ async function action(el: HTMLElement): Promise<void> {
             navigate(el.dataset.route || "dashboard");
             return;
         case "global-search":
+            searchPalette();return;
+        case "palette-open":
             closeModal();
-            navigate("directory");
-            setTimeout(() => document.querySelector<HTMLInputElement>("#filter-form input[name=q]")?.focus(), 250);
+            if(el.dataset.kind==='need')navigate('needs/'+id);
+            else if(el.dataset.kind==='offer'){navigate('offers');}
+            else if(el.dataset.kind==='company')await showCompany(id);
+            else if(el.dataset.kind==='person')await showPerson(id);
             return;
         case "premium":
             showPremium();
@@ -269,6 +343,15 @@ async function action(el: HTMLElement): Promise<void> {
             return;
         case "directory-kind":
             filter("kind", el.dataset.kind || null);
+            return;
+        case "directory-view":
+            filter("view",el.dataset.view||"compact");
+            return;
+        case "company-detail":
+            await showCompany(id);
+            return;
+        case "person-detail":
+            await showPerson(id);
             return;
         case "favorite": {
             el.setAttribute("disabled", "");
@@ -292,14 +375,16 @@ async function action(el: HTMLElement): Promise<void> {
                 navigate("company");
                 return;
             }
-            modal("Nouvelle demande", needForm(ctx, undefined, ctx.boot.user.role === "admin" ? (await getAdmin()).companies : []), { wide: true });
+            modal("Publier une demande · 3 étapes", needForm(ctx, undefined, ctx.boot.user.role === "admin" ? (await getAdmin()).companies : []), { wide: true });
+            setupWizard();
             return;
         case "open-need":
             await openNeed(id);
             return;
         case "edit-need": {
             const data = await read<NeedDetail>("need", { id });
-            modal("Modifier la demande", needForm(ctx, data.need, ctx.boot.user.role === "admin" ? (await getAdmin()).companies : []), { wide: true });
+            modal("Modifier la demande · 3 étapes", needForm(ctx, data.need, ctx.boot.user.role === "admin" ? (await getAdmin()).companies : []), { wide: true });
+            setupWizard(true);
             return;
         }
         case "need-status": {
@@ -312,13 +397,35 @@ async function action(el: HTMLElement): Promise<void> {
             modal("Proposer mon expertise", responseForm(data.need), { wide: true });
             return;
         }
-        case "view-response": {
-            let r = responses.get(id);
-            if (!r) {
-                const d = await read<ThreadDetail>("messages", { id });
-                r = d.thread;
-            }
-            modal("Proposition du prestataire", responseDetail(r), { wide: true });
+        case "view-response":
+            navigate("proposal/" + id);
+            return;
+        case "dismiss-need": {
+            const key="euraconnect.v13.dismissed";
+            const values=JSON.parse(localStorage.getItem(key)||"[]") as string[];
+            localStorage.setItem(key,JSON.stringify([...new Set([...values,id])]));
+            document.querySelectorAll<HTMLElement>("[data-need-id]").forEach(card=>{if(card.dataset.needId===id)card.remove();});
+            toast("Cette opportunité est masquée sur cet appareil.");
+            return;
+        }
+        case "quick-reply": {
+            const target=document.querySelector<HTMLTextAreaElement>('#message-form textarea[name="body"]');
+            if(target){target.value=(target.value.trim()?target.value.trim()+" ":"")+({available:"Disponible mardi ?",scope:"Pouvez-vous préciser le périmètre ?",thanks:"Merci pour votre proposition, je reviens vers vous rapidement."} as Record<string,string>)[el.dataset.text||""]||"";target.focus();}
+            return;
+        }
+        case "wizard-step":
+            showWizard(Number(el.dataset.step || 0));
+            return;
+        case "wizard-next":
+            showWizard(Math.min(2,wizardPage+1));
+            return;
+        case "wizard-prev":
+            showWizard(Math.max(0,wizardPage-1));
+            return;
+        case "compare-selected": {
+            const selected = Array.from(document.querySelectorAll<HTMLInputElement>(".ec13-compare-pick:checked")).map(x=>responses.get(x.value)).filter((r):r is ResponseItem=>Boolean(r));
+            if(selected.length<2 || selected.length>3) { toast("Sélectionnez 2 ou 3 propositions.",true); return; }
+            modal("Comparaison de propositions", `<div class="ec13-compare-grid">${selected.map(r=>`<article class="panel"><h3>${e(r.provider)}</h3><p><strong>${r.price===null?'À convenir':(r.price/100).toLocaleString('fr-FR')+' € HT'}</strong></p><p>${r.lead_days===null?'Délai à préciser':r.lead_days+' jours'}</p><h4>Approche</h4><div class="prose">${markdown(r.approach || r.message)}</div>${button('Voir la proposition','view-response',{id:r.id,class:'primary'})}</article>`).join('')}</div>`,{wide:true});
             return;
         }
         case "response-decision": {
@@ -339,15 +446,8 @@ async function action(el: HTMLElement): Promise<void> {
             return;
         }
         case "directory-detail": {
-            const d = listDirectory.find(x => x.id === id && x.kind === el.dataset.kind);
-            if (!d)
-                return;
-            let extra = "";
-            if (d.kind === "company" && d.identity_visible) {
-                const c = await read<CompanyDetail>("company", { id });
-                extra = `<p class="muted">${e(c.details?.sector || "")} ${e(c.details?.city || "")}</p>${c.details?.contact_email ? `<p>${icon("mail", 16)} ${e(c.details.contact_email)}</p>` : ""}${c.details?.phone ? "<p>" + e(c.details.phone) + "</p>" : ""}`;
-            }
-            modal(d.kind === "company" ? "Fiche entreprise" : "Fiche contact", `<div class="identity-row">${avatar(d.name, d.media, d.kind === "company")}<div><h2>${e(d.name)}</h2>${badge(d.type)}<p>${e(d.subtitle || d.company_name || "")}</p></div></div><div class="prose">${markdown(d.description)}</div>${tags(d.tags)}${extra}<footer class="form-footer">${button("Voir les disponibilit\u00E9s", "directory-slots", { id: d.id, icon: "calendar", class: "primary", extra: `data-kind="${d.kind}"` })}</footer>`, { wide: true });
+            if (el.dataset.kind==="person") await showPerson(id);
+            else await showCompany(id);
             return;
         }
         case "new-offer":
@@ -384,6 +484,14 @@ async function action(el: HTMLElement): Promise<void> {
         case "agenda-view":
             filter("view", el.dataset.view || "week");
             return;
+        case "agenda-clear": {
+            const params=new URLSearchParams({scope:ctx.params.get("scope")||"mine",view:ctx.params.get("view")||"week"});
+            navigate("agenda",params);
+            return;
+        }
+        case "agenda-step":
+            filter("from",shiftAgenda(ctx.params,Number(el.dataset.direction||"1")));
+            return;
         case "agenda-today":
             filter("from", localDate());
             return;
@@ -405,6 +513,9 @@ async function action(el: HTMLElement): Promise<void> {
             setTimeout(() => URL.revokeObjectURL(href), 2000);
             return;
         }
+        case "decline-session":
+            modal("Refuser le créneau proposé",simpleForm("decline_session","<p>Le prestataire sera informé que ce créneau ne vous convient pas. Vous pourrez proposer un autre horaire depuis la conversation.</p>",id,"Confirmer mon refus"));
+            return;
         case "cancel-booking":
             modal("Annuler votre inscription", simpleForm("cancel_booking", "<p>La place sera liberee. L'organisateur sera inform\u00E9.</p>", id, "Confirmer l'annulation"));
             return;
@@ -479,6 +590,13 @@ async function action(el: HTMLElement): Promise<void> {
             modal("Validation de " + c.name, simpleForm("admin_company", selectField("status", "Statut de publication", [{ value: "publiee", label: "Publi\u00E9e et valid\u00E9e" }, { value: "masquee", label: "Masquee / suspendue" }, { value: "brouillon", label: "En attente de validation" }], c.status) + field("reason", "Motif / observation", "", { type: "textarea" }), id));
             return;
         }
+        case "admin-labels": {
+            const c=(await getAdmin()).companies.find(x=>x.id===id);
+            if(!c) return;
+            const choices=[['partenaire','Partenaire du réseau'],['institutionnel','Institutionnel'],['pop','Prestataire POP'],['intervenant_atelier','Intervenant d’atelier']];
+            modal("Catégories de "+c.name,`<form id="command-form" data-command="set_company_labels" data-id="${e(id)}"><p class="muted">Ces distinctions sont administrées et vérifiables. « Premium » reste attribué depuis son panneau dédié. « Intervenant d’atelier » apparaît aussi automatiquement lorsqu’un atelier est publié.</p><div class="ec12-label-form">${choices.map(([v,t])=>`<label><input type="checkbox" name="label_${v}" ${c.labels?.includes(v||"")?'checked':''}>${e(t||"")}</label>`).join('')}</div>${footerSubmit("Enregistrer les catégories")}</form>`,{wide:true});
+            return;
+        }
         case "admin-premium": {
             const c = (await getAdmin()).companies.find(x => x.id === id);
             if (!c)
@@ -522,6 +640,42 @@ async function action(el: HTMLElement): Promise<void> {
         }
     }
 }
+function showWizard(step:number):void {
+    const form=document.querySelector<HTMLFormElement>(".ec13-wizard"); if(!form) return;
+    wizardPage=Math.min(2,Math.max(0,step));
+    form.querySelectorAll<HTMLElement>(".ec13-steps [data-step]").forEach(b=>b.classList.toggle("active",Number(b.dataset.step)===wizardPage));
+    const grid=form.querySelector(".form-grid"); if(!grid)return;
+    // The existing form fields are grouped by their semantic section headings.
+    let stage=0;
+    Array.from(grid.children).forEach(child=>{
+       const x=child as HTMLElement;
+       const title=x.classList.contains("form-section-title") ? x.querySelector("strong")?.textContent || "" : "";
+       if(title.includes("Conditions")) stage=1;
+       else if(title.includes("La startup") || title.includes("projet")) stage=0;
+       if(x.matches("details.form-section") || x.querySelector('[name="status"]')) stage=2;
+       if(x.matches(".ec13-wizard-panel")) stage=0;
+       x.hidden=stage!==wizardPage;
+    });
+    const preview=form.querySelector<HTMLElement>("#ec13-preview"); if(preview){preview.hidden=wizardPage!==2;}
+    const title=(form.querySelector<HTMLInputElement>('[name="title"]')?.value||"Demande sans titre");
+    const context=(form.querySelector<HTMLTextAreaElement>('[name="context"]')?.value||"");
+    const out=form.querySelector<HTMLElement>("#ec13-preview-text");if(out)out.textContent=title+(context?" — "+context.slice(0,300):"");
+    form.querySelector<HTMLElement>('.ec13-wizard-submit')?.toggleAttribute('hidden',wizardPage!==2);
+    form.querySelector<HTMLElement>('[data-action="wizard-next"]')?.toggleAttribute('hidden',wizardPage===2);
+    form.querySelector<HTMLElement>('[data-action="wizard-prev"]')?.toggleAttribute('hidden',wizardPage===0);
+}
+function setupWizard(editing=false):void {
+    const form=document.querySelector<HTMLFormElement>('.ec13-wizard');if(!form)return;
+    wizardPage=0;
+    if(!editing){try{const draft=JSON.parse(sessionStorage.getItem(needDraftKey)||'{}') as Record<string,string>;for(const [k,v] of Object.entries(draft)){const f=form.elements.namedItem(k);if(f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement)f.value=v;}}catch{ /* no saved draft */ }}
+    form.addEventListener('input',()=>{if(editing)return;const values:Record<string,string>={};form.querySelectorAll<HTMLInputElement|HTMLTextAreaElement>('input[name],textarea[name]').forEach(x=>{if(x.type!=='hidden'&&x.type!=='password'&&x.type!=='checkbox')values[x.name]=x.value;});sessionStorage.setItem(needDraftKey,JSON.stringify(values));const state=form.querySelector('#ec13-draft-state');if(state)state.textContent='Brouillon sauvegardé sur cet appareil.';});
+    form.querySelector<HTMLSelectElement>('#ec13-template')?.addEventListener('change',ev=>{
+       const k=(ev.target as HTMLSelectElement).value;
+       const templates:Record<string,[string,string,string]>={audit:['Audit de notre organisation','Nous souhaitons analyser notre situation actuelle et identifier les priorités.','Diagnostic, recommandations et feuille de route.'],juridique:['Sécuriser notre cadre juridique','Nous recherchons un accompagnement juridique adapté à notre activité.','Analyse des risques et documents contractuels.'],recrutement:['Recruter un profil clé','Nous devons définir un poste et identifier des candidats qualifiés.','Définition du besoin, sourcing et présélection.'],financement:['Structurer notre financement','Nous souhaitons préparer notre stratégie de financement.','Plan de financement et dossier investisseurs.']};
+       if(!templates[k])return;const [title,context,deliverables]=templates[k];for(const [name,value] of Object.entries({title,context,deliverables})){const x=form.elements.namedItem(name);if(x instanceof HTMLInputElement||x instanceof HTMLTextAreaElement)x.value=value;}form.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    showWizard(0);
+}
 async function submitCommand(form: HTMLFormElement): Promise<void> {
     const command = form.dataset.command || "";
     const args = formValues(form);
@@ -536,8 +690,9 @@ async function submitCommand(form: HTMLFormElement): Promise<void> {
             args[key] = String(args[key]).trim() ? Number(args[key]) : null;
     if (command === "save_need" && args.deadline)
         args.deadline = String(args.deadline) + "T23:59:00";
-    if (command === "create_session" && args.kind !== "atelier")
-        delete args.tags;
+    if (command === "set_company_labels") {
+        args.labels=["partenaire","institutionnel","pop","intervenant_atelier"].filter(k=>args["label_"+k]===true);
+    }
     if (command === "assign_manager") {
         args.id = args.manager_id;
     }
@@ -550,6 +705,7 @@ async function submitCommand(form: HTMLFormElement): Promise<void> {
     }
     else
         await write(command, args);
+    if(command==="save_need") sessionStorage.removeItem(needDraftKey);
     toast(command === "book_session" ? "Inscription enregistr\u00E9e. Consultez le statut de votre rendez-vous." : command === "respond" ? "Votre proposition a \u00E9t\u00E9 transmise \u00E0 la startup." : "Enregistrement effectu\u00E9.");
     closeModal();
     adminCache = null;
@@ -564,7 +720,7 @@ function authScreen(error = ""): void {
     if (recovery) {
         authMode = "reset";
     }
-    app.innerHTML = `<div class="auth-layout"><aside class="auth-brand"><a class="brand" href="#"><span class="brand-mark">E<span>+</span></span>EURACONNECT</a><p class="eyebrow">LE R\u00C9SEAU QUI FAIT AVANCER VOS PROJETS</p><h1>La bonne expertise.<br>La bonne rencontre.<br><em>Au bon moment.</em></h1><p>Startup, prestataire ou \u00E9quipe d'accompagnement : un espace commun pour transformer les besoins en collaborations.</p><div class="auth-steps">${[["needs", "Exprimer un besoin"], ["people", "Mobiliser une expertise"], ["calendar", "Passer \u00E0 l'action"]].map(([i, t]) => "<span>" + icon(i || "needs", 21) + e(t) + "</span>").join("")}</div><footer>EURASANTE &middot; Services et accompagnement</footer></aside><main class="auth-main"><div class="auth-card"><p class="eyebrow">BIENVENUE DANS VOTRE R\u00C9SEAU</p><h2>${authMode === "signup" ? "Rejoindre en tant que prestataire" : authMode === "recover" ? "Retrouver mon acc\u00E8s" : authMode === "reset" ? "Nouveau mot de passe" : "Se connecter"}</h2><p class="muted">${authMode === "signup" ? "Votre entreprise sera valid\u00E9e par l'\u00E9quipe avant publication. Les comptes incub\u00E9s et managers sont g\u00E9r\u00E9s par l'administrateur." : "Retrouvez vos projets, vos contacts et vos prochaines rencontres."}</p>
+    app.innerHTML = `<div class="auth-layout"><aside class="auth-brand"><a class="brand" href="#"><img class="ec12-brand-logo" src="/euraconnect-64.png" width="48" height="48" alt="" loading="eager">EURACONNECT</a><p class="eyebrow">LE R\u00C9SEAU QUI FAIT AVANCER VOS PROJETS</p><h1>La bonne expertise.<br>La bonne rencontre.<br><em>Au bon moment.</em></h1><p>Startup, prestataire ou \u00E9quipe d'accompagnement : un espace commun pour transformer les besoins en collaborations.</p><div class="auth-steps">${[["needs", "Exprimer un besoin"], ["people", "Mobiliser une expertise"], ["calendar", "Passer \u00E0 l'action"]].map(([i, t]) => "<span>" + icon(i || "needs", 21) + e(t) + "</span>").join("")}</div><footer>EURASANTE &middot; Services et accompagnement</footer></aside><main class="auth-main"><div class="auth-card"><p class="eyebrow">BIENVENUE DANS VOTRE R\u00C9SEAU</p><h2>${authMode === "signup" ? "Rejoindre en tant que prestataire" : authMode === "recover" ? "Retrouver mon acc\u00E8s" : authMode === "reset" ? "Nouveau mot de passe" : "Se connecter"}</h2><p class="muted">${authMode === "signup" ? "Votre entreprise sera valid\u00E9e par l'\u00E9quipe avant publication. Les comptes incub\u00E9s et managers sont g\u00E9r\u00E9s par l'administrateur." : "Retrouvez vos projets, vos contacts et vos prochaines rencontres."}</p>
  ${!hasConfiguration() ? "<div class=\"warning-note\">Configuration Supabase requise : ajoutez les deux variables NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans les variables de compilation de Cloudflare, puis relancez le d\u00E9ploiement.</div>" : ""}<form id="auth-form">${authMode === "signup" ? field("name", "Pr\u00E9nom et nom", "", { required: true }) : ""}${authMode !== "reset" ? field("email", "Email professionnel", "", { type: "email", required: true }) : ""}${authMode !== "recover" ? field("password", "Mot de passe", "", { type: "password", required: true, help: authMode === "login" ? "" : "12 caract\u00E8res minimum." }) : ""}<div class="form-error" role="alert" ${error ? "" : "hidden"}>${e(error)}</div><button class="btn primary full" type="submit" ${!hasConfiguration() ? "disabled" : ""}>${authMode === "signup" ? "Cr\u00E9er mon compte" : authMode === "recover" ? "Envoyer le lien" : authMode === "reset" ? "Enregistrer le mot de passe" : "Entrer dans mon espace"}${icon("arrow", 17)}</button></form><div class="auth-links">${authMode === "login" ? "<button data-auth=\"recover\">Mot de passe oubli\u00E9 ?</button><button data-auth=\"signup\">Devenir prestataire</button>" : "<button data-auth=\"login\">Revenir \u00E0 la connexion</button>"}</div><div class="auth-demo"><span>D\u00E9couvrir les nouveaux parcours</span><a href="?demo=1">Ouvrir l'aper\u00E7u avec des donn\u00E9es fictives ${icon("arrow", 15)}</a></div></div><footer>Vos identifiants restent g\u00E9r\u00E9s par Supabase Auth.</footer></main></div>`;
 }
 document.addEventListener("click", event => {
@@ -584,6 +740,7 @@ document.addEventListener("submit", event => {
     if (!["command-form", "auth-form", "message-form", "filter-form"].includes(form.id))
         return;
     event.preventDefault();
+    if (form.classList.contains("ec13-wizard") && wizardPage < 2) { showWizard(wizardPage+1); return; }
     if (form.id === "filter-form") {
         const values = formValues(form);
         const r = routeParts();
@@ -677,8 +834,24 @@ document.addEventListener("submit", event => {
         }
     });
 });
+let filterTimer:number|undefined;
+let restoreFilterFocus=false;
+document.addEventListener('input',ev=>{
+   const input=ev.target as HTMLElement;
+   if(!input.closest('#filter-form') || !(input instanceof HTMLInputElement) || input.name!=='q')return;
+   window.clearTimeout(filterTimer);
+   const value=input.value;
+   restoreFilterFocus=true;
+   filterTimer=window.setTimeout(()=>{const current=routeParts();const p=new URLSearchParams(current.params);if(value)p.set('q',value);else p.delete('q');p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);},550);
+});
 document.addEventListener("change", event => {
     const el = event.target as HTMLInputElement;
+    if(el.closest('#filter-form') && (el instanceof HTMLSelectElement || (el instanceof HTMLInputElement && el.type==='checkbox'))) {
+        const values=formValues(el.closest('form') as HTMLFormElement);
+        const current=routeParts();const p=new URLSearchParams(current.params);
+        for(const [key,value] of Object.entries(values)){if(value===false || value==='' || value==null)p.delete(key);else p.set(key,String(value));}
+        p.delete('page');navigate(current.route+(current.id?'/'+current.id:''),p);return;
+    }
     if (el.id === "company-switch") {
         activeCompany = el.value || null;
         if (activeCompany)
@@ -703,8 +876,7 @@ document.addEventListener("keydown", event => {
     }
     if (event.key === "/" && !modalOpen() && !["INPUT", "TEXTAREA"].includes(t.tagName) && !t.isContentEditable) {
         event.preventDefault();
-        navigate("directory");
-        setTimeout(() => document.querySelector<HTMLInputElement>("[name=q]")?.focus(), 250);
+        searchPalette();
     }
 });
 window.addEventListener("hashchange", () => {

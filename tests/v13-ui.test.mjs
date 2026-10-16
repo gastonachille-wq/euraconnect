@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const app=fs.readFileSync(new URL('../src/app.ts',import.meta.url),'utf8');
+const forms=fs.readFileSync(new URL('../src/forms.ts',import.meta.url),'utf8');
+const views=fs.readFileSync(new URL('../src/views.ts',import.meta.url),'utf8');
+test('V1.3: deep links need and proposal',()=>{assert.match(app,/case "proposal":/);assert.match(app,/navigate\("needs\/" \+ id\)/);});
+test('V1.3: brief step navigation and four templates',()=>{for(const k of ['audit','juridique','recrutement','financement'])assert.ok(forms.includes(`value="${k}"`));assert.match(app,/function showWizard/);});
+test('V1.3: comparison only 2 to 3 proposals',()=>{assert.match(app,/selected.length<2 \|\| selected.length>3/);assert.match(forms,/ec13-compare-pick/);});
+test('V1.3: mobile navigation and manager urgency table',()=>{assert.match(views,/ec13-mobile-nav/);assert.match(views,/ec13-health-table/);});
