@@ -1,12 +1,14 @@
-import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia } from "./api.js";
+import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc } from "./api.js";
 import type { Boot, List, Need, NeedDetail, ResponseItem, ThreadDetail, DirectoryItem, SessionItem, Offer, CompanyDetail, AdminData, Notification, Dashboard, Portfolio, Role } from "./domain.js";
 import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs, localDate, markdown, label } from "./domain.js";
-import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, portfolioView, adminView, notificationList, titles } from "./views.js";
+import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles } from "./views.js";
 import type { Context } from "./views.js";
 import { needForm, needDetail, responseForm, responseDetail, statusForm, sessionForm, sessionDetail, companyPage, companyForm, profileForm, offerForm } from "./forms.js";
 import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button, empty, field, selectField, checkField, footerSubmit, badge, tags } from "./ui.js";
 import { icon } from "./icons.js";
 import { demoBoot, demoRpc } from "./demo.js";
+import { managerCenter, startupRecommendations } from "./manager-v20.js";
+import type { ManagerRecommendation } from "./manager-v20.js";
 import { companyDetailV12, personDetailV12 } from "./directory-v12.js";
 import { agendaRange, shiftAgenda } from "./agenda-v12.js";
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -19,6 +21,8 @@ let demo = new URLSearchParams(location.search).get("demo") === "1";
 let demoRole: Role = "incube";
 let activeCompany: string | null = localStorage.getItem("euraconnect.company.v1");
 let adminCache: AdminData | null = null;
+let managerProviders: DirectoryItem[] = [];
+let managerPortfolio: Portfolio | null = null;
 let listOffers: Offer[] = [];
 const responses = new Map<string, ResponseItem>();
 const needDraftKey = "euraconnect.v13.needDraft";
@@ -110,6 +114,10 @@ async function render(): Promise<void> {
         switch (route) {
             case "dashboard":
                 html = dashboardView(ctx, await read<Dashboard>("dashboard"));
+                if(ctx.boot.user.role==="incube" && !demo){
+                    try { const recs=await managerRpc<ManagerRecommendation[]>("mine"); html+=startupRecommendations(recs); }
+                    catch { html+=`<p class="ec20-api-notice">Les recommandations du manager seront accessibles après installation de la migration V2.</p>`; }
+                }
                 break;
             case "needs": {
                 const data = id ? {items:[],total:0} as List<Need> : await read<List<Need>>("needs", { ...args, scope: ctx.boot.user.role === "incube" ? "mine" : "all" });
@@ -117,6 +125,9 @@ async function render(): Promise<void> {
                     const detail = await read<NeedDetail>("need", { id });
                     detail.responses.forEach(r => responses.set(r.id,r));
                     html = `<a class="ec13-back" href="#needs">← Retour aux demandes</a>` + needDetail(ctx,detail);
+                    if(ctx.boot.user.role==="incube" && detail.need.owned) {
+                        html+=`<section class="ec20-help"><div><span class="ec20-eyebrow">ACCOMPAGNEMENT</span><h3>Besoin d’un coup de pouce ?</h3><p>Votre Startup Manager peut vous orienter vers une expertise, débloquer une situation ou vous aider à préciser la demande.</p></div><button class="btn primary" data-action="ask-manager" data-id="${e(detail.need.id)}">${icon('send',16)} Solliciter mon Startup Manager</button></section>`;
+                    }
                 } else {
                     const dismissed = new Set(JSON.parse(localStorage.getItem("euraconnect.v13.dismissed")||"[]") as string[]);
                     const shown = ctx.boot.user.role === "prestataire" ? {...data,items:data.items.filter(n=>!dismissed.has(n.id))} : data;
@@ -191,7 +202,14 @@ async function render(): Promise<void> {
                     navigate("portfolio/" + data.startups[0]!.id, params);
                     return;
                 }
-                html = portfolioView(ctx, data, id);
+                managerPortfolio=data;
+                const suppliers=await read<List<DirectoryItem>>("directory",{kind:"company",type:"prestataire",size:100,sort:"name"});
+                managerProviders=suppliers.items;
+                let recs:ManagerRecommendation[]=[];
+                let recommendationWarning="";
+                if(!demo){try {recs=await managerRpc<ManagerRecommendation[]>("list");}
+                    catch {recommendationWarning='<div class="warning-note">Les recommandations d’experts nécessitent la migration Supabase 07_V20_MANAGER_RECOMMANDATIONS.sql. Les autres actions restent disponibles.</div>';}}
+                html=recommendationWarning+managerCenter(data,id,managerProviders,recs);
                 break;
             }
             case "company":
@@ -533,6 +551,18 @@ async function action(el: HTMLElement): Promise<void> {
             closeModal();
             await render();
             return;
+        case "ask-manager": {
+            modal("Demander l’appui de votre Startup Manager",`<p>Votre demande sera envoyée au manager affecté à votre startup. Il pourra suivre votre situation et recommander un expert.</p><form id="ec20-help-form"><input type="hidden" name="need_id" value="${e(id)}"><label class="ec20-form-label">Que souhaitez-vous débloquer ?<textarea name="message" required minlength="15" maxlength="1000" rows="4" placeholder="Exemple : nous cherchons un prestataire capable de..."></textarea></label><p class="form-error" role="alert" hidden></p><button type="submit" class="btn primary full">Envoyer au manager</button></form>`,{wide:true});
+            return;
+        }
+        case "manager-open-recommend": {
+            if(!managerPortfolio) {toast("Ouvrez votre portefeuille.",true);return;}
+            const target=managerPortfolio.needs.find(n=>n.id===id);
+            if(!target){toast("Demande introuvable.",true);return;}
+            const supplierOptions=managerProviders.filter(x=>x.kind==="company"&&x.type==="prestataire"&&x.identity_visible);
+            modal("Recommander un expert",`<p>Pour la demande <strong>${e(target.title)}</strong>. Vous transmettez une recommandation à la startup, sans l’engager commercialement.</p><form id="ec20-recommend-form"><input type="hidden" name="need_id" value="${e(target.id)}"><label>Prestataire validé<select name="provider_id" required><option value="">Choisir un prestataire</option>${supplierOptions.map(x=>`<option value="${e(x.id)}">${e(x.name)}</option>`).join("")}</select></label><label>Votre recommandation<textarea name="rationale" rows="4" minlength="15" maxlength="1800" required placeholder="Pourquoi cet expert répond au besoin..."></textarea></label><div class="form-error" role="alert" hidden></div><button class="btn primary full" type="submit">Transmettre à la startup</button></form>`,{wide:true});
+            return;
+        }
         case "followup-form":
             modal("Action d'accompagnement", simpleForm("followup", `<input type="hidden" name="target_company" value="${id}">${field("body", "Observation et prochaine action", "", { type: "textarea", required: true })}${field("due_at", "\u00C9ch\u00E9ance de suivi", "", { type: "date" })}<p class="muted">Visible uniquement des managers affect\u00E9s et de l'administrateur.</p>`));
             return;
@@ -737,7 +767,7 @@ document.addEventListener("click", event => {
 });
 document.addEventListener("submit", event => {
     const form = event.target as HTMLFormElement;
-    if (!["command-form", "auth-form", "message-form", "filter-form"].includes(form.id))
+    if (!["command-form", "auth-form", "message-form", "filter-form", "ec20-recommend-form", "ec20-help-form"].includes(form.id))
         return;
     event.preventDefault();
     if (form.classList.contains("ec13-wizard") && wizardPage < 2) { showWizard(wizardPage+1); return; }
@@ -770,6 +800,24 @@ document.addEventListener("submit", event => {
         err.textContent = "";
     }
     const run = async () => {
+        if (form.id === "ec20-help-form") {
+            if(demo)throw new Error("L'aperçu est en lecture seule.");
+            const v=formValues(form);
+            await managerRpc("ask",{need_id:v.need_id,message:v.message});
+            toast("Votre demande d’aide a été transmise au Startup Manager.");
+            closeModal();
+            await render();
+            return;
+        }
+        if (form.id === "ec20-recommend-form") {
+            if(demo)throw new Error("L'aperçu est en lecture seule.");
+            const v=formValues(form);
+            await managerRpc("recommend",{need_id:v.need_id,provider_id:v.provider_id,rationale:v.rationale});
+            toast("Recommandation transmise à la startup et enregistrée dans votre suivi.");
+            closeModal();
+            await render();
+            return;
+        }
         if (form.id === "auth-form") {
             if (authBusy)
                 return;

@@ -188,3 +188,8 @@ export async function uploadImage(file: File, userId: string, kind: "company" | 
     await rpc("register_media", { type: kind, target_id: targetId, path, company });
     releaseMedia();
 }
+
+/** API manager v2 : droits vérifiés par Supabase, pas par l'interface. */
+export async function managerRpc<T>(action: 'list'|'mine'|'recommend'|'ask', args:Record<string,unknown>={}):Promise<T> {
+    return await request('/rest/v1/rpc/ec20_manager_api','POST',{p_action:action,p_args:args},await accessToken()) as T;
+}
