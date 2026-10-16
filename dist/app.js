@@ -377,6 +377,14 @@ async function action(el) {
             section?.querySelector("button[data-action=view-response]")?.focus({ preventScroll: true });
             return;
         }
+        case "collapse-sidebar": {
+            const collapsed = document.body.classList.toggle("ec24-sidebar-collapsed");
+            try {
+                localStorage.setItem("euraconnect.nav.collapsed", collapsed ? "1" : "0");
+            }
+            catch { }
+            return;
+        }
         case "menu":
             document.querySelector(".app-shell")?.classList.toggle("mobile-open");
             return;
@@ -1161,3 +1169,9 @@ function managerMeetings(items, role) {
         return '';
     return `<section class="ec23-meetings"><div class="ec23-meetings-head"><div><span class="eyebrow">ACCOMPAGNEMENT</span><h2>${role === 'incube' ? 'Mes invitations du Startup Manager' : 'Rendez-vous proposés aux startups'}</h2></div><span>${items.filter(x => x.status === 'pending').length} en attente</span></div><div class="ec23-meetings-grid">${items.slice(0, 12).map(x => `<article class="ec23-meeting"><span class="ec23-state ${e(x.status)}">${x.status === 'pending' ? 'À confirmer' : x.status === 'accepted' ? 'Accepté' : 'Refusé'}</span><h3>${e(x.title)}</h3><p>${e(x.startup_name)} · ${role === 'incube' ? 'Avec ' + e(x.manager_name) : 'Pour ' + e(x.invitee_name)}</p><strong>${dateText(x.starts_at)} · ${new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(new Date(x.starts_at))}</strong><p>${e(x.mode === 'visio' ? 'Visio' : x.mode === 'telephone' ? 'Téléphone' : 'Sur place')}${x.location ? ' · ' + e(x.location) : ''}</p>${x.message ? `<p class="ec23-message">${e(x.message)}</p>` : ''}${x.can_respond && x.status === 'pending' ? `<div class="ec23-meeting-actions"><button class="btn primary small" data-action="manager-meeting-response" data-id="${e(x.id)}" data-status="accepted">Accepter</button><button class="btn ghost small" data-action="manager-meeting-response" data-id="${e(x.id)}" data-status="declined">Refuser</button></div>` : ''}</article>`).join('')}</div></section>`;
 }
+// Navigation preferences are local to the browser and never alter user permissions.
+try {
+    if (localStorage.getItem("euraconnect.nav.collapsed") === "1")
+        document.body.classList.add("ec24-sidebar-collapsed");
+}
+catch { }
