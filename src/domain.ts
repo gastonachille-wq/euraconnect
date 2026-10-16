@@ -38,6 +38,7 @@ export interface PersonProfile {
     nom_public?: string;
     titre?: string;
     bio_html?: string;
+    linkedin_url?: string;
     visible?: boolean;
     tags?: Tag[];
     media?: Media | null;
@@ -81,6 +82,7 @@ export interface ResponseItem {
     company_id: string;
     provider: string;
     author: string;
+    author_id?: string;
     need_title: string;
     startup: string;
     startup_id: string;
@@ -130,6 +132,8 @@ export interface DirectoryItem {
     identity_visible: boolean;
     tags: Tag[];
     premium: boolean;
+    labels?: string[];
+    linkedin_url?: string;
     can_edit: boolean;
     status?: string;
     next_slot: string | null;
@@ -138,6 +142,9 @@ export interface DirectoryItem {
 }
 export interface CompanyDetail {
     media?: Media | null;
+    type?: string;
+    premium?: boolean;
+    labels?: string[];
     id: string;
     name: string;
     can_edit: boolean;
@@ -153,6 +160,10 @@ export interface CompanyDetail {
         id: string;
         name: string;
         role: string;
+        contact_role?: string;
+        title?: string;
+        linkedin_url?: string;
+        media?: Media | null;
         active: boolean;
         email: string;
     }[];
@@ -182,6 +193,8 @@ export interface SessionItem {
     can_manage: boolean;
     need_id: string | null;
     response_id: string | null;
+    can_reply?: boolean;
+    tags?: Tag[];
     participants: {
         id: string;
         user_id: string;
@@ -272,6 +285,7 @@ export interface AdminData {
         provider_status: string | null;
         premium: boolean;
         expires_at: string | null;
+        labels?: string[];
     }[];
     assignments: {
         manager_id: string;

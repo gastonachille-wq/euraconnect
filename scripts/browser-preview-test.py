@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parent.parent
-css=(root/'public/app.css').read_text()
+css=(root/'public/app.css').read_text()+'\n'+(root/'public/ux-v11.css').read_text()
 js=(root/'docs/previews/preview-runtime.js').read_text()
 results=[]
 with sync_playwright() as pw:
@@ -29,6 +29,15 @@ with sync_playwright() as pw:
    page.evaluate('(r)=>{location.hash="#"+r;}',route)
    page.wait_for_timeout(100)
    check(role+': '+route)
+   if role=='startup_manager' and route=='portfolio':
+    assert '#portfolio/' in page.evaluate('location.hash'), 'Manager portfolio did not select its first startup'
+    assert 'Journal d\'accompagnement' in page.locator('#page-content').inner_text(), 'Manager pipeline details are missing'
+    results.append({'test':'portfolio manager auto-selects its first startup','status':'passed'})
+   if role=='prestataire' and route=='needs':
+    page_text=page.locator('#page-content').inner_text()
+    assert 'Nova Care Studio' not in page_text, 'Non-premium demo provider sees startup identity'
+    assert 'Startup accompagn' in page_text, 'Anonymized startup reference missing'
+    results.append({'test':'Non-premium provider preview masks startup identity','status':'passed'})
    if (role,route) in [('incube','directory'),('prestataire','needs'),('incube','agenda'),('startup_manager','portfolio'),('admin','admin')]:page.screenshot(path=str(root/'docs/previews'/f'{role}-{route}.png'),full_page=True)
  page.select_option('#demo-role','incube')
  page.evaluate('location.hash="#needs"')
@@ -37,6 +46,10 @@ with sync_playwright() as pw:
  page.locator('[data-action="open-need"]').first.click()
  page.wait_for_timeout(180)
  check('fiche besoin')
+ page.locator('[data-action="go-responses"]').click()
+ page.wait_for_timeout(200)
+ assert page.evaluate('document.activeElement?.dataset?.action')=='view-response', 'Proposal jump did not focus a proposition'
+ results.append({'test':'Primary need CTA jumps to received proposals','status':'passed'})
  page.screenshot(path=str(root/'docs/previews/besoin.png'),full_page=True)
  page.keyboard.press('Escape')
  page.set_viewport_size({'width':390,'height':844})

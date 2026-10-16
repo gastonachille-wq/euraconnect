@@ -10,7 +10,7 @@ for(const file of await fs.readdir('src')){
  factories.push(JSON.stringify('./'+file.replace(/\.ts$/,'.js'))+':function(module,exports,require){\n'+code+'\n}');
 }
 const bundle=`(()=>{try{void localStorage.length;}catch{const data={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>data[k]??null,setItem:(k,v)=>{data[k]=String(v)},removeItem:k=>{delete data[k]}}});}const factories={${factories.join(',\n')}};const cache={};function require(id){if(cache[id])return cache[id].exports;const module={exports:{}};cache[id]=module;factories[id](module,module.exports,require);return module.exports;}window.EC_PREVIEW_MODULE=require;require('./app.js');})();`;
-const css=await fs.readFile('public/app.css','utf8');
+const css=await fs.readFile('public/app.css','utf8') + '\n' + await fs.readFile('public/ux-v11.css','utf8') + '\n' + await fs.readFile('public/ux-v12.css','utf8');
 const html=`<!doctype html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EURACONNECT - Apercu fictif en lecture seule</title><style>${css}</style></head><body><a class="skip-link" href="#main">Aller au contenu</a><div id="app"></div><div id="overlay"></div><div id="toasts" role="status" aria-live="polite"></div><script>${bundle.replace(/<\/script/gi,'<\\/script')}</script></body></html>`;
 await fs.mkdir('docs/previews',{recursive:true});
 await fs.writeFile('docs/previews/APERCU_INTERACTIF.html',html);

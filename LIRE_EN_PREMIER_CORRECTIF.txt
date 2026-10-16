@@ -1,0 +1,12 @@
+CORRECTIF EURACONNECT V1.3 - BUILD CLOUDFLARE
+
+La mise a jour precedente etait incomplete : modules src/directory-v12.ts, src/agenda-v12.ts et definitions TypeScript src/domain.ts non fournis. Ce ZIP contient un jeu coherent de fichiers compatible V1.3.
+
+1. Ouvrir https://github.dev/gastonachille-wq/euraconnect
+2. Extraire le ZIP et copier TOUT son contenu a la racine du depot, en remplacant les fichiers existants.
+3. Faire Commit & Push. Cloudflare relancera npm run check puis npx wrangler deploy.
+4. Ne pas modifier les variables de build Supabase.
+
+Le dossier supabase est present uniquement pour la coherence du projet et ses tests automatises. N'EXECUTEZ AUCUNE MIGRATION SQL lors de ce correctif.
+
+Validation locale : 48 tests Node passes, TypeScript sans erreur, build statique OK. L'installation npm dans un dossier propre n'a pu etre revalidee hors ligne faute de cache npm.

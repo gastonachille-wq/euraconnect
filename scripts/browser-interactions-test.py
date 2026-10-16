@@ -7,12 +7,12 @@ import json
 from playwright.sync_api import sync_playwright
 root=Path(__file__).resolve().parent.parent
 runtime=(root/'docs/previews/preview-runtime.js').read_text().replace('let demo = true;', 'let demo = false;')
-css=(root/'public/app.css').read_text()
+css=(root/'public/app.css').read_text()+'\n'+(root/'public/ux-v11.css').read_text()
 report=[]
 setup='''(() => {
  const data={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>data[k]??null,setItem:(k,v)=>data[k]=String(v),removeItem:k=>delete data[k]}});
  localStorage.setItem('euraconnect.auth.v1',JSON.stringify({access_token:'test-only',refresh_token:'test-only',expires_at:Math.floor(Date.now()/1000)+3600}));
- window.EC_CONFIG={version:'1.0.0',supabaseUrl:'https://fixture.supabase.co',supabaseKey:'sb_publishable_fixture'};
+ window.EC_CONFIG={version:'1.1.0',supabaseUrl:'https://fixture.supabase.co',supabaseKey:'sb_publishable_fixture'};
  window.TEST_ROLE='incube';window.TEST_WRITES=[];location.hash='#dashboard';
  window.fetch=async (url,opts) => {
   if(!url.includes('/rest/v1/rpc/ec1_api')) throw new Error('Unexpected external request: '+url);
@@ -43,7 +43,14 @@ with sync_playwright() as pw:
  print('actions',page.locator('.directory-card [data-action]').first.get_attribute('data-action'))
  page.locator('.directory-card [data-action="favorite"]').first.click()
  assert_write('favorite',lambda a:a['type']=='company' and a['value'] is False,'Unfavorite from directory thumbnail, desired state')
- nav('needs');page.locator('[data-action="new-need"]').click()
+ nav('needs');
+ page.locator('[data-action="need-quick-status"][data-status="ouvert"]').click()
+ page.wait_for_timeout(120)
+ assert 'status=ouvert' in page.evaluate('location.hash'), 'Quick filter not reflected in URL'
+ report.append({'test':'Quick need filter updates URL for server-side filtering','status':'passed'})
+ page.locator('[data-action="need-quick-status"][data-status=""]').click()
+ page.wait_for_timeout(120)
+ page.locator('[data-action="new-need"]').click()
  page.locator('#f-title').fill('Structurer notre dossier de partenariat')
  page.locator('[data-name="context"]').fill('Nous recherchons une expertise concrete pour cadrer les objectifs de notre projet et definir les livrables attendus avec les partenaires du reseau.')
  page.locator('#tag-input').fill('Qualite');page.wait_for_timeout(320)
@@ -53,7 +60,7 @@ with sync_playwright() as pw:
  page.locator('#f-budget_max').fill('1500.50')
  page.locator('#command-form button[type="submit"]').click()
  assert_write('save_need',lambda a:'Interop clinique' in a['tags'] and a['budget_max']==150050 and len(a['context'])>=50,'Create contextual need: selected/custom tags and exact cents')
- nav('needs');page.locator('[data-action="open-need"]').first.click();page.wait_for_timeout(130)
+ nav('needs');page.locator('[data-action="open-need"][data-id="00000000-0000-4000-8000-000000000102"]').first.click();page.wait_for_timeout(130)
  page.locator('[data-action="view-response"]').first.click();page.wait_for_timeout(130)
  page.locator('[data-action="response-decision"][data-status="en_discussion"]').click();page.wait_for_timeout(80)
  # Decision optionally uses a confirmation form.
@@ -61,6 +68,10 @@ with sync_playwright() as pw:
  assert_write('response_status',lambda a:a['status']=='en_discussion','Startup gives suite using canonical server status')
  page.keyboard.press('Escape')
  nav('messages/00000000-0000-4000-8000-000000000200')
+ page.locator('#message-form textarea').fill('Ceci est un brouillon')
+ page.locator('[data-action="refresh-thread"]').click();page.wait_for_timeout(150)
+ assert page.locator('#message-form textarea').input_value()=='Ceci est un brouillon', 'Refresh erased unsent draft'
+ report.append({'test':'Manual inbox refresh does not erase draft','status':'passed'})
  page.locator('#message-form textarea').fill('Merci. Precisons le calendrier et les livrables ensemble.')
  page.locator('#message-form button[type="submit"]').click()
  assert_write('send_message',lambda a:a['id'].endswith('200') and 'calendrier' in a['body'],'Send message in existing dossier')
@@ -68,6 +79,12 @@ with sync_playwright() as pw:
  # Verify the actual RPC listing uses an identifier, never a provider name.
  assert 'target_company=00000000-0000-4000-8000-000000000002' in page.evaluate('location.hash'), 'Availability company UUID missing'
  report.append({'test':'Directory availability panel opens by company UUID','status':'passed'})
+ page.set_viewport_size({'width':390,'height':844});nav('dashboard')
+ page.locator('.topbar [data-action="menu"]').click();page.wait_for_timeout(100)
+ assert page.locator('.app-shell.mobile-open').count()==1, 'Navigation did not open on mobile'
+ page.locator('.main-nav a[href="#needs"]').click();page.wait_for_timeout(150)
+ assert page.locator('.app-shell.mobile-open').count()==0, 'Navigation stayed open after route change'
+ report.append({'test':'Mobile menu closes after navigation','status':'passed'})
  browser.close()
 (root/'docs/previews/interaction-test-results.json').write_text(json.dumps({'cases':report,'page_errors':errs,'transport':'mocked Supabase; no database test'},ensure_ascii=False,indent=2))
 print('SUCCESS',len(report),'interaction tests')
