@@ -1,1 +1,1 @@
-window.EC_CONFIG = {"version":"2.6.0","supabaseUrl":"","supabaseKey":""};
+window.EC_CONFIG = {"version":"2.7.0","supabaseUrl":"","supabaseKey":""};
