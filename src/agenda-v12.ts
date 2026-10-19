@@ -48,6 +48,39 @@ function proposalStrip(items:SessionItem[]):string{
     if(!active.length)return '';
     return `<section class="ec12-proposal-inbox" aria-label="Créneaux proposés à confirmer"><div class="ec12-proposal-intro"><span class="ec12-pulse-icon">${icon('calendar',21)}</span><div><p class="eyebrow">VOTRE RÉPONSE ATTENDUE</p><h2>${active.length} proposition${active.length>1?'s':''} de créneau à examiner</h2><p>Les rendez-vous proposés sont visibles ici même s'ils se trouvent hors de la semaine affichée.</p></div></div><div class="ec12-proposal-items">${active.slice(0,4).map(s=>`<div class="ec12-proposal-item"><strong>${e(s.title)}</strong><span>${dateText(s.starts_at,true)} · ${e(s.host_name)}</span>${button('Consulter / répondre','open-session',{id:s.id,class:'small primary'})}</div>`).join('')}</div></section>`;
 }
+
+/** Place visible sessions on an hour grid in Europe/Paris. Does not change bookings. */
+export function sessionClock(instant:string):number {
+ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant));
+ return Number(parts.find(p=>p.type==='hour')?.value||0)*60+Number(parts.find(p=>p.type==='minute')?.value||0);
+}
+export interface TimedSegment { session:SessionItem;start:number;end:number;lane:number;lanes:number; }
+export function daySegments(items:SessionItem[],date:string):TimedSegment[] {
+ const intervals=items.filter(s=>s.status!=='annule'&&Number.isFinite(Date.parse(s.starts_at))&&Number.isFinite(Date.parse(s.ends_at))&&Date.parse(s.ends_at)>Date.parse(s.starts_at)).map(session=>{
+  const startDate=localDate(new Date(session.starts_at)),endDate=localDate(new Date(session.ends_at));
+  const start=startDate===date?sessionClock(session.starts_at):0;
+  const end=endDate===date?sessionClock(session.ends_at):1440;
+  return {session,start,end,lane:0,lanes:1,startDate,endDate};
+ }).filter(i=>i.startDate<=date && i.endDate>=date && i.end>i.start).sort((a,b)=>a.start-b.start||b.end-a.end);
+ let group:TimedSegment[]=[];let limit=-1;let laneEnds:number[]=[];
+ const flush=()=>{for(const i of group)i.lanes=laneEnds.length;group=[];laneEnds=[];};
+ for(const interval of intervals){
+  if(interval.start>=limit){flush();limit=-1;}
+  let lane=laneEnds.findIndex(end=>end<=interval.start);
+  if(lane<0)lane=laneEnds.length;
+  laneEnds[lane]=interval.end;interval.lane=lane;group.push(interval);limit=Math.max(limit,interval.end);
+ }
+ flush();return intervals;
+}
+export function timedCalendar(items:SessionItem[],days:string[]):string {
+ const dayData=days.map(date=>({date,items:daySegments(items,date)}));
+ const segments=dayData.flatMap(d=>d.items);
+ const first=Math.min(8,...segments.map(i=>Math.floor(i.start/60))),last=Math.max(20,...segments.map(i=>Math.ceil(i.end/60)));
+ const hours=last-first;
+ const ruler=Array.from({length:hours},(_,i)=>`<span style="top:${i*60}px">${String(first+i).padStart(2,'0')}:00</span>`).join('');
+ const grid=`<div class="v3-hour-scroll" tabindex="0" aria-label="Calendrier horaire, d\u00e9filement horizontal et vertical"><div class="v3-hour-grid ${days.length===1?'is-day':''}" style="--v3-days:${days.length};--v3-hours:${hours}"><div class="v3-hour-head" aria-hidden="true">Paris</div>${days.map(date=>`<div class="v3-hour-head ${date===localDate()?'today':''}">${e(shortDay(date))}</div>`).join('')}<div class="v3-hour-ruler" aria-hidden="true">${ruler}</div>${dayData.map(day=>`<div class="v3-hour-day ${day.date===localDate()?'today':''}" aria-label="${e(shortDay(day.date))}">${day.items.map(i=>`<div class="v3-timed-event" style="--event-top:${i.start-first*60}px;--event-height:${Math.max(20,i.end-i.start)}px;--event-left:${100*i.lane/i.lanes}%;--event-width:${100/i.lanes}%" title="${e(i.session.title)} \u00b7 ${timeText(i.session.starts_at)}\u2013${timeText(i.session.ends_at)}">${eventCard(i.session)}</div>`).join('')}</div>`).join('')}</div></div>`;
+ return `<div class="v3-timeline-legend"><span>${icon('clock',15)} Disponibilit\u00e9</span><span>${icon('calendar',15)} Rendez-vous</span><span>${icon('messages',15)} Proposition</span><span>${icon('workshop',15)} Atelier</span></div>`+grid;
+}
 export function sessionsViewV12(ctx:Context,data:List<SessionItem>,workshops=false,proposals:SessionItem[]=[]):string{
     const scope=ctx.params.get('scope')||'mine';
     const view=agendaViewParam(ctx.params);
@@ -62,17 +95,17 @@ export function sessionsViewV12(ctx:Context,data:List<SessionItem>,workshops=fal
     const mode=ctx.params.get('mode')||''; const kind=ctx.params.get('kind')||''; const sort=ctx.params.get('sort')||'date';
     const types=[['','Tous les rendez-vous'],['creneau','Créneau individuel'],['permanence','Permanence'],['proposition','Créneau proposé'],['atelier','Atelier']];
     const tagsAvail=[...new Set(data.items.flatMap(s=>(s.tags||[]).map(t=>t.label)))].sort((a,b)=>a.localeCompare(b,'fr'));
-    html+=`<form id="filter-form" class="ec12-agenda-filters"><input type="hidden" name="scope" value="${e(scope)}"><input type="hidden" name="view" value="${e(view)}">
+    html+=`<details class="v3-agenda-filters" ${['q','expertise','mode','kind'].some(key=>ctx.params.get(key))?'open':''}><summary>${icon('filter',17)} Filtres de l'agenda</summary><form id="filter-form" class="ec12-agenda-filters"><input type="hidden" name="scope" value="${e(scope)}"><input type="hidden" name="view" value="${e(view)}">
     <label class="ec12-wide">${icon('search',16)}<span>Recherche</span><input name="q" value="${e(ctx.params.get('q')||'')}" placeholder="Intervenant ou objet du RDV"></label>
     <label>Expertise<input list="ec12-expertise" name="expertise" value="${e(ctx.params.get('expertise')||'')}" placeholder="Expertise, mot-clé…"><datalist id="ec12-expertise">${tagsAvail.map(x=>`<option value="${e(x)}"></option>`).join('')}</datalist></label>
     <label>Type de rendez-vous<select name="kind">${types.map(([v,t])=>option(v,t,kind)).join('')}</select></label>
     <label>Modalité<select name="mode">${option('','Toutes',mode)}${[['visio','Visioconférence'],['sur_site','Sur place'],['telephone','Téléphone']].map(([v,t])=>option(v,t,mode)).join('')}</select></label>
     <label>À partir du<input type="date" name="from" value="${e(range.reference)}"></label>
     <label>Tri<select name="sort">${[['date','Date / heure'],['host','Intervenant'],['kind','Type'],['mode','Modalité']].map(([v,t])=>option(v,t,sort)).join('')}</select></label>
-    <button type="submit" class="btn primary">${icon('search',16)} Rechercher</button>${ctx.params.size?button('Effacer les filtres','agenda-clear',{class:'ghost small'}):''}</form>`;
+    <button type="submit" class="btn primary">${icon('search',16)} Rechercher</button>${ctx.params.size?button('Effacer les filtres','agenda-clear',{class:'ghost small'}):''}</form></details>`;
     html+=`<div class="ec12-agenda-strip"><div class="ec12-agenda-range">${iconButton('back','Période précédente','agenda-step','','data-direction="-1"')}${button('Aujourd’hui','agenda-today',{class:'small ghost'})}${iconButton('arrow','Période suivante','agenda-step','','data-direction="1"')}<strong>${view==='month'?titleMonth(range.reference):view==='day'?shortDay(range.reference):dateText(range.from)+' → '+dateText(add(range.to,-1))}</strong></div><div><strong>${data.total}</strong> résultat${data.total>1?'s':''}<span class="ec12-timezone"> · Horaires Europe/Paris</span></div></div>`;
     if(!data.items.length)html+=empty('Aucun créneau ne correspond à vos critères','Essayez un autre type de rencontre, une période plus large ou les disponibilités du réseau.',canCreate?button('Publier un créneau','new-session',{class:'primary',extra:'data-kind="creneau"'}):'','calendar');
-    else if(view==='week'||view==='day')html+=`<section class="ec12-calendar-week ${view==='day'?'is-day':''}" aria-label="Vue ${view==='day'?'jour':'semaine'}">${range.days.map(date=>`<div class="ec12-calendar-column ${date===localDate()?'today':''}"><div class="ec12-calendar-day"><strong>${shortDay(date)}</strong>${date===localDate()?'<small>Aujourd’hui</small>':''}</div><div class="ec12-calendar-events">${data.items.filter(s=>localDate(new Date(s.starts_at))===date&&s.status!=='annule').map(eventCard).join('')||'<span class="ec12-calendar-blank">Pas de créneau</span>'}</div></div>`).join('')}</section>`;
+    else if(view==='week'||view==='day')html+=timedCalendar(data.items,range.days);
     else if(view==='month')html+=`<section class="ec12-month-calendar" aria-label="Vue mensuelle"><div class="ec12-month-days">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(x=>`<strong>${x}</strong>`).join('')}</div><div class="ec12-month-grid">${range.days.map(date=>{const events=data.items.filter(s=>localDate(new Date(s.starts_at))===date&&s.status!=='annule');return `<div class="ec12-month-day ${date.slice(0,7)===range.reference.slice(0,7)?'':'outside'} ${date===localDate()?'today':''}"><div class="ec12-month-date">${Number(date.slice(-2))}</div>${events.slice(0,3).map(s=>`<button data-action="open-session" data-id="${e(s.id)}" class="ec12-month-event ${s.kind==='proposition'?'is-proposal':''}">${timeText(s.starts_at)} ${e(s.title)}</button>`).join('')}${events.length>3?`<span class="ec12-more">+${events.length-3} autre(s)</span>`:''}</div>`;}).join('')}</div></section>`;
     else if(view==='table')html+=`<div class="table-wrap ec12-agenda-table"><table><thead><tr><th>Date</th><th>Heure</th><th>Rencontre</th><th>Intervenant</th><th>Type</th><th>Modalité</th><th>Statut</th><th>Action</th></tr></thead><tbody>${data.items.map(s=>`<tr><td>${dateText(s.starts_at)}</td><td>${timeText(s.starts_at)}–${timeText(s.ends_at)}</td><td><strong>${e(s.title)}</strong><small>${tags((s.tags||[]).slice(0,2))}</small></td><td>${e(s.host_name)}</td><td>${badge(s.kind)}</td><td>${modeLabel(s)}</td><td>${e(statusText(s))}</td><td>${button(s.can_reply?'Répondre':'Détails','open-session',{id:s.id,class:'small '+(s.can_reply?'primary':'ghost')})}</td></tr>`).join('')}</tbody></table></div>`;
     else html+=`<div class="ec12-agenda-list">${data.items.map(row).join('')}</div>`;

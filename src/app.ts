@@ -429,6 +429,9 @@ async function action(el: HTMLElement): Promise<void> {
         }
         case "menu":
             setMobileMenu(!document.querySelector('.app-shell.mobile-open'));return;
+        case "logout-confirm":
+            modal("Se d\u00e9connecter", `<p>Voulez-vous fermer votre session EURACONNECT ?</p><p class="muted">Les saisies qui ne sont pas enregistr\u00e9es peuvent \u00eatre perdues.</p><div class="modal-actions"><button class="btn ghost" data-action="close-modal">Annuler</button><button class="btn primary" data-action="logout">Se d\u00e9connecter</button></div>`);
+            return;
         case "logout":
             if (demo) {
                 location.href = location.pathname;
@@ -1158,4 +1161,18 @@ document.addEventListener('pointerdown',event=>{
  const target=event.target;
  if(!(target instanceof Node))return;
  document.querySelectorAll<HTMLDetailsElement>('.ec22-facet-drawer[open],.ec27-facets[open]').forEach(panel=>{if(!panel.contains(target))panel.open=false;});
+});
+
+document.addEventListener('click', event => {
+ const target=event.target;
+ if(!(target instanceof Element))return;
+ document.querySelectorAll<HTMLDetailsElement>('.v3-account-menu[open]').forEach(menu=>{if(!menu.contains(target)||target.closest('a,button'))menu.open=false;});
+});
+document.addEventListener('keydown', event=>{
+ if(event.key==='Escape')document.querySelectorAll<HTMLDetailsElement>('.v3-account-menu[open]').forEach(menu=>{menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus();});
+ const target=event.target;
+ if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing&&target instanceof HTMLTextAreaElement&&target.closest('#message-form')){
+  event.preventDefault();const form=target.closest<HTMLFormElement>('#message-form');
+  if(form && target.value.trim() && !form.querySelector<HTMLButtonElement>('button[type=submit]')?.disabled)form.requestSubmit();
+ }
 });

@@ -9,7 +9,7 @@ const context=(params='')=>({boot:demoBoot('incube'),companyId:null,company:unde
 const offer=(id,extras={})=>({id,company_id:'company-'+id,title:'Service '+id,description:'Accompagnement spécialisé détaillé avec des livrables concrets et un plan de travail personnalisé.',format:'distance',price:100000,provider:'Entreprise '+id,can_edit:false,tags:[{label:'Conseil'}],benefit:null,favorite:false,media:null,...extras});
 test('V2.7 suppresses placeholder Lorem ipsum rather than inventing a description',()=>{
  assert.equal(offerSummary('Lorem IpsumLorem Ipsum').incomplete,true);
- assert.match(offerSummary('Lorem IpsumLorem Ipsum').text,/pas encore/);
+ assert.match(offerSummary('Lorem IpsumLorem Ipsum').text,/Consultez la fiche/);
  assert.equal(offerSummary('Description précise de la mission et de son organisation').incomplete,false);
 });
 test('V2.7 catalog is contextual and routes to real actions',()=>{

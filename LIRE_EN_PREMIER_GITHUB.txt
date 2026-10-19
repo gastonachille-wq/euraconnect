@@ -1,21 +1,7 @@
-EURACONNECT 2.9.0 - MISE A JOUR COMPLETE DEPUIS V2.8
+EURACONNECT 3.0 - ARCHIVE RECONSTITUEE
 
-1. Sauvegardez votre depot GitHub actuel (Download ZIP).
-2. Decompressez cette archive. Importez tout son CONTENU a la racine du depot.
-   Remplacez les fichiers de meme nom et gardez les dossiers src/, public/, etc.
-   N'effacez pas les autres fichiers de votre depot.
-3. Enregistrez en UN commit : EURACONNECT 2.9 - Navigation et interactions.
-4. Cloudflare : Build command = npm run check ; Deploy = npx wrangler deploy.
-   Root directory = / ; Node.js >= 22.
-5. Conservez les variables de BUILD : NEXT_PUBLIC_SUPABASE_URL et
-   NEXT_PUBLIC_SUPABASE_ANON_KEY. Aucune cle service_role ou sb_secret_.
-6. Attendez le deploiement reussi et rechargez l'application.
-
-AUCUNE NOUVELLE MIGRATION SQL pour cette mise a jour.
-Les SQL historiques sont conserves pour les tests et la documentation :
-ne les rejouez pas si vous avez deja installe V2.8.
-
-Le dossier dist est reconstruit automatiquement. Ne pas importer node_modules.
-Les tests sont executes apres generation de dist, y compris dans un depot propre.
-
-Lire README_V29.md et VALIDATION_V29.md avant la mise en ligne.
+Commencez par LIRE_V3.md.
+Importez le contenu du ZIP a la racine du depot GitHub.
+Cloudflare : npm run check / npx wrangler deploy.
+Pas de nouvelle migration SQL.
+Les sources et ressources sont incluses; dist est regenere.
