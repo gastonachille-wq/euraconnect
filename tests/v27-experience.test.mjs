@@ -36,7 +36,7 @@ test('V2.7 clearly flags that facets are partial when server pagination applies'
  assert.match(html,/data-action="page"/);
 });
 test('V2.7 restores a fixed sidebar after V2.5 caused double offset',()=>{
- assert.match(read('public/ux-v27.css'),/\.app-shell>\.sidebar\{position:fixed!important\}/);
+ assert.match(read('public/interface.css'),/\.app-shell>\.sidebar\{position:fixed!important\}/);
  assert.match(shell(context()),/ec27-route-offers/);
- assert.match(read('public/index.html'),/ux-v27\.css/);
+ assert.match(read('public/index.html'),/interface\.css/);
 });

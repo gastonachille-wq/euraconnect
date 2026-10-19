@@ -1,0 +1,310 @@
+[
+  {
+    "width": 1280,
+    "route": "dashboard",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "needs",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "messages",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "agenda",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "directory",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "offers",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1280,
+    "route": "company",
+    "pass": true,
+    "details": {
+      "outer": 1280,
+      "viewport": 1280,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "dashboard",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "needs",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "messages",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "agenda",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "directory",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "offers",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1440,
+    "route": "company",
+    "pass": true,
+    "details": {
+      "outer": 1440,
+      "viewport": 1440,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "dashboard",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "needs",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "messages",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "agenda",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "directory",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "offers",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 1920,
+    "route": "company",
+    "pass": true,
+    "details": {
+      "outer": 1920,
+      "viewport": 1920,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "dashboard",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "needs",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "messages",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "agenda",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "directory",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "offers",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  },
+  {
+    "width": 390,
+    "route": "company",
+    "pass": true,
+    "details": {
+      "outer": 390,
+      "viewport": 390,
+      "main": true,
+      "bad": []
+    }
+  }
+]
