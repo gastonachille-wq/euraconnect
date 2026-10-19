@@ -21,10 +21,10 @@ if (key.split('.').length===3) {
   } catch(e) { if(e instanceof Error && e.message.includes('interdite')) throw e; }
 }
 if (url && new URL(url).protocol!=='https:') throw new Error('URL Supabase HTTPS requise.');
-const config={version:'3.0.0',supabaseUrl:url.replace(/\/$/,''),supabaseKey:key};
+const config={version:'3.1.0',supabaseUrl:url.replace(/\/$/,''),supabaseKey:key};
 await fs.writeFile('dist/config.js', `window.EC_CONFIG = ${JSON.stringify(config).replace(/</g,'\\u003c')};\n`);
 const files=await fs.readdir('dist');
-const manifest={version:'3.0.0', files:{}};
+const manifest={version:'3.1.0', files:{}};
 for(const file of files) { const bytes=await fs.readFile(`dist/${file}`);manifest.files[file]={bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}; }
 await fs.writeFile('dist/manifest.json',JSON.stringify(manifest,null,2));
-console.log(`EURACONNECT 3.0.0: ${files.length} fichiers compiles. Configuration Supabase ${url&&key?'presente':'a renseigner au deploiement'}.`);
+console.log(`EURACONNECT 3.1.0: ${files.length} fichiers compiles. Configuration Supabase ${url&&key?'presente':'a renseigner au deploiement'}.`);

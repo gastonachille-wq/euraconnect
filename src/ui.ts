@@ -14,7 +14,7 @@ export function button(text: string, action: string, options: {
     disabled?: boolean;
 } = {}): string { return `<button type="button" class="btn ${options.class || ""}" data-action="${e(action)}" ${options.id ? `data-id="${e(options.id)}"` : ""} ${options.extra || ""} ${options.disabled ? "disabled" : ""}>${options.icon ? icon(options.icon, 17) : ""}${e(text)}</button>`; }
 export function iconButton(symbol: string, title: string, action: string, id = "", extra = ""): string { return `<button type="button" class="icon-button" title="${e(title)}" aria-label="${e(title)}" data-action="${e(action)}" data-id="${e(id)}" ${extra}>${icon(symbol)}</button>`; }
-export function favorite(id: string, type: string, on: boolean, pin = false): string { return `<button type="button" class="favorite ${on ? "on" : ""}" data-action="favorite" data-id="${e(id)}" data-type="${e(type)}" data-value="${!on}" aria-pressed="${on}" title="${on ? "Retirer des favoris" : "Ajouter aux favoris"}" aria-label="${on ? "Retirer des favoris" : "Ajouter aux favoris"}">${icon(pin ? "pin" : "heart", 19)}</button>`; }
+export function favorite(id: string, type: string, on: boolean, _pin = false): string { return `<button type="button" class="favorite ${on ? "on" : ""}" data-action="favorite" data-id="${e(id)}" data-type="${e(type)}" data-value="${!on}" aria-pressed="${on}" title="${on ? "Retirer des favoris" : "Ajouter aux favoris"}" aria-label="${on ? "Retirer des favoris" : "Ajouter aux favoris"}">${icon("heart", 19)}</button>`; }
 export function field(name: string, text: string, value: unknown = "", options: {
     type?: string;
     required?: boolean;
