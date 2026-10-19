@@ -1,5 +1,5 @@
 import { stored, store, stringList, filteredHash, clearFilterHash } from "./client-state.js";
-import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc, needLifecycleRpc } from "./api.js";
+import { signIn, signUp, signOut, restoreSession, acceptAuthRedirect, hasConfiguration, recover, passwordUpdate, rpc, uploadImage, releaseMedia, managerRpc, managerMeetingRpc, managerAdviceRpc, needLifecycleRpc } from "./api.js";
 import type { Boot, List, Need, NeedDetail, ResponseItem, ThreadDetail, DirectoryItem, SessionItem, Offer, CompanyDetail, AdminData, Notification, Dashboard, Portfolio, Role } from "./domain.js";
 import { escapeHtml as e, roleLabels, errorMessage, cents, dateText, calendarIcs, localDate, markdown, label } from "./domain.js";
 import { shell, dashboardView, needsView, directoryView, offersView, messagesView, sessionsView, adminView, notificationList, titles, offerSummary } from "./views.js";
@@ -8,8 +8,8 @@ import { needForm, needDetail, responseForm, responseDetail, statusForm, session
 import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button, empty, field, selectField, checkField, footerSubmit, badge, tags } from "./ui.js";
 import { icon } from "./icons.js";
 import { demoBoot, demoRpc } from "./demo.js";
-import { managerCenter, startupRecommendations } from "./manager-v20.js";
-import type { ManagerRecommendation } from "./manager-v20.js";
+import { managerCenter, startupRecommendations, startupAdvice } from "./manager-v20.js";
+import type { ManagerRecommendation, ManagerAdvice } from "./manager-v20.js";
 import { companyDetailV12, personDetailV12 } from "./directory-v12.js";
 import { agendaRange, shiftAgenda } from "./agenda-v12.js";
 const app = document.querySelector<HTMLElement>("#app")!;
@@ -174,7 +174,8 @@ async function render(): Promise<void> {
             case "dashboard":
                 html = dashboardView(ctx, await read<Dashboard>("dashboard"));
                 if(ctx.boot.user.role==="incube" && !demo){
-                    try { const recs=await managerRpc<ManagerRecommendation[]>("mine"); html+=startupRecommendations(recs); }
+                    try { const recs=await managerRpc<ManagerRecommendation[]>("mine"); html+=startupRecommendations(recs);
+                        try {html+=startupAdvice(await managerAdviceRpc<ManagerAdvice[]>("list"));} catch {html+=`<p class="ec20-api-notice">Les conseils du manager seront disponibles après installation de la migration V3.5.</p>`;} }
                     catch { html+=`<p class="ec20-api-notice">Les recommandations du manager seront accessibles après installation de la migration V2.</p>`; }
                 }
                 if(!demo && ["incube","startup_manager"].includes(ctx.boot.user.role)) {
@@ -704,6 +705,13 @@ async function action(el: HTMLElement): Promise<void> {
             modal("Demander l’appui de votre Startup Manager",`<p>Votre demande sera envoyée au manager affecté à votre startup. Il pourra suivre votre situation et recommander un expert.</p><form id="ec20-help-form"><input type="hidden" name="need_id" value="${e(id)}"><label class="ec20-form-label">Que souhaitez-vous débloquer ?<textarea name="message" required minlength="15" maxlength="1000" rows="4" placeholder="Exemple : nous cherchons un prestataire capable de..."></textarea></label><p class="form-error" role="alert" hidden></p><button type="submit" class="btn primary full">Envoyer au manager</button></form>`,{wide:true});
             return;
         }
+        case "manager-open-advice": {
+            if(ctx.boot.user.role!=="startup_manager" && ctx.boot.user.role!=="admin") {toast("Accès réservé au Startup Manager.",true);return;}
+            const need=managerPortfolio?.needs.find(n=>n.id===id);
+            if(!need){toast("Demande introuvable dans votre portefeuille.",true);return;}
+            modal("Conseiller la startup",`<p>Votre avis concerne <strong>${e(need.title)}</strong>. Il est transmis à la startup à titre de conseil, sans bloquer sa décision.</p><form id="ec35-advice-form"><input type="hidden" name="need_id" value="${e(id)}"><label>Votre conseil argumenté<textarea name="advice" minlength="30" maxlength="3000" rows="6" required placeholder="Points d'attention, pistes d'action, prestataires ou ressources à explorer…"></textarea></label><p class="form-error" role="alert" hidden></p><button type="submit" class="btn primary full">Partager mon conseil</button></form>`,{wide:true});
+            return;
+        }
         case "manager-open-recommend": {
             if(!managerPortfolio) {toast("Ouvrez votre portefeuille.",true);return;}
             const target=managerPortfolio.needs.find(n=>n.id===id);
@@ -919,7 +927,7 @@ document.addEventListener("click", event => {
 });
 document.addEventListener("submit", event => {
     const form = event.target as HTMLFormElement;
-    if (!["command-form", "auth-form", "message-form", "filter-form", "ec20-recommend-form", "ec20-help-form", "ec23-invite-form"].includes(form.id))
+    if (!["command-form", "auth-form", "message-form", "filter-form", "ec20-recommend-form", "ec20-help-form", "ec35-advice-form", "ec23-invite-form"].includes(form.id))
         return;
     event.preventDefault();
     if (form.classList.contains("ec13-wizard") && wizardPage < 2) { showWizard(wizardPage+1); return; }
@@ -960,6 +968,13 @@ document.addEventListener("submit", event => {
             if(starts.getTime()<=Date.now())throw new Error('Choisissez un cr\u00e9neau \u00e0 venir.');
             await managerMeetingRpc("invite",{...v,starts_at:starts.toISOString(),ends_at:ends.toISOString()});
             toast("Créneau proposé à l'incubé. Vous serez informé de sa réponse.");
+            closeModal();await render();return;
+        }
+        if (form.id === "ec35-advice-form") {
+            if(demo)throw new Error("Aperçu en lecture seule.");
+            const v=formValues(form);
+            await managerAdviceRpc("create",{need_id:v.need_id,advice:v.advice});
+            toast("Conseil partagé. La startup conserve l'entière liberté de décision.");
             closeModal();await render();return;
         }
         if (form.id === "ec20-help-form") {

@@ -206,3 +206,8 @@ export async function needLifecycleRpc<T>(operation: "view" | "archive" | "delet
     const endpoint = { view: "ec22_view", archive: "ec22_archive", delete: "ec22_delete" }[operation];
     return await request("/rest/v1/rpc/" + endpoint, "POST", payload, await accessToken()) as T;
 }
+
+/** Avis facultatifs : lecture startup/portefeuille et publication manager, autorisation cote SQL. */
+export async function managerAdviceRpc<T>(action:'list'|'create', args:Record<string,unknown>={}):Promise<T> {
+ return await request('/rest/v1/rpc/ec35_advice','POST',{p_action:action,p_args:args},await accessToken()) as T;
+}
