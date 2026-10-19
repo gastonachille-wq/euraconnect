@@ -312,6 +312,16 @@ async function render(): Promise<void> {
                 node.innerHTML=`<strong>${stats.views} prestataire${stats.views>1?"s":""} ayant consulté</strong><span>${stats.responses} proposition${stats.responses>1?"s":""} transmise${stats.responses>1?"s":""}</span>` + (role==="startup_manager" && stats.providers ? `<details><summary>Voir les prestataires intéressés (${stats.providers.length})</summary><ul>${stats.providers.map(p=>`<li>${p.name.replace(/&/g,"&amp;").replace(/</g,"&lt;")} · ${p.responded?"A répondu":"A consulté"}</li>`).join("")}</ul></details>` : "");
             }).catch(()=>{const node=document.getElementById("ec22-views");if(node)node.textContent="Statistiques disponibles après installation de la migration V2.2.";});
         }
+        const hourScroll=out.querySelector<HTMLElement>('.v3-hour-scroll');
+        if(hourScroll && !samePage){
+            const first=Number(hourScroll.dataset.firstHour||8);
+            const firstEvent=Number(hourScroll.dataset.firstEvent||480);
+            const now=new Date();
+            const paris=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now);
+            const current=Number(paris.find(p=>p.type==='hour')?.value||8)*60+Number(paris.find(p=>p.type==='minute')?.value||0);
+            const target=Math.min(firstEvent,Math.max(0,current-60));
+            hourScroll.scrollTop=Math.max(0,(target-first*60)*.8);
+        }
         const msgs = out.querySelector(".message-flow");
         if (msgs)
             msgs.scrollTop = msgs.scrollHeight;

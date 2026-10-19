@@ -19,7 +19,7 @@ test('V3: duration does not invent negative or invalid values',()=>{
 });
 test('V3: dashboard actions match the available data',()=>{
  const ctx=context(),d=demoRpc('dashboard',{},'incube');d.kpis.waiting=0;d.kpis.needs=4;
- let html=dashboardV3(ctx,d);assert.match(html,/Gardez le cap/);assert.match(html,/Suivre mes demandes/);
+ let html=dashboardV3(ctx,d);assert.doesNotMatch(html,/Gardez le cap|VOTRE PROCHAINE ACTION/);assert.match(html,/Demandes en cours/);
  d.kpis.needs=0;html=dashboardV3(ctx,d);assert.match(html,/data-action="new-need"/);
  assert.doesNotMatch(html,/NaN|undefined/);
 });
@@ -53,7 +53,7 @@ test('V3: overnight events split at local midnight without an extra day',()=>{
 });
 test('V3: timed calendar preserves the existing booking action',()=>{
  const html=timedCalendar([sample('slot-1','2026-10-19T08:00:00Z','2026-10-19T09:00:00Z')],['2026-10-19']);
- assert.match(html,/data-action="open-session"/);assert.match(html,/data-id="slot-1"/);assert.match(html,/--event-top:120px/);assert.doesNotMatch(html,/NaN/);
+ assert.match(html,/data-action="open-session"/);assert.match(html,/data-id="slot-1"/);assert.match(html,/--event-top:96px/);assert.doesNotMatch(html,/NaN/);
 });
 test('V3: incomplete service copy is neutral, never fabricates a discount or unit',()=>{
  const result=offerSummary('Lorem ipsum');assert.equal(result.incomplete,true);assert.match(result.text,/Consultez la fiche/);assert.doesNotMatch(result.text,/forfait|remise|%/);

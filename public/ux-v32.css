@@ -1,0 +1,24 @@
+/* V3.2 : parcours lisibles, densité contrôlée, sans nouvelle couleur hors tokens */
+:root{--ux-hour:48px;--ux-legend-availability:#357760;--ux-legend-meeting:#42678e;--ux-legend-proposal:#9b6a1c;--ux-legend-workshop:#7b53a8}
+.ec29-workspace .v3-agenda-filters{margin-block:var(--sp-2)!important}
+.ec29-workspace .v3-agenda-filters>summary{min-height:var(--h-control);padding:var(--sp-2) var(--sp-4);cursor:pointer;font-weight:650}
+.ec29-workspace .ec12-agenda-controls{margin-block:var(--sp-2)!important;gap:var(--sp-2)}
+.ec29-workspace .ec12-agenda-strip{margin-block:var(--sp-2)!important}
+.ec29-workspace .v3-hour-scroll{scrollbar-gutter:stable;max-height:min(72dvh,780px)}
+.ec29-workspace .v3-timeline-legend{margin:var(--sp-2) 0;gap:var(--sp-5);font-size:var(--fs-md);color:var(--text-2)}
+.ec29-workspace .v3-timeline-legend>span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ux-legend-meeting)}
+.ec29-workspace .v3-timeline-legend>.legend-availability::before{background:var(--ux-legend-availability);outline:1px dashed var(--ux-legend-availability);outline-offset:2px}
+.ec29-workspace .v3-timeline-legend>.legend-proposal::before{background:var(--ux-legend-proposal)}
+.ec29-workspace .v3-timeline-legend>.legend-workshop::before{background:var(--ux-legend-workshop)}
+.ec29-workspace .v3-messages{min-height:0;max-height:calc(100dvh - 180px)}
+.ec29-workspace .v3-messages .message-flow{min-height:0;overflow-y:auto}
+.ec29-workspace .v3-messages .message-composer textarea{min-height:44px;max-height:160px;resize:none}
+.ec29-workspace .v3-messages .message{max-width:70%}
+.ec29-workspace .v3-messages .v3-thread-context .v3-context-body{padding:var(--sp-6);gap:var(--sp-5)}
+.ec29-workspace .v3-messages .thread-top strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ec29-workspace .v3-metric{min-width:0}
+.ec29-workspace .v3-metric span{overflow-wrap:anywhere}
+.ec29-workspace .v3-workitem{min-width:0}
+.ec29-workspace .v3-work-copy{min-width:0;overflow-wrap:anywhere}
+.ec29-workspace .v3-hour-head{font-size:var(--fs-sm)}
+@media(max-width:800px){.ec29-workspace .v3-messages .message{max-width:94%}.ec29-workspace .v3-messages{max-height:none}.ec29-workspace .v3-timeline-legend{gap:var(--sp-3)}}
