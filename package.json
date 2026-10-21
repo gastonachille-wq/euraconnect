@@ -1,6 +1,6 @@
 {
   "name": "euraconnect",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "private": true,
   "description": "EURACONNECT - interface operationnelle et parcours metier, Supabase + Cloudflare",
   "type": "module",

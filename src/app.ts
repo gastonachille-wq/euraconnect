@@ -9,6 +9,7 @@ import { modal, closeModal, modalOpen, toast, formValues, hydrateImages, button,
 import { icon } from "./icons.js";
 import { demoBoot, demoRpc } from "./demo.js";
 import { managerCenter, startupRecommendations, startupAdvice } from "./manager-v20.js";
+import { managerErrorNotice } from "./manager-diagnostics.js";
 import type { ManagerRecommendation, ManagerAdvice } from "./manager-v20.js";
 import { companyDetailV12, personDetailV12 } from "./directory-v12.js";
 import { agendaRange, shiftAgenda } from "./agenda-v12.js";
@@ -174,9 +175,11 @@ async function render(): Promise<void> {
             case "dashboard":
                 html = dashboardView(ctx, await read<Dashboard>("dashboard"));
                 if(ctx.boot.user.role==="incube" && !demo){
-                    try { const recs=await managerRpc<ManagerRecommendation[]>("mine"); html+=startupRecommendations(recs);
-                        try {html+=startupAdvice(await managerAdviceRpc<ManagerAdvice[]>("list"));} catch {html+=`<p class="ec20-api-notice">Les conseils du manager seront disponibles après installation de la migration V3.5.</p>`;} }
-                    catch { html+=`<p class="ec20-api-notice">Les recommandations du manager seront accessibles après installation de la migration V2.</p>`; }
+                    try { const recs=await managerRpc<ManagerRecommendation[]>("mine"); html+=startupRecommendations(recs); }
+                    catch (err) { html+=managerErrorNotice(err,"recommendations"); }
+                    // Les conseils V3.5 sont indépendants des recommandations V2.
+                    try { html+=startupAdvice(await managerAdviceRpc<ManagerAdvice[]>("list")); }
+                    catch (err) { html+=managerErrorNotice(err,"advice"); }
                 }
                 if(!demo && ["incube","startup_manager"].includes(ctx.boot.user.role)) {
                     try {html += managerMeetings(await managerMeetingRpc<ManagerMeeting[]>("list"),ctx.boot.user.role);}
@@ -277,7 +280,7 @@ async function render(): Promise<void> {
                 let recs:ManagerRecommendation[]=[];
                 let recommendationWarning="";
                 if(!demo){try {recs=await managerRpc<ManagerRecommendation[]>("list");}
-                    catch {recommendationWarning='<div class="warning-note">Les recommandations d’experts nécessitent la migration Supabase 07_V20_MANAGER_RECOMMANDATIONS.sql. Les autres actions restent disponibles.</div>';}}
+                    catch (err) {recommendationWarning=managerErrorNotice(err,"recommendations");}}
                 html=recommendationWarning+managerCenter(data,id,managerProviders,recs);
                 break;
             }

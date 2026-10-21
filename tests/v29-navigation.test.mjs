@@ -63,7 +63,7 @@ test('V2.9 direct lifecycle RPCs use their actual endpoint names and payload',()
 });
 test('V2.9 full package can test from a clean checkout without shipping dist',()=>{
  const pkg=JSON.parse(read('package.json'));assert.match(pkg.scripts.pretest,/npm run build/);
- assert.match(pkg.scripts.check,/npm test/);assert.equal(pkg.version,'3.6.0');
+ assert.match(pkg.scripts.check,/npm test/);assert.equal(pkg.version,'3.6.1');
 });
 test('V2.9 cancellation sends the server enum, not a translated label',()=>{
  const app=read('src/app.ts');assert.doesNotMatch(app,/value=\\"annul\\u00E9/);

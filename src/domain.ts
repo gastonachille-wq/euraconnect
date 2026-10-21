@@ -361,7 +361,7 @@ export function errorMessage(error: unknown): string {
     if (raw.includes("Failed to fetch") || raw.includes("NetworkError"))
         return "Connexion interrompue. V\u00E9rifiez votre acc\u00E8s Internet puis r\u00E9essayez.";
     if (x.code === "PGRST202" || raw.includes("Could not find the function"))
-        return "La migration V1 est manquante. Executez 01_INSTALL_V1.sql puis 02_ACTIVER_V1.sql.";
+        return "Fonction Supabase indisponible. Vérifiez que les migrations requises sont installées sur le bon projet et actualisez le cache de schéma.";
     if (x.code === "42702" || x.code === "42P01")
         return "La base doit \u00EAtre mise \u00E0 jour. Transmettez le code " + x.code + " \u00E0 votre administrateur.";
     return raw && raw !== "[object Object]" ? raw : "Op\u00E9ration non aboutie. Actualisez la page et r\u00E9essayez.";
