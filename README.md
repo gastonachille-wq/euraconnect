@@ -1,47 +1,22 @@
-# EURACONNECT 1.1 — Parcours prioritaires & ergonomie
+# EURACONNECT V3.6.2 - Edition compacte pour GitHub / Netlify
 
-**Version Cloudflare Workers / Supabase — application TypeScript statique.**
+Ce depot contient **84 fichiers**, tous necessaires ou utiles au build, aux tests et aux migrations. Les 79 fichiers historiques de la distribution complete ont ete retires **sans modifier le code applicatif** (`src/`, `public/`), les migrations (`supabase/`) ni les tests Node.js.
 
-Cette version ameliore les parcours utilisateur et les composants visuels de la version 1.0 **sans aucune nouvelle table Supabase, aucune nouvelle API et aucune dependance npm**. Les autorisations et les regles Premium restent appliquees par la base Supabase existante.
+## Import GitHub avec limite de 100 fichiers
 
-## Pour mettre a jour la version deja deployee
+1. Decompresser `EURACONNECT_V362_COMPACT_GITHUB_84_FICHIERS.zip` sur l'ordinateur.
+2. Dans GitHub, deposer les **84 fichiers decompressee** en conservant leur arborescence (racine avec `package.json`, `netlify.toml`, `src/`, `public/`, `supabase/`, `scripts/`, `tests/`). **Ne pas deposer le ZIP tel quel** dans le depot.
+3. Pour un depot ancien qui contient deja plus de 100 fichiers, supprimer les fichiers obsoletes si tu veux aussi ramener le depot total sous les 100. L'import web ne supprime pas automatiquement les anciens fichiers. Une mise a jour via Git (`git add -A`) permet de synchroniser proprement les suppressions.
+4. Verifier dans Netlify les variables `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` (cle publique et jamais `service_role` ou `sb_secret_`). Netlify doit executer `npm run check` et publier `dist`.
+5. Apres redeploiement, ouvrir `/diagnostic.html` pour diagnostiquer l'erreur de recommandations.
 
-**Lire d'abord `docs/V11_DEPLOIEMENT_CLOUDFLARE.md`.**
-
-- Conserver le meme depot GitHub `gastonachille-wq/euraconnect` et le meme Cloudflare Worker `euraconnect`.
-- Importer les fichiers de cette version dans le depot, en respectant les sous-dossiers. Un ZIP leger de mise a jour est fourni separement.
-- Cloudflare reconstruit le site avec `npm run check`, puis `npx wrangler deploy`.
-- Les deux variables de **compilation** Cloudflare doivent rester presentes : `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- **AUCUN SCRIPT SQL a executer pour passer de 1.0 a 1.1.** Ne pas relancer les migrations initiales.
-
-L'URL existante est conservee : https://euraconnect.gaston-achille.workers.dev
-
-## Changements principaux
-
-1. Tableau de bord par profil avec une action prioritaire et des indicateurs navigables.
-2. Fiches besoins avec les quatre etapes du parcours, propositions bien visibles, boutons de decision explicites, historique replie.
-3. Formulaires de besoin et de reponse restructures en blocs hierarchises et lisibles.
-4. Navigation de messagerie qui ouvre automatiquement une conversation existante ; actualisation manuelle protegee contre la perte de brouillon.
-5. Portefeuille Startup Manager qui selectionne directement la premiere startup accompagnee.
-6. Agenda mobile avec une vue liste par defaut ; ateliers et inscriptions plus explicites.
-7. Annuaire et fiches societes/contacts avec visuels harmonises, actions et filtres coherents.
-8. Menus, cartes, etats, espaces et couleurs repenses, y compris sur petits ecrans.
-
-Le service est toujours **sans paiement en ligne**. Le Premium ne revele les identites des startups qu'aux prestataires autorises, selon les fonctions serveur historiques ; le front ne peut pas accorder ces droits.
-
-## Ce que cette mise a jour ne fait pas
-
-Pas de push temps reel des messages, pas d'envoi email ajoute, pas de synchronisation Google/Outlook, pas de nouveaux objets Supabase ni de modification des politiques SQL. Voir `docs/V11_VALIDATION_ET_LIMITES.md`.
-
-## Tester le design sans Supabase
-
-Ouvrir `docs/previews/APERCU_INTERACTIF.html` dans le navigateur. Toutes les donnees sont **fictives, en lecture seule**. Cet apercu n'est pas une preuve de fonctionnement sur votre propre base.
-
-## Verifications techniques
+## Tests locaux
 
 ```sh
 npm ci
 npm run check
 ```
 
-L'archive complete conserve, pour archivage uniquement, la documentation et les SQL de migration **1.0**. **Ne pas les executer lors de cette mise a jour 1.1.**
+Ne jamais envoyer `node_modules/`, `dist/` ou `.env` sur GitHub. Le build Netlify regenere `dist/` et insere les variables de configuration publiques dans `dist/config.js`.
+
+Lire `README_DEPLOIEMENT_NETLIFY_V362.md` pour la procedure de diagnostic Supabase.

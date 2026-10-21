@@ -2,6 +2,15 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import ts from 'typescript';
+const url=(process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+const key=(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+// On Netlify, never publish a site that cannot connect to the configured project.
+// Local builds may remain unconfigured for offline demo/automated tests.
+const deployed = process.env.NETLIFY === 'true' || process.env.EURACONNECT_REQUIRE_CONFIG === '1';
+if (deployed && (!url || !key)) {
+  throw new Error('Deploiement EURACONNECT bloque : NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont obligatoires. Configurez-les dans Netlify > Site configuration > Environment variables puis lancez un nouveau build.');
+}
+
 await fs.rm('dist', {recursive:true, force:true});
 await fs.mkdir('dist', {recursive:true});
 await fs.cp('public', 'dist', {recursive:true});
@@ -12,8 +21,6 @@ for (const file of await fs.readdir('src')) {
   if (diagnostics?.some(d=>d.category===ts.DiagnosticCategory.Error)) throw new Error(`Transpilation: ${file}`);
   await fs.writeFile(path.join('dist',file.replace(/\.ts$/,'.js')), outputText);
 }
-const url=process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 if (key.startsWith('sb_secret_')) throw new Error('Une cle secrete ne doit jamais etre publiee.');
 if (key.split('.').length===3) {
   try { const payload=JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString());
@@ -21,10 +28,10 @@ if (key.split('.').length===3) {
   } catch(e) { if(e instanceof Error && e.message.includes('interdite')) throw e; }
 }
 if (url && new URL(url).protocol!=='https:') throw new Error('URL Supabase HTTPS requise.');
-const config={version:'3.6.1',supabaseUrl:url.replace(/\/$/,''),supabaseKey:key};
+const config={version:'3.6.2',supabaseUrl:url.replace(/\/$/,''),supabaseKey:key};
 await fs.writeFile('dist/config.js', `window.EC_CONFIG = ${JSON.stringify(config).replace(/</g,'\\u003c')};\n`);
 const files=await fs.readdir('dist');
-const manifest={version:'3.6.1', files:{}};
+const manifest={version:'3.6.2', files:{}};
 for(const file of files) { const bytes=await fs.readFile(`dist/${file}`);manifest.files[file]={bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}; }
 await fs.writeFile('dist/manifest.json',JSON.stringify(manifest,null,2));
-console.log(`EURACONNECT 3.6.1: ${files.length} fichiers compiles. Configuration Supabase ${url&&key?'presente':'a renseigner au deploiement'}.`);
+console.log(`EURACONNECT 3.6.2: ${files.length} fichiers compiles. Configuration Supabase ${url&&key?'presente':'a renseigner au deploiement'}.`);

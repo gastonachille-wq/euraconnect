@@ -45,5 +45,5 @@ export function managerErrorNotice(error: unknown, feature: ManagerFeature): str
         typeof x.details === 'string' && x.details ? `Détail : ${x.details.slice(0, 650)}` : '',
         typeof x.hint === 'string' && x.hint ? `Indication : ${x.hint.slice(0, 400)}` : '',
     ].filter(Boolean).join('\n');
-    return `<div class="warning-note ec-manager-diagnostic" role="alert"><strong>${escapeHtml(issue)}</strong><p>${escapeHtml(next)}</p><p>Les autres actions restent disponibles.</p><details><summary>Afficher le diagnostic technique</summary><pre>${escapeHtml(technical)}</pre></details></div>`;
+    return `<div class="warning-note ec-manager-diagnostic" role="alert"><strong>${escapeHtml(issue)}</strong><p>${escapeHtml(next)}</p><p>Les autres actions restent disponibles.</p><details><summary>Afficher le diagnostic technique</summary><pre>${escapeHtml(technical)}</pre></details><p><a href="/diagnostic.html" target="_blank" rel="noopener">Tester la connexion et les fonctions Supabase</a></p></div>`;
 }

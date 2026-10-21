@@ -1,8 +1,8 @@
 {
   "name": "euraconnect",
-  "version": "3.6.1",
+  "version": "3.6.2",
   "private": true,
-  "description": "EURACONNECT - interface operationnelle et parcours metier, Supabase + Cloudflare",
+  "description": "EURACONNECT - plateforme TypeScript statique, Supabase + Netlify",
   "type": "module",
   "engines": {
     "node": ">=22"

@@ -60,5 +60,5 @@ test('V3: incomplete service copy is neutral, never fabricates a discount or uni
  const html=offersView(context(),{items:[],total:0});assert.match(html,/Aucune offre/);
 });
 test('V3: configuration reads build variables and does not ship a secret',()=>{
- const build=fs.readFileSync('scripts/build.mjs','utf8');assert.match(build,/NEXT_PUBLIC_SUPABASE_URL/);assert.match(build,/NEXT_PUBLIC_SUPABASE_ANON_KEY/);assert.match(build,/3\.6\.1/);
+ const build=fs.readFileSync('scripts/build.mjs','utf8');assert.match(build,/NEXT_PUBLIC_SUPABASE_URL/);assert.match(build,/NEXT_PUBLIC_SUPABASE_ANON_KEY/);assert.match(build,/3\.6\.2/);
 });
