@@ -1029,3 +1029,10 @@ body{background:var(--v3-canvas);color:var(--v3-ink);font-size:16px;letter-spaci
 .ec20-need a{overflow-wrap:anywhere}
 @media(max-width:760px){.ec28-toolbar{display:flex;flex-wrap:wrap}.ec28-search{order:-1;flex-basis:100%}.ec28-heading-actions{display:flex;flex-wrap:wrap}.ec12-agenda-controls{align-items:stretch}.ec12-agenda-strip{align-items:flex-start}.ec20-need{flex-direction:column}.ec20-need-actions{display:flex;flex-wrap:wrap}.ec12-dir-bottom>div{width:100%}}
 @media(prefers-reduced-motion:reduce){.ec12-dir-card,.ec12-agenda-list-row{transition:none!important}}
+
+/* Diagnostic opérationnel des RPC manager : détails sans présumer une migration manquante. */
+.ec-manager-diagnostic strong{display:block;font-size:13px;color:#85551c}
+.ec-manager-diagnostic p{margin:8px 0;line-height:1.55}
+.ec-manager-diagnostic details{margin-top:8px}
+.ec-manager-diagnostic summary{cursor:pointer;font-weight:650}
+.ec-manager-diagnostic pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;background:#fffdf8;border:1px solid #eddfc8;border-radius:6px;padding:10px;margin-top:8px;color:#614b36}
