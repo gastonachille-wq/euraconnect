@@ -1,10 +1,10 @@
 {
   "name": "eurasante-crm-v5-cloudflare-workers",
-  "version": "5.0.1",
+  "version": "5.2.0",
   "private": true,
   "description": "CRM Eurasante V5 restaure - Cloudflare Workers static assets + Supabase",
   "scripts": {
-    "check": "node --check public/ui_config.js && node --check public/cloudflare-bridge.js && node --check public/app.js",
+    "check": "node --check public/ui_config.js && node --check public/cloudflare-bridge.js && node --check public/app.js && node scripts/audit-public.mjs",
     "deploy": "wrangler deploy",
     "preview": "wrangler dev"
   },

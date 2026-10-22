@@ -118,6 +118,10 @@
       </button>
      </div>
     </div>
+    <section class="card today-board" aria-labelledby="todayTitle">
+      <div class="today-head"><div><h2 id="todayTitle">Ma journée</h2><p class="meta">Vue équipe · échéances et dossiers à reprendre · données Supabase</p></div><button type="button" class="btn" data-ui-action="go-section" data-section="partnerships">Voir les partenariats →</button></div>
+      <div id="todayContent" class="today-columns" aria-live="polite"></div>
+    </section>
     <div class="grid2">
      <div class="card">
       <h3 id="funnelTitle">
@@ -448,7 +452,7 @@
    <section class="section" id="sec-partnerships">
     <div class="section-head partnership-head">
      <div><h2>Partenariats & conventions</h2><div class="meta">Convention source, engagements, tâches opérationnelles et planification Outlook</div></div>
-     <div class="partnership-actions"><button class="btn" id="seedPartnerships">Charger le référentiel fourni</button><button class="btn" id="importPartnershipJson">Importer JSON convention</button><button class="btn" id="exportPartnershipIcs">⇩ Export ICS ciblé</button><button class="btn" id="exportPartnershipHtml">⇩ HTML autonome</button><button class="btn primary" id="newPartnership">+ Nouvelle convention</button></div>
+     <div class="partnership-actions"><button class="btn" id="importPartnershipJson">Importer JSON convention</button><button class="btn" id="exportPartnershipIcs">⇩ Export ICS ciblé</button><button class="btn" id="exportPartnershipHtml">⇩ HTML autonome</button><button class="btn primary" id="newPartnership">+ Nouvelle convention</button></div>
     </div>
     <div id="partnershipMigration" class="card hidden"></div>
     <div id="partnershipKpis" class="kpis partnership-kpis"></div>

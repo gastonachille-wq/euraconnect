@@ -118,7 +118,7 @@
   async function prospectSave(arg,newOne){
     const d=allowed('prospects',arg);
     const ids=Array.isArray(arg.projet_ids)?uniq(arg.projet_ids):null;
-    if(!d.nom_sponsor?.trim())throw Error('Le nom du prospect est obligatoire.');
+    if((newOne||Object.prototype.hasOwnProperty.call(d,'nom_sponsor'))&&!d.nom_sponsor?.trim())throw Error('Le nom du prospect est obligatoire.');
     d.date_maj=d.date_maj||localDay();
     d.montant=d.montant===''?null:d.montant;
     if(ids){const projects=latest?.projects||await rows('projets');d.projet_cible=projects.find(p=>String(p.id)===ids[0])?.nom_projet||null}
@@ -175,11 +175,11 @@
       else delete d.source_key;
     }
     if(table==='engagements_partenariat'){
-      if(!d.titre?.trim())throw Error('Titre de l’engagement obligatoire.');
+      if((mode==='add'||Object.prototype.hasOwnProperty.call(d,'titre'))&&!d.titre?.trim())throw Error('Titre de l’engagement obligatoire.');
       if(mode==='add'){if(!arg.partenariat_id)throw Error('Partenariat manquant');d.partenariat_id=arg.partenariat_id;d.source_key=arg.source_key||`manual-${slug(d.titre)}-${Date.now()}`;}
     }
     if(table==='actions_pilotage_partenariat'){
-      if(!d.titre?.trim())throw Error('Titre de la tâche obligatoire.');
+      if((mode==='add'||Object.prototype.hasOwnProperty.call(d,'titre'))&&!d.titre?.trim())throw Error('Titre de la tâche obligatoire.');
       if(mode==='add'){if(!arg.partenariat_id)throw Error('Partenariat manquant');d.partenariat_id=arg.partenariat_id;d.source_key=arg.source_key||`manual-action-${slug(d.titre)}-${Date.now()}`;}
     }
     if(table==='realisations_engagement_partenariat'){
@@ -220,45 +220,6 @@
     const actionKeys=new Set(existing.actions.map(x=>String(x.source_key)));
     for(const a of acts){if(actionKeys.has(String(a.source_key)))continue;const d=allowed('actions_pilotage_partenariat',a);d.source_key=a.source_key;d.partenariat_id=part.id;const e=emap.get(String(a.engagement_source_key||''));if(e)d.engagement_id=e.id;await insert('actions_pilotage_partenariat',d);actionKeys.add(String(a.source_key));createdA++;}
     latest=null;return {ok:true,partnerships_added:createdP,engagements_added:createdE,actions_added:createdA};
-  }
-  async function seed(){
-    // Initialisation additive historique : les source_key préexistantes ne sont jamais écrasées.
-    if(!latest)await load();
-    if(!latest.partnerships.ready)throw Error('La table partenariats est indisponible dans Supabase.');
-    const response=await fetch('/data/partnership_seed.json',{cache:'no-store'});
-    if(!response.ok)throw Error('Référentiel V5 historique introuvable.');
-    const seed=await response.json();
-    let servicesAdded=0,partsAdded=0,engsAdded=0,actsAdded=0;
-    const existing=latest.partnerships;
-    const serviceCodes=new Set(existing.services.map(x=>String(x.code)));
-    for(const service of seed.services||[]){
-      if(!service.code||serviceCodes.has(String(service.code)))continue;
-      const d=Object.fromEntries(Object.entries(service).filter(([k])=>['code','nom','description','ordre','actif'].includes(k)));
-      await insert('referentiel_services_partenariats',d);serviceCodes.add(String(service.code));servicesAdded++;
-    }
-    const partners=new Map(existing.partenariats.map(p=>[String(p.source_key),p]));
-    for(const p of seed.partenariats||[]){
-      const key=String(p.source_key||'');if(!key||partners.has(key))continue;
-      const row=await insert('partenariats',allowed('partenariats',p));partners.set(key,row);partsAdded++;
-    }
-    const engagements=new Map(existing.engagements.map(e=>[String(e.source_key),e]));
-    for(const e of seed.engagements||[]){
-      const key=String(e.source_key||''),partner=partners.get(String(e.partenaire_source_key||''));
-      if(!key||!partner||engagements.has(key))continue;
-      const d={...allowed('engagements_partenariat',e),partenariat_id:partner.id,source_key:key};
-      const row=await insert('engagements_partenariat',d);engagements.set(key,row);engsAdded++;
-    }
-    const actionKeys=new Set(existing.actions.map(a=>String(a.source_key)));
-    if(existing.actions_ready){for(const a of seed.actions||[]){
-      const key=String(a.source_key||''),partner=partners.get(String(a.partenaire_source_key||''));
-      if(!key||!partner||actionKeys.has(key))continue;
-      const d={...allowed('actions_pilotage_partenariat',a),partenariat_id:partner.id,source_key:key};
-      if(!existing.v5_ready)for(const field of ['date_planification','heure_planification','duree_minutes','lieu','notes_calendrier'])delete d[field];
-      const engagement=engagements.get(String(a.engagement_source_key||''));if(engagement)d.engagement_id=engagement.id;
-      await insert('actions_pilotage_partenariat',d);actionKeys.add(key);actsAdded++;
-    }}
-    latest=null;
-    return {ok:true,services_added:servicesAdded,partnerships_added:partsAdded,engagements_added:engsAdded,actions_added:actsAdded};
   }
   async function createProspectFromOrg(id){
     const org=(latest?.relations?.organisations||[]).find(x=>String(x.id)===String(id));if(!org)throw Error('Organisation introuvable.');
@@ -311,7 +272,6 @@
       case '/api/partnership/realisation/add':return savePartner(arg,'realisations_engagement_partenariat','add');
       case '/api/partnerships/import-json-preview':return previewImport(arg);
       case '/api/partnerships/import-json':return importJSON(arg);
-      case '/api/partnerships/seed':return seed();
       case '/api/import/apply':throw Error('Import Excel non disponible sur Cloudflare Pages. La base n’a pas été modifiée.');
       default:throw Error(`Action serveur non portée : ${path}. Aucune donnée modifiée.`);
     }

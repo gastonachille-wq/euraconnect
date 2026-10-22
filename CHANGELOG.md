@@ -1,3 +1,6 @@
+# Version active : V5.2 ; se reporter à CHANGELOG_V5_2.md.
+# Les entrées ci-dessous décrivent des fonctions historiques, dont le seed public désormais supprimé.
+
 # Correctif 5.0.1 — Cloudflare Workers Static Assets (21/10/2026)
 
 - Neutralisation du redirect `/* /index.html 200` qui provoquait l'erreur Cloudflare 100324.
