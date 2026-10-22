@@ -1,0 +1,103 @@
+{
+  "schema_version": "eurasante.partnership.v5",
+  "meta": {
+    "template": true,
+    "source_document": "Nom_du_fichier.pdf",
+    "generated_by": "ChatGPT",
+    "review_required": true
+  },
+  "partenariat": {
+    "source_key": "partenaire-annee-reference",
+    "partenaire": "NOM DU PARTENAIRE",
+    "raison_sociale": "Raison sociale complète",
+    "type_partenariat": "Partenariat incubateurs",
+    "statut_convention": "active",
+    "signature_statut": "signée",
+    "date_signature": "2026-01-01",
+    "date_debut": "2026-01-01",
+    "date_fin": "2026-12-31",
+    "duree_texte": "1 an",
+    "renouvellement_texte": "Texte exact ou synthèse fidèle",
+    "preavis_texte": "Texte exact ou synthèse fidèle",
+    "objet": "Objet de la convention",
+    "expertise": "Expertise du partenaire",
+    "exclusif": false,
+    "perimetre_exclusivite": "",
+    "dispositifs": ["Bio-Incubateur"],
+    "programmes": [],
+    "representant": "Nom et fonction",
+    "referent_interne": "",
+    "secteur": "",
+    "montants": [
+      {
+        "montant": 10000,
+        "fiscalite": "TTC",
+        "annee": 2026,
+        "nature": "numéraire",
+        "sens": "partenaire_vers_eurasante",
+        "note": ""
+      }
+    ],
+    "facturation_texte": "",
+    "paiement_texte": "",
+    "resume_operationnel": "Résumé opérationnel court du partenariat",
+    "droits_partenaire": [],
+    "obligations_partenaire": [],
+    "points_vigilance": [],
+    "source_fichiers": ["Nom_du_fichier.pdf"],
+    "source_reference": "Convention / article(s)",
+    "clauses_source": {},
+    "niveau_confiance": "à vérifier",
+    "notes_internes": ""
+  },
+  "engagements": [
+    {
+      "source_key": "partenaire-annee-eng-001",
+      "partie": "eurasante",
+      "service_code": "EVENEMENTIEL",
+      "categorie": "événement",
+      "titre": "Inviter le partenaire aux événements prévus",
+      "description": "Description fidèle à la clause source.",
+      "quantite_cible": 2,
+      "unite": "événements",
+      "frequence": "par an",
+      "echeance": "2026-12-31",
+      "obligatoire": true,
+      "priorite": "normale",
+      "statut": "a_faire",
+      "progression": 0,
+      "responsable": "",
+      "preuve": "",
+      "commentaire_suivi": "",
+      "source_reference": "Article 3.1",
+      "classification": "clause",
+      "dispositifs": ["Bio-Incubateur"]
+    }
+  ],
+  "actions": [
+    {
+      "source_key": "partenaire-annee-act-001",
+      "engagement_source_key": "partenaire-annee-eng-001",
+      "service_code": "EVENEMENTIEL",
+      "type_action": "invitation",
+      "titre": "Planifier et envoyer l'invitation au prochain événement",
+      "description": "Identifier l'événement compatible, ajouter le contact partenaire et archiver la preuve d'envoi.",
+      "echeance": "2026-12-31",
+      "date_planification": "2026-09-15",
+      "heure_planification": "09:00",
+      "duree_minutes": 30,
+      "lieu": "",
+      "notes_calendrier": "",
+      "frequence": "selon planning",
+      "priorite": "normale",
+      "statut": "a_faire",
+      "progression": 0,
+      "responsable": "",
+      "preuve_attendue": "Invitation Outlook ou e-mail, puis liste de participants / compte rendu",
+      "preuve": "",
+      "commentaire_suivi": "",
+      "origine": "import_json_convention",
+      "ordre": 10
+    }
+  ]
+}

@@ -1,21 +1,14 @@
 {
-  "name": "euraconnect",
-  "version": "3.6.2",
+  "name": "eurasante-crm-v5-cloudflare-workers",
+  "version": "5.0.1",
   "private": true,
-  "description": "EURACONNECT - plateforme TypeScript statique, Supabase + Netlify",
-  "type": "module",
-  "engines": {
-    "node": ">=22"
-  },
+  "description": "CRM Eurasante V5 restaure - Cloudflare Workers static assets + Supabase",
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && node scripts/build.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "preview": "node scripts/serve.mjs",
-    "check": "npm run typecheck && npm test",
-    "pretest": "npm run build"
+    "check": "node --check public/ui_config.js && node --check public/cloudflare-bridge.js && node --check public/app.js",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
-    "typescript": "5.8.3"
+    "wrangler": "4.151.3"
   }
 }
