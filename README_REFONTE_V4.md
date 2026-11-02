@@ -20,7 +20,7 @@ Les roles (incube, prestataire, Startup Manager, admin), les parcours existants 
 Prerequis : Node.js 22 ou superieur et acces a npm.
 
 ```bash
-npm install
+npm ci
 npm run check
 npm run preview
 ```

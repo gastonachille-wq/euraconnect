@@ -6,9 +6,9 @@ const url=(process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const key=(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 // On Netlify, never publish a site that cannot connect to the configured project.
 // Local builds may remain unconfigured for offline demo/automated tests.
-const deployed = process.env.NETLIFY === 'true' || process.env.EURACONNECT_REQUIRE_CONFIG === '1';
+const deployed = process.env.NETLIFY === 'true' || process.env.CF_PAGES === '1' || process.env.EURACONNECT_REQUIRE_CONFIG === '1';
 if (deployed && (!url || !key)) {
-  throw new Error('Deploiement EURACONNECT bloque : NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont obligatoires. Configurez-les dans Netlify > Site configuration > Environment variables puis lancez un nouveau build.');
+  throw new Error('Deploiement EURACONNECT bloque : NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY sont obligatoires. Configurez-les comme variables de build Cloudflare puis lancez un nouveau build.');
 }
 
 await fs.rm('dist', {recursive:true, force:true});
