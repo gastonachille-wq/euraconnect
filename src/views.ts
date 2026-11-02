@@ -27,22 +27,30 @@ export function shell(ctx: Context): string {
     const active = activeNavigation(route,role);
     const collapsed = stored("euraconnect.nav.collapsed") === "1";
     const counter = (value:number) => value>99 ? "99+" : String(value);
+    const roleCta = role === "incube"
+      ? `<button type="button" class="ec40-quick-cta" data-action="new-need">${icon('plus',16)}<span>Créer une demande</span></button>`
+      : role === "prestataire"
+        ? `<a class="ec40-quick-cta" href="#needs">${icon('search',16)}<span>Voir les opportunités</span></a>`
+        : role === "startup_manager"
+          ? `<a class="ec40-quick-cta" href="#portfolio">${icon('portfolio',16)}<span>Mes startups</span></a>`
+          : `<a class="ec40-quick-cta" href="#admin?tab=validate">${icon('shield',16)}<span>À valider</span></a>`;
     const navHtml = nav.map(n => `<li><a href="#${n.id}" class="ec29-nav-link ${n.id === active ? "active" : ""}" data-universe="${n.universe}" ${n.id===active?'aria-current="page"':''} data-tooltip="${e(n.name)}" aria-label="${e(n.name+' \u00b7 '+n.category)}" title="${e(n.name+' \u00b7 '+n.category)}"><span class="ec29-nav-icon">${icon(n.symbol,20)}</span><span class="ec29-nav-label">${e(n.name)}</span>${n.id==='messages'?`<span class="ec29-nav-counter" id="nav-message-counter" ${boot.unread_messages?'':'hidden'}>${counter(boot.unread_messages)}</span>`:''}</a></li>`).join("");
     return `<div class="app-shell ec29-shell ${ctx.demo?'ec29-demo':''}" data-universe="${universeFor(route,role)}">
     <aside class="sidebar ec29-sidebar" id="primary-sidebar" aria-label="Navigation EURACONNECT">
         <a href="#dashboard" class="ec29-brand" aria-label="EURACONNECT, accueil"><img src="/euraconnect-64.png" alt="" width="36" height="36"><span><strong>EURA<span>CONNECT</span></strong></span></a>
-        <nav class="ec29-navigation" aria-label="Navigation principale"><ul>${navHtml}</ul></nav>
-        <footer class="ec29-sidebar-footer"><span class="ec29-version">EURACONNECT <b>3.0</b></span><button id="sidebar-toggle" type="button" class="ec29-collapse" data-action="collapse-sidebar" aria-controls="primary-sidebar" aria-expanded="${!collapsed}" aria-label="${collapsed?'Agrandir':'R\u00e9duire'} le menu" data-tooltip="${collapsed?'Agrandir':'R\u00e9duire'} le menu" title="${collapsed?'Agrandir':'R\u00e9duire'} le menu">${icon('panel',20)}</button></footer>
+        <div class="ec40-sidebar-caption">VOTRE ESPACE</div><nav class="ec29-navigation" aria-label="Navigation principale"><ul>${navHtml}</ul></nav>
+        <footer class="ec29-sidebar-footer"><span class="ec29-version">EURACONNECT <b>UX V4</b></span><button id="sidebar-toggle" type="button" class="ec29-collapse" data-action="collapse-sidebar" aria-controls="primary-sidebar" aria-expanded="${!collapsed}" aria-label="${collapsed?'Agrandir':'R\u00e9duire'} le menu" data-tooltip="${collapsed?'Agrandir':'R\u00e9duire'} le menu" title="${collapsed?'Agrandir':'R\u00e9duire'} le menu">${icon('panel',20)}</button></footer>
     </aside>
     <button class="mobile-shade ec29-shade" data-action="menu" aria-label="Fermer le menu" tabindex="-1"></button>
     <div class="workspace ec29-workspace ec27-route-${e(route)}">
     <header class="topbar ec29-topbar">
         <button class="icon-button ec29-mobile-menu" type="button" data-action="menu" aria-controls="primary-sidebar" aria-expanded="false" aria-label="Ouvrir le menu">${icon('menu',21)}</button>
-        <div class="ec29-breadcrumb"><span class="ec29-title-icon">${icon(nav.find(n=>n.id===active)?.symbol||'dashboard',18)}</span><strong>${e(navigationTitle(route,role))}</strong></div>
+        <div class="ec29-breadcrumb"><span class="ec40-crumb-parent">Espace de travail</span><span class="ec40-crumb-separator">/</span><span class="ec29-title-icon">${icon(nav.find(n=>n.id===active)?.symbol||'dashboard',18)}</span><strong>${e(navigationTitle(route,role))}</strong></div>
         <div class="topbar-actions ec29-topbar-actions">
         ${ctx.demo?`<div class="ec29-demo-control"><span title="Donn\u00e9es fictives, aucune \u00e9criture Supabase">D\u00e9mo</span><select id="demo-role" aria-label="Profil de d\u00e9monstration">${(["incube","prestataire","startup_manager","admin"] as const).map(r=>`<option value="${r}" ${r===role?'selected':''}>${roleLabels[r]}</option>`).join('')}</select></div>`:''}
         <button type="button" class="search-shortcut ec29-search-trigger" data-action="global-search" aria-label="Rechercher dans EURACONNECT, raccourci barre oblique ou Commande K">${icon('search',18)}<span>Rechercher une demande, une entreprise, un service…</span><kbd>/</kbd></button>
         
+        ${roleCta}
         <button type="button" class="icon-button counted" data-action="notifications" aria-label="Notifications, ${boot.unread_notifications} non lues" title="Notifications">${icon('bell')}<span class="counter" id="notice-counter" ${boot.unread_notifications?'':'hidden'}>${counter(boot.unread_notifications)}</span></button>
         ${boot.memberships.length>1?`<label class="ec29-company-switch"><span class="sr-only">Entreprise active</span><select id="company-switch" aria-label="Changer d'entreprise">${boot.memberships.map(m=>`<option value="${e(m.id)}" ${m.id===ctx.companyId?'selected':''}>${e(m.name)}</option>`).join('')}</select></label>`:''}
         <details class="v3-account-menu"><summary class="profile-chip" aria-label="Ouvrir le menu du compte">${avatar(boot.user.name||boot.user.email,boot.profile.media)}<span><strong>${e(boot.user.name||boot.user.email.split('@')[0])}</strong><small>${e(roleLabels[role])}</small></span>${icon('down',14)}</summary><nav aria-label="Menu du compte"><a href="#company?tab=profile">${icon('user',17)} Mon profil</a><a href="#company?tab=company">${icon('company',17)} Mon entreprise</a><a href="#company?tab=security">${icon('lock',17)} S\u00e9curit\u00e9</a><button type="button" data-action="logout-confirm">${icon('logout',17)} Se d\u00e9connecter</button></nav></details>

@@ -5,7 +5,7 @@ import { icon } from './icons.js';
 import { avatar, badge, tags, button, empty, pagination } from './ui.js';
 
 export function heading(title: string, text: string, action = ''): string {
-  return `<div class="page-head v3-page-head"><div><h1>${e(title)}</h1><p>${e(text)}</p></div><div class="page-actions">${action}</div></div>`;
+  return `<div class="page-head v3-page-head"><div><p class="eyebrow">VOTRE ESPACE DE TRAVAIL</p><h1>${e(title)}</h1><p>${e(text)}</p></div><div class="page-actions">${action}</div></div>`;
 }
 export function minutesBetween(start: string, end: string): number {
   const n = (Date.parse(end)-Date.parse(start))/60000;

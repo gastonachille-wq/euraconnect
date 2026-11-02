@@ -30,8 +30,18 @@ if (key.split('.').length===3) {
 if (url && new URL(url).protocol!=='https:') throw new Error('URL Supabase HTTPS requise.');
 const config={version:'3.6.2',supabaseUrl:url.replace(/\/$/,''),supabaseKey:key};
 await fs.writeFile('dist/config.js', `window.EC_CONFIG = ${JSON.stringify(config).replace(/</g,'\\u003c')};\n`);
-const files=await fs.readdir('dist');
+async function listFiles(directory, prefix='') {
+  const entries=await fs.readdir(directory,{withFileTypes:true});
+  const result=[];
+  for(const entry of entries) {
+    const relative=path.posix.join(prefix,entry.name);
+    if(entry.isDirectory()) result.push(...await listFiles(path.join(directory,entry.name),relative));
+    else if(entry.isFile()) result.push(relative);
+  }
+  return result;
+}
+const files=await listFiles('dist');
 const manifest={version:'3.6.2', files:{}};
-for(const file of files) { const bytes=await fs.readFile(`dist/${file}`);manifest.files[file]={bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}; }
+for(const file of files) { const bytes=await fs.readFile(path.join('dist',file));manifest.files[file]={bytes:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')}; }
 await fs.writeFile('dist/manifest.json',JSON.stringify(manifest,null,2));
 console.log(`EURACONNECT 3.6.2: ${files.length} fichiers compiles. Configuration Supabase ${url&&key?'presente':'a renseigner au deploiement'}.`);
