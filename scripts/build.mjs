@@ -14,6 +14,16 @@ if (deployed && (!url || !key)) {
 await fs.rm('dist', {recursive:true, force:true});
 await fs.mkdir('dist', {recursive:true});
 await fs.cp('public', 'dist', {recursive:true});
+// Keep the Content Security Policy aligned with the Supabase project configured at build time.
+// A stale hard-coded hostname previously blocked Supabase Auth with a CSP violation.
+const headersPath = 'dist/_headers';
+let headers = await fs.readFile(headersPath, 'utf8');
+if (url) {
+  const supabaseOrigin = new URL(url).origin;
+  headers = headers.replace(/connect-src [^;\r\n]*/g, `connect-src 'self' ${supabaseOrigin} wss://${new URL(url).host}`);
+}
+await fs.writeFile(headersPath, headers);
+
 for (const file of await fs.readdir('src')) {
   if (!file.endsWith('.ts')) continue;
   const source=await fs.readFile(path.join('src',file),'utf8');
